@@ -7,7 +7,6 @@ describe('GET /users', () => {
   it('should get all users', async () => {
     const res = await request(app)
       .get('/users')
-    console.log(res.body);
     expect(res.statusCode).toEqual(200)
     expect(Array.isArray(res.body)).toBe(true); // Check if the body is an array
     expect(res.body.length).toBeGreaterThan(0); // Check if the array is not empty
