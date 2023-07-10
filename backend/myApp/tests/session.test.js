@@ -119,4 +119,42 @@ describe('socket.io events', () => {
 
   });
 
+  test('should delete a session', (done) => {
+
+    let testSessionId;
+    let hostId = '1234';
+    let memberId = '4321';
+
+    socket.on('session created', (sessionID) => {
+        testSessionId = sessionID;
+        done();
+        otherSocket.emit('join session', testSessionId);
+    });
+    socket.emit('create session', hostId);
+
+    otherSocket.on('session joined', (joinedSessionID) => {
+        expect(joinedSessionID).toEqual(testSessionId);
+        done();
+        otherSocket.emit('delete session', { userID: memberId, sessionID: testSessionId });
+    });
+
+    socket.on('session deleted', (deletedSessionID) => {
+        expect(deletedSessionID).toBe(testSessionId);
+        done();
+        // ensure that the member client is disconnected
+        otherSocket.on('disconnect', () => {
+            done();
+        });
+    });
+    
+    otherSocket.on('permissions error', (message) => {
+        const errMsg = 'Only the host can delete the session.';
+        expect(message).toEqual(errMsg);
+        done();
+        // now delete the session proplery
+        socket.emit('delete session', { userID: hostId, sessionID: testSessionId });
+    });
+
+});
+
 });

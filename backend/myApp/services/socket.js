@@ -23,12 +23,9 @@ module.exports = function (io) {
         // When a user wants to join a session
         socket.on('join session', (sessionID) => {
             const session = SessionManager.getSession(sessionID);
-            console.log("ID: ", sessionID);
-            console.log("SES", session);
 
             if (session) {
                 socket.join(sessionID);
-                console.log("JOINED", sessionID)
                 socket.emit('session joined', sessionID);
             } else {
                 socket.emit('error', 'Invalid session ID');
@@ -79,7 +76,7 @@ module.exports = function (io) {
 
                     socket.emit('session deleted', sessionID);
                 } else {
-                    socket.emit('error', 'Only the host can delete the session.');
+                    socket.emit('permissions error', 'Only the host can delete the session.');
                 }
             } else {
                 socket.emit('error', 'Invalid session ID');
