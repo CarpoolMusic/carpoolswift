@@ -29,6 +29,10 @@ class SessionManager {
         return sessionID;
     }
 
+    joinSession(userID) {
+
+    }
+
     getSession(sessionID) {
         return this.sessions.get(sessionID);
     }
