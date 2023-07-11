@@ -1,4 +1,5 @@
 const SessionManager = require('./sessionManager');
+const Song = require('../models/song');
 
 module.exports = function (io) {
     io.on('connection', (socket) => {
@@ -6,18 +7,21 @@ module.exports = function (io) {
 
         // SOCKET EVENTS
 
+
+        // SESSION CREATION AND MODIFICATION
+
         // When a user connects to the socket
         socket.emit('connected', { status: 'connected' });
 
         // When a user creates a session
         socket.on('create session', (userID) => {
-            const sessionID = SessionManager.createSession(userID);
+            const sessionId = SessionManager.createSession(userID);
 
             // Join the user to the session room
-            socket.join(sessionID);
+            socket.join(sessionId);
 
             // Send the session ID back to the client
-            socket.emit('session created', sessionID);
+            socket.emit('session created', sessionId);
         });
 
         // When a user wants to join a session
@@ -25,7 +29,10 @@ module.exports = function (io) {
             const session = SessionManager.getSession(sessionID);
 
             if (session) {
+                // Connect user to session
                 socket.join(sessionID);
+                // Add user to session object
+                session.join(socket.id);
                 socket.emit('session joined', sessionID);
             } else {
                 socket.emit('error', 'Invalid session ID');
@@ -35,13 +42,13 @@ module.exports = function (io) {
         // When a user wants to leave a session (non-admin)
         socket.on('leave session', (sessionID) => {
             const session = SessionManager.getSession(sessionID);
-            console.log("ID2", sessionID);
-            console.log("SES2", session);
 
             if (session) {
-                if (session.members.has(socket.id) && session.host != socket.id) {
+                if (session.isMember(socket.id) && !isHost(socket.id)) {
+                    // Remove user from socket session
                     socket.leave(sessionID);
-                    SessionManager.removeMemberFromSession(sessionID, socket.id); // Remove member from session
+                    // Remove user from session object
+                    session.remove(socket.id);
 
                     socket.emit('left session', sessionID); // Notify the user they've left the session
                     io.in(sessionID).emit('member left', socket.id); // Notify others in the room that a member has left
@@ -54,12 +61,12 @@ module.exports = function (io) {
         });
 
         // When a user wants to delete a session
-        socket.on('delete session', ({ userID, sessionID }) => {
-            const session = SessionManager.getSession(sessionID);
+        socket.on('delete session', ({ userId, sessionId }) => {
+            const session = SessionManager.getSession(sessionId);
 
             if (session) {
                 // Only allow the session host (admin) to delete the session
-                if (session.host === userID) {
+                if (session.isHost(userId)) {
 
                     // Disconnect all sockets associated with this session
                     io.of('/').in(sessionID).clients((error, socketIds) => {
@@ -68,13 +75,13 @@ module.exports = function (io) {
                     });
 
                     // Delete session from session manager
-                    SessionManager.deleteSession(sessionID);
-                    socket.leave(sessionID); // Leave the socket room
+                    SessionManager.deleteSession(sessionId);
+                    socket.leave(sessionId); // Leave the socket room
 
                     // Broadcast message to other users in the session
-                    socket.to(sessionID).emit('session deleted', { message: 'The session has been deleted by the host.' });
+                    socket.to(sessionId).emit('session deleted', { message: 'The session has been deleted by the host.' });
 
-                    socket.emit('session deleted', sessionID);
+                    socket.emit('session deleted', sessionId);
                 } else {
                     socket.emit('permissions error', 'Only the host can delete the session.');
                 }
@@ -82,6 +89,87 @@ module.exports = function (io) {
                 socket.emit('error', 'Invalid session ID');
             }
         });
+
+        // QUEUE MODIFICATION
+
+        socket.on('add song', ({ sessionId, userId, songData }) => {
+        const session = SessionManager.getSession(sessionId);
+        if (!session) {
+            socket.emit('error', 'Invalid session ID');
+            return;
+        }
+
+        if (!session.isMember(userId)) {
+            socket.emit('error', 'You are not a member of this session');
+            return;
+        }
+
+        // Create the song object
+        const song = new Song(songData.songID, songData.name, songData.artist, userId);
+
+        // Add the song to the session queue
+        session.addSong(song);
+
+        // Broadcast the updated queue to all members in the session
+        socket.to(sessionId).emit('queue updated', session.queue);
+        });
+
+        socket.on('remove song', ({ sessionId, userId, songID }) => {
+            const session = SessionManager.getSession(sessionId);
+            if (!session) {
+              socket.emit('error', 'Invalid session ID');
+              return;
+            }
+          
+            if (!session.isMember(userId)) {
+              socket.emit('error', 'You are not a member of this session');
+              return;
+            }
+          
+            const song = session.queue.find(song => song.songID === songID);
+            if (!song) {
+              socket.emit('error', 'Song not found in the session');
+              return;
+            }
+          
+            if(song.addedBy !== userId) {
+              socket.emit('error', 'Only the user who added the song can remove it');
+              return;
+            }
+          
+            // Remove the song from the session queue
+            session.removeSong(songID);
+          
+            // Broadcast the updated queue to all members in the session
+            socket.to(sessionId).emit('queue updated', session.queue);
+          });
+
+          socket.on('vote song', ({ sessionId, userId, songID, vote }) => {
+            const session = SessionManager.getSession(sessionId);
+            if (!session) {
+              socket.emit('error', 'Invalid session ID');
+              return;
+            }
+          
+            if (!session.isMember(userId)) {
+              socket.emit('error', 'You are not a member of this session');
+              return;
+            }
+          
+            const song = session.queue.find(song => song.songID === songID);
+            if (!song) {
+              socket.emit('error', 'Song not found in the session');
+              return;
+            }
+          
+            // Add the vote to the song in the session queue
+            session.voteOnSong(songID, vote);
+          
+            // Broadcast the updated queue to all members in the session
+            socket.to(sessionId).emit('queue updated', session.queue);
+          });
+
+
 
         socket.on('disconnect', () => {
             console.log('Client disconnected');

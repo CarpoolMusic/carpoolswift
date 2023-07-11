@@ -1,6 +1,8 @@
 // SessionManager.js
 
 const uuid = require('uuid');
+const Session = require('../models/session');
+const Song = require('../models/song');
 
 class SessionManager {
     constructor() {
@@ -11,30 +13,19 @@ class SessionManager {
         return SessionManager.instance;
     }
 
-    createSession(userID) {
-        // Generate a unique session ID
-        const sessionID = uuid.v4();
+    createSession(userId) {
 
         // Create a new session
-        const session = {
-        id: sessionID,
-        host: userID,
-        members: new Set(),
-        queue: [],
-        };
+        const session = Session(userId);
 
         // Add the session to the map of active sessions
-        this.sessions.set(sessionID, session);
+        this.sessions.set(session.sessionId, session);
 
-        return sessionID;
+        return session.sessionId;
     }
 
-    joinSession(userID) {
-
-    }
-
-    getSession(sessionID) {
-        return this.sessions.get(sessionID);
+    getSession(sessionId) {
+        return this.sessions.get(sessionId);
     }
 
     deleteSession(sessionID) {

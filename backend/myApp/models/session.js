@@ -1,18 +1,43 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize('musicqueuedb', 'nolb', '', {
-  host: 'localhost',
-  dialect: 'postgresql'
-});
+const uuid = require('uuid');
 
-const Session = sequelize.define('Session', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: Sequelize.UUIDV4, // Or Sequelize.UUIDV1
-    primaryKey: true
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  // Add other fields as needed
-});
+class Session {
+  constructor(hostId) {
+    this.hostId = hostId;
+    this.sessionId = uuid.v4();
+    this.members = new Set();
+    this.queue = []; // The queue of songs
+  }
+
+  join(userId) {
+    this.members.add(userId);
+  }
+
+  remove(userId) {
+    this.members.delete(userId);
+  }
+
+  isMember(userId) {
+    return this.members.has(userId);
+  }
+
+  ishost(userId) {
+    return this.host !== userId;
+  }
+
+  addSong(song) {
+    this.queue.push(song);
+  }
+
+  removeSong(songId) {
+    this.queue = this.queue.filter(song => song.id !== songId);
+  }
+
+  voteOnSong(songId, vote) {
+    const song = this.queue.find(song => song.id === songId);
+    if(song) {
+      song.voteCount += vote; // assumes 'vote' is 1 for upvote, -1 for downvote
+    }
+  }
+}
+
+module.exports = Session;
