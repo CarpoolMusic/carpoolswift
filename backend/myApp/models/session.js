@@ -8,20 +8,20 @@ class Session {
     this.queue = []; // The queue of songs
   }
 
-  join(userId) {
-    this.members.add(userId);
+  join(socketId) {
+    this.members.add(socketId);
   }
 
-  remove(userId) {
-    this.members.delete(userId);
+  remove(socketId) {
+    this.members.delete(socketId);
   }
 
-  isMember(userId) {
-    return this.members.has(userId);
+  isMember(socketId) {
+    return this.members.has(socketId);
   }
 
-  ishost(userId) {
-    return this.host !== userId;
+  isHost(socketId) {
+    return this.hostId == socketId;
   }
 
   addSong(song) {
@@ -29,13 +29,13 @@ class Session {
   }
 
   removeSong(songId) {
-    this.queue = this.queue.filter(song => song.id !== songId);
+    this.queue = this.queue.filter(song => song.songID !== songId);
   }
 
   voteOnSong(songId, vote) {
-    const song = this.queue.find(song => song.id === songId);
+    let song = this.queue.find(song => song.songID === songId);
     if(song) {
-      song.voteCount += vote; // assumes 'vote' is 1 for upvote, -1 for downvote
+      song.votes += vote; // assumes 'vote' is 1 for upvote, -1 for downvote
     }
   }
 }
