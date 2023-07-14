@@ -18,11 +18,28 @@ import MusicKit
 struct WelcomeView: View {
     
     // MARK: - Properties
-    /// The current authorization status of MusicKit.
-    @Binding var musicAuthorizationStatus: MusicAuthorization.Status
     
-    /// Opens a URL using the appropriate system service.
-    @Environment(\.openURL) private var openURL
+    enum MusicServiceType {
+        case apple, spotify
+    }
+    @State var musicServiceType: MusicServiceType?
+    
+    /// Specific music services
+    @StateObject var appleMusicService = AppleMusicService()
+    @StateObject var spotifyMusicService = SpotifyMusicService()
+    
+    /// The generic music service interface
+    var musicService: MusicService? {
+        switch musicServiceType {
+        case .apple:
+            return appleMusicService
+        case .spotify:
+            return spotifyMusicService
+        case .none:
+            return nil
+        }
+    }
+    
     
     // MARK: - View
     
@@ -31,33 +48,59 @@ struct WelcomeView: View {
         ZStack {
             gradient
             VStack {
+                
+                Spacer()
+                
                 Text("App name")
                     .foregroundColor(.primary)
                     .font(.largeTitle.weight(.semibold))
                     .shadow(radius: 2)
                     .padding(.bottom, 1)
-                Text("Democratize the AUX.")
+                Text("Some slogan")
                     .foregroundColor(.primary)
                     .font(.title2.weight(.medium))
                     .multilineTextAlignment(.center)
                     .shadow(radius: 1)
                     .padding(.bottom, 16)
-                explanatoryText
-                    .foregroundColor(.primary)
-                    .font(.title3.weight(.medium))
-                    .multilineTextAlignment(.center)
-                    .shadow(radius: 1)
-                    .padding([.leading, .trailing], 32)
-                    .padding(.bottom, 16)
-                if let secondaryExplanatoryText = self.secondaryExplanatoryText {
-                    secondaryExplanatoryText
-                        .foregroundColor(.primary)
-                        .font(.title3.weight(.medium))
-                        .multilineTextAlignment(.center)
-                        .shadow(radius: 1)
-                        .padding([.leading, .trailing], 32)
-                        .padding(.bottom, 16)
-                }
+                
+                Spacer()
+                
+                Button(action: handleAppleButtonPressed) {
+                       HStack {
+                           Text("Log in with Apple Music")
+                               .font(.headline)
+                           Image(systemName: "applelogo") // Replace this with your Apple Music logo
+                               .resizable()
+                               .aspectRatio(contentMode: .fit)
+                               .frame(height: 24)
+                       }
+                       .foregroundColor(.white)
+                       .padding([.leading, .trailing], 10)
+                       .frame(maxWidth: .infinity)
+                       .padding()
+                   }
+                   .background(Color(red: 211/255, green: 17/255, blue: 69/255))
+                   .cornerRadius(30)
+                   .padding([.leading, .trailing], 20)
+                   
+                   Button(action: handleSpotifyButtonPressed) {
+                       HStack {
+                           Text("Log in with Spotify")
+                               .font(.headline)
+                           Image("spotifyLogo") // Replace this with your Spotify logo
+                               .resizable()
+                               .aspectRatio(contentMode: .fit)
+                               .frame(height: 24)
+                       }
+                       .foregroundColor(.white)
+                       .padding([.leading, .trailing], 10)
+                       .frame(maxWidth: .infinity)
+                       .padding()
+                   }
+                   .background(Color(red: 29/255, green: 185/255, blue: 84/255))
+                   .cornerRadius(30)
+                   .padding([.leading, .trailing], 20)
+                
                 if musicAuthorizationStatus == .notDetermined || musicAuthorizationStatus == .denied {
                     Button(action: handleButtonPressed) {
                         buttonText
@@ -84,20 +127,6 @@ struct WelcomeView: View {
         )
         .flipsForRightToLeftLayoutDirection(false)
         .ignoresSafeArea()
-    }
-    
-    /// Provides text that explains how to use the app according to the authorization status.
-    private var explanatoryText: Text {
-        let explanatoryText: Text
-        switch musicAuthorizationStatus {
-            case .restricted:
-                explanatoryText = Text("{APP_NAME} cannot be used on this iPhone because usage of ")
-                    + Text(Image(systemName: "applelogo")) + Text(" Music is restricted.")
-            default:
-                explanatoryText = Text("APP_NAME uses ")
-                    + Text(Image(systemName: "applelogo")) + Text(" Music\nto vote which songs are played in your listening sessions.")
-        }
-        return explanatoryText
     }
     
     /// Provides additional text that explains how to get access to Apple Music
@@ -127,11 +156,37 @@ struct WelcomeView: View {
         }
         return buttonText
     }
+    
+    /// Button that user taps to sign in with Apple Music.
+    private var appleButtonText: Text {
+        return Text("Sign in with Apple Music") + Text(Image(systemName: "applelogo"))
+    }
+    
+    /// BUtton that user taps to sign in with Spotify.
+    private var spotifyButtonText: Text {
+        return Text("Sign in with Spotify") + Text(Image(systemName: "applelogo"))
+    }
 
     // MARK: - Methods
 
     /// Allows the user to authorize Apple Music usage when tapping the Continue/Open Setting button.
     private func handleButtonPressed() {
+        
+        switch musicAuthorizationStatus {
+            case .notDetermined:
+                Task {
+                    // Authenticate with corresponding music service
+                    musicService?.authorize { result in
+                    }
+//                    let musicAuthorizationStatus = await MusicAuthorization.request()
+//                    await update(with: musicAuthorizationStatus)
+                }
+            case .denied:
+            // Handle with corresponding music service
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(settingsURL)
+                }
+        // Implement Apple Music's authorization process here
         switch musicAuthorizationStatus {
             case .notDetermined:
                 Task {
@@ -145,6 +200,21 @@ struct WelcomeView: View {
             default:
                 fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
         }
+            default:
+                fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
+        }
+    }
+    
+    private func handleAppleButtonPressed() {
+        // Set the corresponding music service
+        musicServiceType = .apple
+        handleButtonPressed()
+    }
+    
+    private func handleSpotifyButtonPressed() {
+        // Set the corresponding music service
+        musicServiceType = .spotify
+        handleButtonPressed()
     }
 
     /// Safely updates the `musicAuthorizationStatus` property on the main thread.
