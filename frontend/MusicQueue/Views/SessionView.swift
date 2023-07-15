@@ -1,104 +1,172 @@
-//
-//  SessionView.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-07-05.
-//
 
 import SwiftUI
-import MusicKit
 
 struct SessionView: View {
     
     // MARK: - Object lifecycle
-        
     init(_ session: SessionManager) {
         self.session = session
     }
     
     // MARK: - Properties
-    
     /// The session that this view represents.
     let session: SessionManager
+
+    /// The song queue for this session
+    @State private var queue: [Song] = [
+        Song(id: "1", title: "Imagine", artist: "John Lennon", votes: 3),
+        Song(id: "2", title: "Hey Jude", artist: "The Beatles", votes: 5),
+        Song(id: "3", title: "Bohemian Rhapsody", artist: "Queen", votes: 2),
+        Song(id: "4", title: "Stairway to Heaven", artist: "Led Zeppelin", votes: 6)
+    ] {
+        didSet {
+            queue.sort {
+                $0.votes > $1.votes
+            }
+        }
+    }
     
-    /// The songs that belong to this session.
-    @State var songs: MusicItemCollection<Song>?
+    /// Boolean value determining whether user is host or not
+    @State private var isUserHost = true // placeholder
     
+    /// Boolean value determining if the queue is being displayed
+    @State private var isQueueOpen = false
+    
+    let albumArtPlaceholder = Image(systemName: "photo")
+
     // MARK: - View
-    
     var body: some View {
         VStack {
-            Text("Session: \(session.sessionID)")
-                .font(.title)
-                .padding()
-            
-            // Add a list of songs on the session.
-            if let loadedSongs = songs, !loadedSongs.isEmpty {
-                Section(header: Text("Now Playing")) {
-                    if let currentSong = loadedSongs.first {
-                        VStack {
-                            Text(currentSong.title)
-                            if let artwork = currentSong.artwork {
-                                ArtworkImage(artwork, width: 320)
-                                    .cornerRadius(8)
-                            }
-                        }
-                    }
+            HStack {
+                Text("Session: \(session.sessionID)")
+                    .font(.largeTitle)
+                    .padding()
+                Spacer()
+                Button(action: handleAddSongButtonTapped) {
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
                 }
             }
-            
-            Button(action: handleLeaveSessionButtonSelected) {
-                Text("Leave Session")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            /// now playing section
+            VStack {
+                albumArtPlaceholder
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                
+                HStack {
+                    Button(action: {}) {
+                        Image(systemName: "backward.fill")
+                    }
+                    .disabled(!isUserHost)
+                    Button(action: {}) {
+                        Image(systemName: "playpause.fill")
+                    }
+                    .disabled(!isUserHost)
+                    Button(action: {}) {
+                        Image(systemName: "forward.fill")
+                    }
+                    .disabled(!isUserHost)
+                }
+                .font(.largeTitle)
+                .padding(.top)
             }
-            .padding(.bottom)
+            
+            Spacer()
+            
+            
+            /// Lower menu bar,
+            HStack {
+                // Queue button.
+                Button(action: { withAnimation { isQueueOpen.toggle() } }) {
+                    Image(systemName: "line.horizontal.3")
+                        .font(.largeTitle)
+                }
+                .padding()
+                
+                Spacer()
+                
+                // Chat button.
+                Button(action: { /* Handle chat button action */ }) {
+                    Image(systemName: "bubble.right")
+                        .font(.largeTitle)
+                }
+                .padding()
+                
+                Button(action: handleLeaveSessionButtonSelected) {
+                    Image(systemName: "arrow.turn.up.left")
+                        .font(.largeTitle)
+                        .foregroundColor(.red)
+                }
+                .padding()
+            }
+            .sheet(isPresented: $isQueueOpen) {
+                QueueView(session: session, queue: queue)
+            }
+
+            // The queue of songs
+            if isQueueOpen {
+                List(queue, id: \.id) { song in
+                    VStack(alignment: .leading) {
+                        Text(song.title)
+                        Text(song.artist)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Button(action: {
+                            session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: 1)
+                        }) {
+                            Image(systemName: "hand.thumbsup")
+                                .foregroundColor(.blue)
+                        }
+
+                        Button(action: {
+                            session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: -1)
+                        }) {
+                            Image(systemName: "hand.thumbsdown")
+                                .foregroundColor(.red)
+                        }
+                        Text("\(song.votes)")
+                    }
+                    
+                }
+                .padding([.top, .bottom])
+            }
         }
         .padding()
-//        .navigationTitle(session.name)
-        
+
         // When the view appears, load songs asynchronously.
         .task {
+            session.onQueueUpdate = { updatedQueue in
+                self.queue = updatedQueue
+            }
             try? await loadSongs()
         }
     }
-    
+
     // MARK: - Loading songs
-    
     /// Loads songs asynchronously.
     private func loadSongs() async throws {
-//        let detailedSession = try await session.with([.songs])
-//        update(songs: detailedSession.songs)
+        // Code to load songs
     }
-    
-    /// Safely updates `songs` property on the main thread.
-    @MainActor
-    private func update(songs: MusicItemCollection<Song>?) {
-        withAnimation {
-            self.songs = songs
-        }
-    }
-    
+
     // MARK: - Playback
-    
     /// The action to perform when the user taps the Leave Session button.
     private func handleLeaveSessionButtonSelected() {
         // Implement session leave logic here
     }
     
-    /// The action to perform when the user taps a song in the list of songs.
-    private func handleSongSelected(_ song: Song, loadedSongs: MusicItemCollection<Song>) {
-        // Implement song selection logic here
-    }
+    // MARK: - Handlers
+    
+    /// Handle add song button tapped
+    private func handleAddSongButtonTapped() {
+       // Implement add song logic here
+   }
+    
 }
 
 struct SessionView_Previews: PreviewProvider {
-    let session: SessionManager
     static var previews: some View {
         SessionView(SessionManager())
     }
 }
-

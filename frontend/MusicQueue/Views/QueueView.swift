@@ -8,13 +8,37 @@
 import SwiftUI
 
 struct QueueView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+    @Environment(\.dismiss) var dismiss
+    var session: SessionManager
+    var queue: [Song]
 
-struct QueueView_Previews: PreviewProvider {
-    static var previews: some View {
-        QueueView()
+    var body: some View {
+        VStack {
+            List(queue, id: \.id) { song in
+                VStack(alignment: .leading) {
+                    Text(song.title)
+                    Text(song.artist)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                HStack {
+                    Button(action: {
+                        session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: 1)
+                    }) {
+                        Image(systemName: "hand.thumbsup")
+                            .foregroundColor(.blue)
+                    }
+
+                    Button(action: {
+                        session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: -1)
+                    }) {
+                        Image(systemName: "hand.thumbsdown")
+                            .foregroundColor(.red)
+                    }
+                    Text("Votes: \(song.votes)")
+                }
+            }
+            .padding([.top, .bottom])
+        }
     }
 }

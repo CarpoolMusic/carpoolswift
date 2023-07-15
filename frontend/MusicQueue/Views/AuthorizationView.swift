@@ -1,5 +1,5 @@
 //
-//  WelcomeView.swift
+//  AuthorizationView.swift
 //  MusicQueue
 //
 //  Created by Nolan Biscaro on 2023-07-05.
@@ -8,25 +8,25 @@
 import SwiftUI
 import MusicKit
 
-// MARK: - Welcome View
+// MARK: - Authorization View
 
-/// `WelcomeView` is a view that introduces to users the purpose of the MusicAlbums app,
-/// and demonstrates best practices for requesting user consent for an app to get access to
-/// Apple Music data.
-///
+/// `WelcomeView` is a view that appears when a user needs to choose and
+/// authenticate their underlying music source
 
-struct WelcomeView: View {
-    
+struct AuthorizationView: View {
     // MARK: - Properties
+    
+    /// Opens a URL using the appropriate system service.
+    @Environment(\.openURL) private var openURL
+    
+    
+    @ObservedObject var appleMusicService: AppleMusicService
+    @ObservedObject var spotifyMusicService: SpotifyMusicService
     
     enum MusicServiceType {
         case apple, spotify
     }
     @State var musicServiceType: MusicServiceType?
-    
-    /// Specific music services
-    @StateObject var appleMusicService = AppleMusicService()
-    @StateObject var spotifyMusicService = SpotifyMusicService()
     
     /// The generic music service interface
     var musicService: MusicService? {
@@ -51,7 +51,7 @@ struct WelcomeView: View {
                 
                 Spacer()
                 
-                Text("App name")
+                Text("Carpool")
                     .foregroundColor(.primary)
                     .font(.largeTitle.weight(.semibold))
                     .shadow(radius: 2)
@@ -87,7 +87,7 @@ struct WelcomeView: View {
                        HStack {
                            Text("Log in with Spotify")
                                .font(.headline)
-                           Image("spotifyLogo") // Replace this with your Spotify logo
+                           Image(systemName: "appleLogo") // Replace this with your Spotify logo
                                .resizable()
                                .aspectRatio(contentMode: .fit)
                                .frame(height: 24)
@@ -100,15 +100,6 @@ struct WelcomeView: View {
                    .background(Color(red: 29/255, green: 185/255, blue: 84/255))
                    .cornerRadius(30)
                    .padding([.leading, .trailing], 20)
-                
-                if musicAuthorizationStatus == .notDetermined || musicAuthorizationStatus == .denied {
-                    Button(action: handleButtonPressed) {
-                        buttonText
-                            .padding([.leading, .trailing], 10)
-                    }
-//                    .buttonStyle(.prominent)
-                    .colorScheme(.light)
-                }
             }
             .colorScheme(.dark)
         }
@@ -129,30 +120,17 @@ struct WelcomeView: View {
         .ignoresSafeArea()
     }
     
-    /// Provides additional text that explains how to get access to Apple Music
-    /// after previously denying authorization.
-    private var secondaryExplanatoryText: Text? {
-        var secondaryExplanatoryText: Text?
-        switch musicAuthorizationStatus {
-            case .denied:
-                secondaryExplanatoryText = Text("Please grant {APP_NAME} access to ")
-                    + Text(Image(systemName: "applelogo")) + Text(" Music in Settings.")
-            default:
-                break
-        }
-        return secondaryExplanatoryText
-    }
     /// A button that the user taps to continue using the app according to the current
     /// authorization status.
     private var buttonText: Text {
         let buttonText: Text
-        switch musicAuthorizationStatus {
+        switch musicService?.authorizationStatus {
             case .notDetermined:
                 buttonText = Text("Continue")
             case .denied:
                 buttonText = Text("Open Settings")
             default:
-                fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
+            fatalError("No button should be displayed for current authorization status: \(musicService!.authorizationStatus).")
         }
         return buttonText
     }
@@ -168,63 +146,33 @@ struct WelcomeView: View {
     }
 
     // MARK: - Methods
-
-    /// Allows the user to authorize Apple Music usage when tapping the Continue/Open Setting button.
-    private func handleButtonPressed() {
-        
-        switch musicAuthorizationStatus {
-            case .notDetermined:
-                Task {
-                    // Authenticate with corresponding music service
-                    musicService?.authorize { result in
-                    }
-//                    let musicAuthorizationStatus = await MusicAuthorization.request()
-//                    await update(with: musicAuthorizationStatus)
-                }
-            case .denied:
-            // Handle with corresponding music service
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    openURL(settingsURL)
-                }
-        // Implement Apple Music's authorization process here
-        switch musicAuthorizationStatus {
-            case .notDetermined:
-                Task {
-                    let musicAuthorizationStatus = await MusicAuthorization.request()
-                    await update(with: musicAuthorizationStatus)
-                }
-            case .denied:
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    openURL(settingsURL)
-                }
-            default:
-                fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
-        }
-            default:
-                fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
-        }
-    }
-    
     private func handleAppleButtonPressed() {
         // Set the corresponding music service
         musicServiceType = .apple
-        handleButtonPressed()
+        musicService?.authorize { result in
+            switch result {
+                case .success(let user):
+                    print("User successfully authroized. Name: \(user.name), ID: \(user.id)")
+                case .failure(let error):
+                    print("Authorization failed with error: \(error)")
+            }
+        }
     }
     
     private func handleSpotifyButtonPressed() {
         // Set the corresponding music service
         musicServiceType = .spotify
-        handleButtonPressed()
-    }
-
-    /// Safely updates the `musicAuthorizationStatus` property on the main thread.
-    @MainActor
-    private func update(with musicAuthorizationStatus: MusicAuthorization.Status) {
-        withAnimation {
-            self.musicAuthorizationStatus = musicAuthorizationStatus
+        print("HERE")
+        musicService?.authorize { result in
+            switch result {
+            case .success(let user):
+                print("User successfully authroized. Name: \(user.name), ID: \(user.id)")
+            case .failure(let error):
+                print("Authorization failed with error: \(error)")
+            }
         }
+        print("HERERE")
     }
-
     // MARK: - Presentation coordinator
 
     /// A presentation coordinator to use in conjuction with `SheetPresentationModifier`.
@@ -252,10 +200,14 @@ struct WelcomeView: View {
     fileprivate struct SheetPresentationModifier: ViewModifier {
         @StateObject private var presentationCoordinator = PresentationCoordinator.shared
         
+        // Create instances of AppleMusicService and SpotifyMusicService
+        @ObservedObject var appleMusicService = AppleMusicService()
+        @ObservedObject var spotifyMusicService = SpotifyMusicService()
+        
         func body(content: Content) -> some View {
             content
                 .sheet(isPresented: $presentationCoordinator.isWelcomeViewPresented) {
-                    WelcomeView(musicAuthorizationStatus: $presentationCoordinator.musicAuthorizationStatus)
+                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService)
                         .interactiveDismissDisabled()
                 }
         }
@@ -267,14 +219,18 @@ struct WelcomeView: View {
 /// Allows the addition of the`welcomeSheet` view modifier to the top-level view.
 extension View {
     func welcomeSheet() -> some View {
-        modifier(WelcomeView.SheetPresentationModifier())
+        modifier(AuthorizationView.SheetPresentationModifier())
     }
 }
 
 // MARK: - Previews
 
-struct WelcomeView_Previews: PreviewProvider {
+struct AuthorizationView_Previews: PreviewProvider {
+    // Create instances of AppleMusicService and SpotifyMusicService
+    @ObservedObject static var appleMusicService = AppleMusicService()
+    @ObservedObject static var spotifyMusicService = SpotifyMusicService()
+    
     static var previews: some View {
-        WelcomeView(musicAuthorizationStatus: .constant(.notDetermined))
+        AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService)
     }
 }

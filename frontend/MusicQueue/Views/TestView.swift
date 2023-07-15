@@ -7,14 +7,47 @@
 
 import SwiftUI
 
-struct TestView: View {
+struct MainView: View {
+    @State private var isListViewOpen = false
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            // Main Content
+            VStack {
+                Text("Main Content")
+                    .font(.largeTitle)
+                    .padding()
+                
+                
+                // Button to Open ListView
+                Button(action: { withAnimation { self.isListViewOpen.toggle() } }) {
+                    Image(systemName: "line.horizontal.3")
+                        .font(.largeTitle)
+                        .foregroundColor(.blue)
+                        .padding()
+                }
+            }
+            .zIndex(1) // To ensure Main Content stays in front when ListView is not open.
+            
+            // ListView
+            if isListViewOpen {
+                VStack {
+                    List {
+                        ForEach(0..<20) { item in
+                            Text("List Item \(item)")
+                        }
+                    }
+                    Spacer()
+                }
+                .background(Color.gray.opacity(0.5)) // To provide a visual separation from the Main Content
+                .transition(.move(edge: .bottom)) // Transition effect when ListView appears/disappears.
+                .offset(y: isListViewOpen ? UIScreen.main.bounds.height * 0.10 : UIScreen.main.bounds.height)
+            }
+        }
     }
 }
 
-struct TestView_Previews: PreviewProvider {
+struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        TestView()
+        MainView()
     }
 }
