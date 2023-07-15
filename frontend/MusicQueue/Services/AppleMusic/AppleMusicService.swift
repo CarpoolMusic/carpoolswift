@@ -16,7 +16,7 @@ class AppleMusicService: MusicService, ObservableObject {
     @Environment(\.openURL) private var openURL
     
     /// The current authorization status of MusicKit.
-    private var musicAuthorizationStatus: MusicAuthorization.Status = MusicAuthorization.currentStatus
+    @Published var musicAuthorizationStatus: MusicAuthorization.Status = MusicAuthorization.currentStatus
     
     
     /// The current authorization status
@@ -35,16 +35,19 @@ class AppleMusicService: MusicService, ObservableObject {
     
     // MARK: - Methods
     
-    func authorize(completion: @escaping (Result<User, Error>) -> Void) {
+    func authorize() {
         // Implement Apple Music's authorization process here
         switch self.authorizationStatus {
             case .notDetermined:
                 Task {
-                    musicAuthorizationStatus = await MusicAuthorization.request()
+                    let status = await MusicAuthorization.request()
+                        DispatchQueue.main.async {
+                            self.musicAuthorizationStatus = status
+                        }
                 }
             case .denied:
                 if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    openURL(settingsURL)
+                    UIApplication.shared.open(settingsURL)
                 }
             default:
                 fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")

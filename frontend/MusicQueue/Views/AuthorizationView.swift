@@ -23,10 +23,7 @@ struct AuthorizationView: View {
     @ObservedObject var appleMusicService: AppleMusicService
     @ObservedObject var spotifyMusicService: SpotifyMusicService
     
-    enum MusicServiceType {
-        case apple, spotify
-    }
-    @State var musicServiceType: MusicServiceType?
+    @Binding var musicServiceType: MusicServiceType?
     
     /// The generic music service interface
     var musicService: MusicService? {
@@ -100,6 +97,7 @@ struct AuthorizationView: View {
                    .background(Color(red: 29/255, green: 185/255, blue: 84/255))
                    .cornerRadius(30)
                    .padding([.leading, .trailing], 20)
+                   .padding([.bottom], 40)
             }
             .colorScheme(.dark)
         }
@@ -137,41 +135,28 @@ struct AuthorizationView: View {
     
     /// Button that user taps to sign in with Apple Music.
     private var appleButtonText: Text {
-        return Text("Sign in with Apple Music") + Text(Image(systemName: "applelogo"))
+        return Text("Sign in with Apple Music") + Text(Image(systemName: ""))
     }
     
     /// BUtton that user taps to sign in with Spotify.
     private var spotifyButtonText: Text {
-        return Text("Sign in with Spotify") + Text(Image(systemName: "applelogo"))
+        return Text("Sign in with Spotify") + Text(Image(systemName: ""))
     }
 
     // MARK: - Methods
     private func handleAppleButtonPressed() {
         // Set the corresponding music service
         musicServiceType = .apple
-        musicService?.authorize { result in
-            switch result {
-                case .success(let user):
-                    print("User successfully authroized. Name: \(user.name), ID: \(user.id)")
-                case .failure(let error):
-                    print("Authorization failed with error: \(error)")
-            }
-        }
+        // Set the service type in UserDefaults
+        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
+        musicService?.authorize()
     }
     
     private func handleSpotifyButtonPressed() {
         // Set the corresponding music service
         musicServiceType = .spotify
-        print("HERE")
-        musicService?.authorize { result in
-            switch result {
-            case .success(let user):
-                print("User successfully authroized. Name: \(user.name), ID: \(user.id)")
-            case .failure(let error):
-                print("Authorization failed with error: \(error)")
-            }
-        }
-        print("HERERE")
+        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
+        musicService?.authorize()
     }
     // MARK: - Presentation coordinator
 
@@ -204,22 +189,15 @@ struct AuthorizationView: View {
         @ObservedObject var appleMusicService = AppleMusicService()
         @ObservedObject var spotifyMusicService = SpotifyMusicService()
         
+        @Binding var musicServiceType: MusicServiceType?
+        
         func body(content: Content) -> some View {
             content
                 .sheet(isPresented: $presentationCoordinator.isWelcomeViewPresented) {
-                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService)
+                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $musicServiceType)
                         .interactiveDismissDisabled()
                 }
         }
-    }
-}
-
-// MARK: - View extension
-
-/// Allows the addition of the`welcomeSheet` view modifier to the top-level view.
-extension View {
-    func welcomeSheet() -> some View {
-        modifier(AuthorizationView.SheetPresentationModifier())
     }
 }
 
@@ -231,6 +209,6 @@ struct AuthorizationView_Previews: PreviewProvider {
     @ObservedObject static var spotifyMusicService = SpotifyMusicService()
     
     static var previews: some View {
-        AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService)
+        AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: .constant(.spotify))
     }
 }

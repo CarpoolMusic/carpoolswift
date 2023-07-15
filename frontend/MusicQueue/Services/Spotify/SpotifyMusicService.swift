@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import KeychainSwift
 
 enum AppRemoteConnectionError: Error {
     case notConnected
@@ -14,21 +15,19 @@ enum AppRemoteConnectionError: Error {
 class SpotifyMusicService: MusicService, ObservableObject {
     // MARK: - Properties
     
+    
     private var SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private var SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     private var accessToken = ""
+    
+    private let keychain = KeychainSwift(keyPrefix: "com.app.musicQueue")
+    private let accessTokenKey = "SpotifyAccessToken"
     
     private let appRemoteDelegate = SpotifyAppRemoteDelegate()
     private let sessionManagerDelegate = SpotifySessionManagerDelegate()
     
     /// The current authorization status of Spotify iOS SDK
-    var authorizationStatus: MusicServiceAuthStatus {
-        if appRemote.authorizeAndPlayURI("") {
-            return .authorized
-        } else {
-            return .notDetermined // Adjust this depending on your needs.
-        }
-    }
+    @Published var authorizationStatus: MusicServiceAuthStatus = .notDetermined
     
     lazy var configuration = SPTConfiguration(
       clientID: SpotifyClientID,
@@ -53,22 +52,78 @@ class SpotifyMusicService: MusicService, ObservableObject {
     }()
     
     init() {
+        // Setup the intial notification handlers
         setupNotificationObservers()
+        
+        /// Note: If the token is from a long time ago and has since expried,
+        /// the Spotify iOS SDK will automatically handle token swap
+        /// Set initial authorization status
+        if let _ = self.retrieveAccessTokenFromKeychain() {
+            authorizationStatus = .authorized
+        } else {
+            authorizationStatus = .notDetermined
+        }
+        
+        print("AUTH IN SPOT")
+        print(self.authorizationStatus)
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("SpotifySessionInitiated"), object: nil)
     }
 
     
-    // MARK: - Methods
+    // MARK: - Notification Methods
     
-    func authorize(completion: @escaping (Result<User, Error>) -> Void) {
+    // Notifications from Delegates or UIApplication
+    func setupNotificationObservers() {
+        // Re-connect when the user re-opens the application
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            if let _ = self?.appRemote.connectionParameters.accessToken {
+                self?.appRemote.connect()
+            }
+        }
+        
+        // Clean up if user is disconnecting
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            if self?.appRemote.isConnected == true {
+                self?.appRemote.disconnect()
+            }
+        }
+        
+        // Set Access Token and Connect when the user initiates a session
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionInitiated"), object: nil, queue: .main) { [weak self] notification in
+            print("IN AUTH CALLBACK")
+            if let token = notification.userInfo?["accessToken"] as? String {
+                print("TOKEN: ", token)
+                self?.appRemote.connectionParameters.accessToken = token
+                self?.appRemote.connect()
+                // Save the token in the keychain for session persistence
+                self?.saveAccessTokenToKeychain(token)
+                // update the authorzations status of the user
+                // Note that we only confirm authorization once we have the token
+                self?.authorizationStatus = .authorized
+            }
+        }
+        
+        // Update the user token when session manager performs token swap
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionRenewed"), object: nil, queue: .main) { [weak self] notification in
+            if let token = notification.userInfo?["accessToken"] as? String {
+                // Save the token in the keychain for session persistence
+                self?.saveAccessTokenToKeychain(token)
+            }
+        }
+    }
+    
+    // MARK: - Authorization methods
+    
+    func authorize() {
         // Implement Spotify's authorization process here
-        print("AUTH")
         let requestedScopes: SPTScope = [.appRemoteControl]
         self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
+        // This invokes the Auth Modal for the spotify login
         self.sessionManager.initiateSession(with: requestedScopes, options: .default)
     }
     
@@ -88,6 +143,31 @@ class SpotifyMusicService: MusicService, ObservableObject {
             }
         }
     }
+    
+    // MARK: - Spotify app methods
+    
+    private func fetchSpotifyUser(with accessToken: String, completion: @escaping (Result<SpotifyUser, Error>) -> Void) {
+        guard let url = URL(string: "https://api.spotify.com/v1/me") else { return }
+
+        var request = URLRequest(url: url)
+        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = data {
+                do {
+                    let user = try JSONDecoder().decode(SpotifyUser.self, from: data)
+                    completion(.success(user))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+
+        task.resume()
+    }
+    
 
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Spotify's playback here
@@ -141,25 +221,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
 //           }
 //       })
     }
-
-    // Other methods as needed...
-    func setupNotificationObservers() {
-        // Re-connect when the user re-opens the application
-        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            if let _ = self?.appRemote.connectionParameters.accessToken {
-                self?.appRemote.connect()
-            }
-        }
-        
-        // Clean up if user is disconnecting
-        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            if self?.appRemote.isConnected == true {
-                self?.appRemote.disconnect()
-            }
-        }
-    }
     
-    // MARK: - App Remote Methods
     func isSpotifyInstalled() -> Bool {
         guard let url = URL(string: "spotify:") else {
             return false
@@ -173,5 +235,15 @@ class SpotifyMusicService: MusicService, ObservableObject {
         }
         UIApplication.shared.open(url)
     }
-
+    
+// MARK: - Keychain methods
+    
+    private func saveAccessTokenToKeychain(_ token: String) {
+        keychain.set(token, forKey: accessTokenKey)
+    }
+    
+    private func retrieveAccessTokenFromKeychain() -> String? {
+        let token = keychain.get(accessTokenKey)
+        return token
+    }
 }
