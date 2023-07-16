@@ -41,6 +41,7 @@
 		60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */; };
 		60BA77DB2A64463B00A5516B /* SocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77DA2A64463B00A5516B /* SocketService.swift */; };
 		60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77DC2A64498300A5516B /* SessionManagerProtocol.swift */; };
+		60BA77E12A64794500A5516B /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77E02A64794500A5516B /* Session.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 		60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketServiceProtocol.swift; sourceTree = "<group>"; };
 		60BA77DA2A64463B00A5516B /* SocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketService.swift; sourceTree = "<group>"; };
 		60BA77DC2A64498300A5516B /* SessionManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerProtocol.swift; sourceTree = "<group>"; };
+		60BA77E02A64794500A5516B /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +211,7 @@
 				60BA779C2A55F9D600A5516B /* Cells */,
 				60BA77A52A5E3CA200A5516B /* Song.swift */,
 				60BA77B32A61DF0C00A5516B /* AuthStatus.swift */,
+				60BA77E02A64794500A5516B /* Session.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -431,6 +434,7 @@
 				60BA77922A55F39400A5516B /* SessionView.swift in Sources */,
 				60BA779E2A55F9F700A5516B /* TrackCell.swift in Sources */,
 				60BA77A62A5E3CA200A5516B /* Song.swift in Sources */,
+				60BA77E12A64794500A5516B /* Session.swift in Sources */,
 				60BA77AA2A5E61A900A5516B /* QueueView.swift in Sources */,
 				60BA77C12A6237AB00A5516B /* SpotifyAppRemoteDelegate.swift in Sources */,
 				60BA77652A55E2A400A5516B /* ContentView.swift in Sources */,

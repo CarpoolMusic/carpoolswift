@@ -6,10 +6,8 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     // MARK: - State
     
     private let socketService: SocketServiceProtocol
-    var sessionID: String
-    private var users: [User] = []
-    private var sessionAdmin: User?
-    var onQueueUpdate: (([Song]) -> Void)?
+    
+    @Published var activeSession: Session?
     
     init(socketService: SocketServiceProtocol) {
         self.socketService = socketService
@@ -20,14 +18,20 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     func handleEvent(_ event: SocketEvent) {
         switch event {
         case .sessionCreated(let sessionId):
-            // Do something when a session is created.
-            print()
+            // Set the intial values of the session and then load
+            self.activeSession = Session(id: sessionId)
         case .sessionJoined(let sessionId):
             // Do something when a session is joined.
             print()
         case .leftSession(let sessionId):
             // Do something when a session is left.
             // Continue for other cases...
+            print()
+        case .memberLeft(let memberId):
+            // Do something when a member of the session leaves
+            print()
+        case .queueUpdated(let queue):
+            // DO something when the queue is updated
             print()
         default:
             print("Unhandled event: \(event)")

@@ -17,7 +17,9 @@ struct DashboardView: View {
 
     var body: some View {
         VStack {
-            Spacer()
+            if sessionManager.activeSession != nil {
+                SessionView(sessionManager: sessionManager)
+            }
 
             Text("MusicQueue")
                 .font(.largeTitle)
@@ -99,7 +101,7 @@ struct DashboardView: View {
 struct DashboardView_Previews: PreviewProvider {
     // Just choose a mock music service
     static var mockMusicService = AppleMusicService()
-    static var mockSessionManager = SessionManager()
+    static var mockSessionManager = SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: "")))
 
     static var previews: some View {
         DashboardView(musicService: AnyMusicService(mockMusicService), sessionManager: mockSessionManager)

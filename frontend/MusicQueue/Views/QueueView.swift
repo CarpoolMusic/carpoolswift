@@ -9,12 +9,12 @@ import SwiftUI
 
 struct QueueView: View {
     @Environment(\.dismiss) var dismiss
-    var session: SessionManager
-    var queue: [Song]
-
+    
+    @ObservedObject var sessionManager: SessionManager
+    
     var body: some View {
         VStack {
-            List(queue, id: \.id) { song in
+            List(sessionManager.activeSession?.queue ?? [], id: \.id) { song in
                 VStack(alignment: .leading) {
                     Text(song.title)
                     Text(song.artist)
@@ -23,14 +23,14 @@ struct QueueView: View {
                 }
                 HStack {
                     Button(action: {
-                        session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: 1)
+                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: 1)
                     }) {
                         Image(systemName: "hand.thumbsup")
                             .foregroundColor(.blue)
                     }
 
                     Button(action: {
-                        session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: -1)
+                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: -1)
                     }) {
                         Image(systemName: "hand.thumbsdown")
                             .foregroundColor(.red)

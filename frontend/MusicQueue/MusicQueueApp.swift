@@ -15,7 +15,7 @@ struct MusicQueueApp: App {
     @StateObject var spotifyMusicService = SpotifyMusicService()
     
     /// Session Manager
-    @StateObject var sessionManager = SessionManager()
+    @StateObject var sessionManager = SessionManager(socketService: SocketService(url: URL(string: "https://localhost:3000")!))
     
     var body: some Scene {
         WindowGroup {

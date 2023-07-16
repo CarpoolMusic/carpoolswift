@@ -3,15 +3,10 @@ import SwiftUI
 
 struct SessionView: View {
     
-    // MARK: - Object lifecycle
-    init(_ session: SessionManager) {
-        self.session = session
-    }
-    
     // MARK: - Properties
-    /// The session that this view represents.
-    let session: SessionManager
-
+    
+    @ObservedObject var sessionManager: SessionManager
+    
     /// The song queue for this session
     @State private var queue: [Song] = [
         Song(id: "1", title: "Imagine", artist: "John Lennon", votes: 3),
@@ -33,12 +28,12 @@ struct SessionView: View {
     @State private var isQueueOpen = false
     
     let albumArtPlaceholder = Image(systemName: "photo")
-
+    
     // MARK: - View
     var body: some View {
         VStack {
             HStack {
-                Text("Session: \(session.sessionID)")
+                Text("Session: \(sessionManager.activeSession?.id ?? "")")
                     .font(.largeTitle)
                     .padding()
                 Spacer()
@@ -100,12 +95,12 @@ struct SessionView: View {
                 .padding()
             }
             .sheet(isPresented: $isQueueOpen) {
-                QueueView(session: session, queue: queue)
+                QueueView(sessionManager: sessionManager)
             }
-
+            
             // The queue of songs
             if isQueueOpen {
-                List(queue, id: \.id) { song in
+                List(sessionManager.activeSession?.queue ?? [], id: \.id) { song in
                     VStack(alignment: .leading) {
                         Text(song.title)
                         Text(song.artist)
@@ -114,14 +109,14 @@ struct SessionView: View {
                     }
                     HStack {
                         Button(action: {
-                            session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: 1)
+                            sessionManager.voteSong(sessionId: "\(sessionManager.activeSession?.id ?? "")", songID: song.id, vote: 1)
                         }) {
                             Image(systemName: "hand.thumbsup")
                                 .foregroundColor(.blue)
                         }
-
+                        
                         Button(action: {
-                            session.voteSong(sessionId: "\(session.sessionID)", songID: song.id, vote: -1)
+                            sessionManager.voteSong(sessionId: "\(sessionManager.activeSession?.id ?? "")", songID: song.id, vote: -1)
                         }) {
                             Image(systemName: "hand.thumbsdown")
                                 .foregroundColor(.red)
@@ -134,22 +129,19 @@ struct SessionView: View {
             }
         }
         .padding()
-
+        
         // When the view appears, load songs asynchronously.
         .task {
-            session.onQueueUpdate = { updatedQueue in
-                self.queue = updatedQueue
-            }
             try? await loadSongs()
         }
     }
-
+    
     // MARK: - Loading songs
     /// Loads songs asynchronously.
     private func loadSongs() async throws {
         // Code to load songs
     }
-
+    
     // MARK: - Playback
     /// The action to perform when the user taps the Leave Session button.
     private func handleLeaveSessionButtonSelected() {
@@ -160,13 +152,13 @@ struct SessionView: View {
     
     /// Handle add song button tapped
     private func handleAddSongButtonTapped() {
-       // Implement add song logic here
-   }
+        // Implement add song logic here
+    }
     
 }
 
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionView(SessionManager())
+        SessionView(sessionManager: SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: ""))))
     }
 }
