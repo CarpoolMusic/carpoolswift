@@ -6,8 +6,8 @@
 //
 
 enum SocketEvent {
-    case connect
-    case disconnect
+    case connected
+    case disconnected
     case sessionCreated(String)
     case sessionJoined(String)
     case leftSession(String)

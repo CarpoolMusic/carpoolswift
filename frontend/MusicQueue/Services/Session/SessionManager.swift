@@ -7,6 +7,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     
     private let socketService: SocketServiceProtocol
     
+    @Published var connected: Bool?
     @Published var activeSession: Session?
     
     init(socketService: SocketServiceProtocol) {
@@ -17,6 +18,12 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     // MARK: - Socket.IO messages
     func handleEvent(_ event: SocketEvent) {
         switch event {
+        case .connected:
+            // Set the connected flag to true for the Session Manager
+            self.connected = true
+        case .disconnected:
+            // Set the connected flag to false for the Session Manager
+            self.connected = false
         case .sessionCreated(let sessionId):
             // Set the intial values of the session and then load
             self.activeSession = Session(id: sessionId)
@@ -41,6 +48,14 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     func handleError(_ error: SocketError) {
         // Emit error event to the server
         socketService.emit(event: "error", with: ["error": error.localizedDescription])
+    }
+    
+    func connect() {
+        socketService.connect()
+    }
+    
+    func disconnect() {
+        socketService.disconnect()
     }
     
     func createSession() {
@@ -81,6 +96,10 @@ extension SessionManager: SocketServiceDelegate {
     
     func socketDidReceiveEvent(event: String, with items: [Any]) {
         switch event {
+        case "connected":
+            handleEvent(.connected)
+        case "disconnected":
+            handleEvent(.disconnected)
         case "session created":
             guard let sessionId = items.first as? String else { return }
             handleEvent(.sessionCreated(sessionId))

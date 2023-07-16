@@ -14,6 +14,7 @@ struct DashboardView: View {
     
     @State private var sessionID: String = ""
     @State private var showingAlert = false
+    @State private var isCreateSessionButtonPressed = false
 
     var body: some View {
         VStack {
@@ -68,7 +69,12 @@ struct DashboardView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)
-
+            .onReceive(sessionManager.$connected) { isConnected in
+                if self.isCreateSessionButtonPressed {
+                    self.sessionManager.createSession()
+                    self.isCreateSessionButtonPressed = false // reset the flag
+                }
+            }
         }
         .onAppear(perform: loadUser)
     }
@@ -85,16 +91,17 @@ struct DashboardView: View {
     }
 
     private func handleJoinSessionButtonPressed () {
-        // Implement functionality to join a session
-        sessionManager.createSession()
-    }
-
-    private func handleCreateSessionButtonPressed () {
         if sessionID.isEmpty {
             showingAlert = true
         } else {
             sessionManager.joinSession(sessionID: sessionID)
         }
+    }
+
+    private func handleCreateSessionButtonPressed () {
+        // Implement functionality to join a session
+        sessionManager.connect()
+        self.isCreateSessionButtonPressed = true
     }
 }
 
