@@ -38,6 +38,9 @@
 		60BA77D02A63278000A5516B /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 60BA77CF2A63278000A5516B /* KeychainSwift */; };
 		60BA77D22A632F4500A5516B /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77D12A632F4500A5516B /* DashboardView.swift */; };
 		60BA77D62A6389A900A5516B /* AnyMusicService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77D52A6389A900A5516B /* AnyMusicService.swift */; };
+		60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */; };
+		60BA77DB2A64463B00A5516B /* SocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77DA2A64463B00A5516B /* SocketService.swift */; };
+		60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77DC2A64498300A5516B /* SessionManagerProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +94,9 @@
 		60BA77CC2A6300C600A5516B /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		60BA77D12A632F4500A5516B /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		60BA77D52A6389A900A5516B /* AnyMusicService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyMusicService.swift; sourceTree = "<group>"; };
+		60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketServiceProtocol.swift; sourceTree = "<group>"; };
+		60BA77DA2A64463B00A5516B /* SocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketService.swift; sourceTree = "<group>"; };
+		60BA77DC2A64498300A5516B /* SessionManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -220,9 +226,9 @@
 		60BA77A12A55FD3B00A5516B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				60BA77D72A6445C300A5516B /* Session */,
 				60BA77C62A6241CE00A5516B /* AppleMusic */,
 				60BA77BF2A62378600A5516B /* Spotify */,
-				60BA77962A55F8FB00A5516B /* SessionManager.swift */,
 				60BA77AD2A5F284300A5516B /* MusicService.swift */,
 				60BA77D52A6389A900A5516B /* AnyMusicService.swift */,
 			);
@@ -254,6 +260,17 @@
 				60BA77CC2A6300C600A5516B /* User.swift */,
 			);
 			path = Users;
+			sourceTree = "<group>";
+		};
+		60BA77D72A6445C300A5516B /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				60BA77962A55F8FB00A5516B /* SessionManager.swift */,
+				60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */,
+				60BA77DA2A64463B00A5516B /* SocketService.swift */,
+				60BA77DC2A64498300A5516B /* SessionManagerProtocol.swift */,
+			);
+			path = Session;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -402,11 +419,14 @@
 				60BA77D62A6389A900A5516B /* AnyMusicService.swift in Sources */,
 				60BA77992A55F95800A5516B /* MusicItemCell.swift in Sources */,
 				60BA77972A55F8FB00A5516B /* SessionManager.swift in Sources */,
+				60BA77DB2A64463B00A5516B /* SocketService.swift in Sources */,
 				60BA77C32A62392D00A5516B /* SpotifyPlayerStateDelegate.swift in Sources */,
 				60BA77902A55F2A800A5516B /* SessionCreationView.swift in Sources */,
 				60BA77AC2A5E65A600A5516B /* ChatView.swift in Sources */,
 				60BA77CD2A6300C600A5516B /* User.swift in Sources */,
+				60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */,
 				60BA77B02A5F286300A5516B /* AppleMusicService.swift in Sources */,
+				60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */,
 				60BA77B42A61DF0C00A5516B /* AuthStatus.swift in Sources */,
 				60BA77922A55F39400A5516B /* SessionView.swift in Sources */,
 				60BA779E2A55F9F700A5516B /* TrackCell.swift in Sources */,

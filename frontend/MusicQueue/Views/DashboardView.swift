@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct DashboardView: View {
+    
     @ObservedObject var musicService: AnyMusicService
+    @ObservedObject var sessionManager: SessionManager
+    
     @State private var sessionID: String = ""
+    @State private var showingAlert = false
 
     var body: some View {
         VStack {
@@ -32,7 +36,7 @@ struct DashboardView: View {
 
             Button(action: {
                 // Action to join session
-                joinSession()
+                handleJoinSessionButtonPressed()
             }) {
                 Text("Join Session")
                     .font(.headline)
@@ -43,12 +47,15 @@ struct DashboardView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)
+            .alert(isPresented: $showingAlert) {
+                Alert(title: Text("Missing Session ID"), message: Text("Please enter a sessioID to join a session."), dismissButton: .default(Text("OK")))
+            }
 
             Spacer()
 
             Button(action: {
                 // Action to create session
-                createSession()
+                handleCreateSessionButtonPressed()
             }) {
                 Text("Create Session")
                     .font(.headline)
@@ -75,20 +82,26 @@ struct DashboardView: View {
         }
     }
 
-    private func joinSession() {
+    private func handleJoinSessionButtonPressed () {
         // Implement functionality to join a session
+        sessionManager.createSession()
     }
 
-    private func createSession() {
-        // Implement functionality to create a new session
+    private func handleCreateSessionButtonPressed () {
+        if sessionID.isEmpty {
+            showingAlert = true
+        } else {
+            sessionManager.joinSession(sessionID: sessionID)
+        }
     }
 }
 
 struct DashboardView_Previews: PreviewProvider {
     // Just choose a mock music service
     static var mockMusicService = AppleMusicService()
+    static var mockSessionManager = SessionManager()
 
     static var previews: some View {
-        DashboardView(musicService: AnyMusicService(mockMusicService))
+        DashboardView(musicService: AnyMusicService(mockMusicService), sessionManager: mockSessionManager)
     }
 }

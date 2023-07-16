@@ -14,11 +14,15 @@ struct MusicQueueApp: App {
     @StateObject var appleMusicService = AppleMusicService()
     @StateObject var spotifyMusicService = SpotifyMusicService()
     
+    /// Session Manager
+    @StateObject var sessionManager = SessionManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appleMusicService)
                 .environmentObject(spotifyMusicService)
+                .environmentObject(sessionManager)
                 .onOpenURL { url in
                     spotifyMusicService.handleAuthCallback(with: url)
                 }

@@ -9,8 +9,12 @@ import SwiftUI
 
 struct ContentView: View {
     
+    // Observed music services from main
     @EnvironmentObject var spotifyMusicService: SpotifyMusicService
     @EnvironmentObject var appleMusicService: AppleMusicService
+    
+    // Observed session manager from main
+    @EnvironmentObject var sessionManager: SessionManager
     
     @State var selectedMusicServiceType: MusicServiceType? = {
         if let stringValue = UserDefaults.standard.string(forKey: "musicServiceType"),
@@ -26,13 +30,13 @@ struct ContentView: View {
             switch selectedMusicServiceType {
             case .spotify:
                 if spotifyMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: AnyMusicService(spotifyMusicService))
+                    DashboardView(musicService: AnyMusicService(spotifyMusicService), sessionManager: sessionManager)
                 } else {
                     AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
                 }
             case .apple:
                 if appleMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: AnyMusicService(appleMusicService))
+                    DashboardView(musicService: AnyMusicService(appleMusicService), sessionManager: sessionManager)
                 } else {
                     AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
                 }
