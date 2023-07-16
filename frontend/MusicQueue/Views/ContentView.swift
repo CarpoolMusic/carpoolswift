@@ -13,11 +13,8 @@ struct ContentView: View {
     @EnvironmentObject var appleMusicService: AppleMusicService
     
     @State var selectedMusicServiceType: MusicServiceType? = {
-        print("HERHEHHRE")
         if let stringValue = UserDefaults.standard.string(forKey: "musicServiceType"),
            let rawValue = MusicServiceType(rawValue: stringValue) {
-            print("DEFAULT SERVICE")
-            print(rawValue)
             return rawValue
         }
         return .none
@@ -29,13 +26,13 @@ struct ContentView: View {
             switch selectedMusicServiceType {
             case .spotify:
                 if spotifyMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: spotifyMusicService)
+                    DashboardView(musicService: AnyMusicService(spotifyMusicService))
                 } else {
                     AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
                 }
             case .apple:
                 if appleMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: appleMusicService)
+                    DashboardView(musicService: AnyMusicService(appleMusicService))
                 } else {
                     AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
                 }

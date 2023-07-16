@@ -14,6 +14,7 @@ enum MusicServiceType: String {
 protocol MusicService {
     var authorizationStatus: MusicServiceAuthStatus { get }
     func authorize()
+    func fetchUser() async throws -> User
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void)
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void)
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)

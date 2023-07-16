@@ -64,7 +64,6 @@ class SpotifyMusicService: MusicService, ObservableObject {
             authorizationStatus = .notDetermined
         }
         
-        print("AUTH IN SPOT")
         print(self.authorizationStatus)
     }
     
@@ -97,7 +96,6 @@ class SpotifyMusicService: MusicService, ObservableObject {
         NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionInitiated"), object: nil, queue: .main) { [weak self] notification in
             print("IN AUTH CALLBACK")
             if let token = notification.userInfo?["accessToken"] as? String {
-                print("TOKEN: ", token)
                 self?.appRemote.connectionParameters.accessToken = token
                 self?.appRemote.connect()
                 // Save the token in the keychain for session persistence
@@ -146,28 +144,20 @@ class SpotifyMusicService: MusicService, ObservableObject {
     
     // MARK: - Spotify app methods
     
-    private func fetchSpotifyUser(with accessToken: String, completion: @escaping (Result<SpotifyUser, Error>) -> Void) {
-        guard let url = URL(string: "https://api.spotify.com/v1/me") else { return }
-
-        var request = URLRequest(url: url)
-        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                completion(.failure(error))
-            } else if let data = data {
-                do {
-                    let user = try JSONDecoder().decode(SpotifyUser.self, from: data)
-                    completion(.success(user))
-                } catch {
-                    completion(.failure(error))
-                }
-            }
+    internal func fetchUser() async throws -> User {
+        guard let url = URL(string: "https://api.spotify.com/v1/me") else {
+            throw URLError(.badURL)
         }
 
-        task.resume()
+        var request = URLRequest(url: url)
+        let accessToken = self.appRemote.connectionParameters.accessToken
+        request.addValue("Bearer \(String(describing: accessToken))", forHTTPHeaderField: "Authorization")
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+//        return try JSONDecoder().decode(User.self, from: data)
+        return User(country: "", displayName: "", email: "")
     }
-    
 
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Spotify's playback here

@@ -65,6 +65,11 @@ class AppleMusicService: MusicService, ObservableObject {
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
         // Implement Apple Music's fetchArtwork here
     }
+    
+    func fetchUser() async throws -> User {
+        // Fetch the Apple music user
+        return User(country: "", displayName: "", email: "")
+    }
 
     // Other methods as needed...
 }

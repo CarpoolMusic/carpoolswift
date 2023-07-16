@@ -10,7 +10,6 @@ class SpotifySessionManagerDelegate: NSObject, SPTSessionManagerDelegate {
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         // Send notification to SpotifyMusicService to notify that session was initiated
         NotificationCenter.default.post(name: NSNotification.Name("SpotifySessionInitiated"), object: nil, userInfo: ["accessToken": session.accessToken])
-        print("I AM IN INTIATED")
         print("success", session)
     }
     
