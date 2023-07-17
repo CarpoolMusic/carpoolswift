@@ -7,8 +7,10 @@
 
 import SwiftUI
 import MusicKit
+import Combine
 
 class AppleMusicService: MusicService, ObservableObject {
+    private var cancellable: AnyCancellable?
     
     // MARK: - Properties
     
@@ -71,5 +73,24 @@ class AppleMusicService: MusicService, ObservableObject {
         return User(country: "", displayName: "", email: "")
     }
 
-    // Other methods as needed...
+    func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
+            let safeQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            
+            guard let url = URL(string: "https://itunes.apple.com/search?term=\(safeQuery)&entity=song") else {
+                return Fail(error: MusicServiceError.invalidURL).eraseToAnyPublisher()
+            }
+            
+            // Cancelling any ongoing request before starting a new one.
+            self.cancellable?.cancel()
+            
+            self.cancellable = URLSession.shared.dataTaskPublisher(for: url)
+                .tryMap { data, _ in
+                    let searchResult = try JSONDecoder().decode(ITunesSearchResult.self, from: data)
+                    return searchResult.results.map { Song(id: "\($0.trackId)", title: $0.trackName, artist: $0.artistName, votes: 0) }
+                }
+                .receive(on: DispatchQueue.main)  // Make sure we update UI on main thread
+                .eraseToAnyPublisher()
+            
+            return self.cancellable?.eraseToAnyPublisher() ?? Fail(error: MusicServiceError.requestCancelled).eraseToAnyPublisher()
+        }
 }

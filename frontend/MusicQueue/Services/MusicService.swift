@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 enum MusicServiceType: String {
     case apple, spotify
@@ -18,5 +19,5 @@ protocol MusicService {
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void)
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void)
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
-    // Other methods as needed...
+    func searchSongs(query: String) -> AnyPublisher<[Song], Error>
 }

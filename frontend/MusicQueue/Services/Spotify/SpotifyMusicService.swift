@@ -7,9 +7,14 @@
 
 import SwiftUI
 import KeychainSwift
+import Combine
 
 enum AppRemoteConnectionError: Error {
     case notConnected
+}
+
+enum SpotifyServiceError: Error {
+    case invalidURL
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
@@ -26,12 +31,19 @@ class SpotifyMusicService: MusicService, ObservableObject {
     private let appRemoteDelegate = SpotifyAppRemoteDelegate()
     private let sessionManagerDelegate = SpotifySessionManagerDelegate()
     
+    /// search functionality
+    private var cancellables = Set<AnyCancellable>()
+    private let urlSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        return URLSession(configuration: config)
+    }()
+    
     /// The current authorization status of Spotify iOS SDK
     @Published var authorizationStatus: MusicServiceAuthStatus = .notDetermined
     
     lazy var configuration = SPTConfiguration(
-      clientID: SpotifyClientID,
-      redirectURL: SpotifyRedirectURL
+        clientID: SpotifyClientID,
+        redirectURL: SpotifyRedirectURL
     )
     
     lazy var appRemote: SPTAppRemote = {
@@ -41,14 +53,14 @@ class SpotifyMusicService: MusicService, ObservableObject {
     }()
     
     lazy var sessionManager: SPTSessionManager = {
-      if let tokenSwapURL = URL(string: "https://[my token swap app domain]/api/token"),
-         let tokenRefreshURL = URL(string: "https://[my token swap app domain]/api/refresh_token") {
-        self.configuration.tokenSwapURL = tokenSwapURL
-        self.configuration.tokenRefreshURL = tokenRefreshURL
-        self.configuration.playURI = ""
-      }
-      let manager = SPTSessionManager(configuration: self.configuration, delegate: sessionManagerDelegate)
-      return manager
+        if let tokenSwapURL = URL(string: "https://[my token swap app domain]/api/token"),
+           let tokenRefreshURL = URL(string: "https://[my token swap app domain]/api/refresh_token") {
+            self.configuration.tokenSwapURL = tokenSwapURL
+            self.configuration.tokenRefreshURL = tokenRefreshURL
+            self.configuration.playURI = ""
+        }
+        let manager = SPTSessionManager(configuration: self.configuration, delegate: sessionManagerDelegate)
+        return manager
     }()
     
     init() {
@@ -72,7 +84,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("SpotifySessionInitiated"), object: nil)
     }
-
+    
     
     // MARK: - Notification Methods
     
@@ -148,17 +160,17 @@ class SpotifyMusicService: MusicService, ObservableObject {
         guard let url = URL(string: "https://api.spotify.com/v1/me") else {
             throw URLError(.badURL)
         }
-
+        
         var request = URLRequest(url: url)
         let accessToken = self.appRemote.connectionParameters.accessToken
         request.addValue("Bearer \(String(describing: accessToken))", forHTTPHeaderField: "Authorization")
-
+        
         let (data, _) = try await URLSession.shared.data(for: request)
         
-//        return try JSONDecoder().decode(User.self, from: data)
+        //        return try JSONDecoder().decode(User.self, from: data)
         return User(country: "", displayName: "", email: "")
     }
-
+    
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Spotify's playback here
         
@@ -170,7 +182,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
             completion(.failure(AppRemoteConnectionError.notConnected))
             return
         }
-
+        
         appRemote.playerAPI?.play("spotify:track:\(songID)", callback: { (result, error) in
             if let error = error {
                 completion(.failure(error))
@@ -179,14 +191,14 @@ class SpotifyMusicService: MusicService, ObservableObject {
             }
         })
     }
-
+    
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Spotify's stop playback here
         guard appRemote.isConnected else {
             completion(.failure(AppRemoteConnectionError.notConnected))
             return
         }
-
+        
         appRemote.playerAPI?.pause({ (result, error) in
             if let error = error {
                 completion(.failure(error))
@@ -195,21 +207,50 @@ class SpotifyMusicService: MusicService, ObservableObject {
             }
         })
     }
-
+    
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
         // Implement Spotify's fetchArtwork here
         guard appRemote.isConnected else {
-           completion(.failure(AppRemoteConnectionError.notConnected))
-           return
-       }
-
-//       appRemote.imageAPI?.fetchImage(forItemWithURI: "spotify:track:\(songID)", callback: { (result, error) in
-//           if let error = error {
-//               completion(.failure(error))
-//           } else if let image = result as? UIImage {
-//               completion(.success(image))
-//           }
-//       })
+            completion(.failure(AppRemoteConnectionError.notConnected))
+            return
+        }
+        
+        //       appRemote.imageAPI?.fetchImage(forItemWithURI: "spotify:track:\(songID)", callback: { (result, error) in
+        //           if let error = error {
+        //               completion(.failure(error))
+        //           } else if let image = result as? UIImage {
+        //               completion(.success(image))
+        //           }
+        //       })
+    }
+    
+    func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
+        // Replacing spaces with '+' for the search query
+        let formattedQuery = query.replacingOccurrences(of: " ", with: "+")
+        
+        // Constructing URL
+        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(formattedQuery)&type=track&limit=20") else {
+            return Fail(error: SpotifyServiceError.invalidURL).eraseToAnyPublisher()
+        }
+        
+        // Building the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        // This token can be received from Spotify API's /v1/authentication/token endpoint
+        request.addValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        // Sending the request and handling the response
+        return urlSession.dataTaskPublisher(for: request)
+            .tryMap { data, response in
+                let decoder = JSONDecoder()
+                let spotifyResponse = try decoder.decode(TrackResponse.self, from: data)
+                // Transforming Spotify's Track objects to your app's Song objects
+                return spotifyResponse.tracks.items.map { item in
+                    Song(id: item.id, title: item.name, artist: item.artists[0].name, votes: 0)
+                }
+            }
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
     
     func isSpotifyInstalled() -> Bool {
@@ -226,7 +267,8 @@ class SpotifyMusicService: MusicService, ObservableObject {
         UIApplication.shared.open(url)
     }
     
-// MARK: - Keychain methods
+    
+    // MARK: - Keychain methods
     
     private func saveAccessTokenToKeychain(_ token: String) {
         keychain.set(token, forKey: accessTokenKey)
