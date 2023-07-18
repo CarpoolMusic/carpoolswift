@@ -41,7 +41,9 @@
 		60BA77E12A64794500A5516B /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77E02A64794500A5516B /* Session.swift */; };
 		60BA77E72A64D54900A5516B /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77E62A64D54900A5516B /* Track.swift */; };
 		60BA77E92A64D5AE00A5516B /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77E82A64D5AE00A5516B /* Artist.swift */; };
-		60BA77EB2A64DA4C00A5516B /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77EA2A64DA4C00A5516B /* SearchViewModel.swift */; };
+		60BA77ED2A65A3BC00A5516B /* SongSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */; };
+		60BA77EF2A65A43500A5516B /* SongSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77EE2A65A43400A5516B /* SongSearchView.swift */; };
+		60BA77F32A66241100A5516B /* SongCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77F22A66241100A5516B /* SongCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,7 +100,9 @@
 		60BA77E02A64794500A5516B /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		60BA77E62A64D54900A5516B /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		60BA77E82A64D5AE00A5516B /* Artist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
-		60BA77EA2A64DA4C00A5516B /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchViewModel.swift; sourceTree = "<group>"; };
+		60BA77EE2A65A43400A5516B /* SongSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchView.swift; sourceTree = "<group>"; };
+		60BA77F22A66241100A5516B /* SongCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +204,7 @@
 				60BA77A92A5E61A900A5516B /* QueueView.swift */,
 				60BA77AB2A5E65A600A5516B /* ChatView.swift */,
 				60BA77D12A632F4500A5516B /* DashboardView.swift */,
+				60BA77EE2A65A43400A5516B /* SongSearchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -213,7 +218,8 @@
 				60BA77E02A64794500A5516B /* Session.swift */,
 				60BA77E62A64D54900A5516B /* Track.swift */,
 				60BA77E82A64D5AE00A5516B /* Artist.swift */,
-				60BA77EA2A64DA4C00A5516B /* SearchViewModel.swift */,
+				60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */,
+				60BA77F22A66241100A5516B /* SongCell.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -414,16 +420,17 @@
 				60BA77D62A6389A900A5516B /* AnyMusicService.swift in Sources */,
 				60BA77972A55F8FB00A5516B /* SessionManager.swift in Sources */,
 				60BA77DB2A64463B00A5516B /* SocketService.swift in Sources */,
-				60BA77EB2A64DA4C00A5516B /* SearchViewModel.swift in Sources */,
 				60BA77C32A62392D00A5516B /* SpotifyPlayerStateDelegate.swift in Sources */,
 				60BA77902A55F2A800A5516B /* SessionCreationView.swift in Sources */,
 				60BA77AC2A5E65A600A5516B /* ChatView.swift in Sources */,
 				60BA77CD2A6300C600A5516B /* User.swift in Sources */,
 				60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */,
 				60BA77B02A5F286300A5516B /* AppleMusicService.swift in Sources */,
+				60BA77ED2A65A3BC00A5516B /* SongSearchViewModel.swift in Sources */,
 				60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */,
 				60BA77B42A61DF0C00A5516B /* AuthStatus.swift in Sources */,
 				60BA77922A55F39400A5516B /* SessionView.swift in Sources */,
+				60BA77EF2A65A43500A5516B /* SongSearchView.swift in Sources */,
 				60BA77A62A5E3CA200A5516B /* Song.swift in Sources */,
 				60BA77E92A64D5AE00A5516B /* Artist.swift in Sources */,
 				60BA77E12A64794500A5516B /* Session.swift in Sources */,
@@ -435,6 +442,7 @@
 				60BA77C52A62398D00A5516B /* SPTSessionManagerDelegate.swift in Sources */,
 				60BA77D22A632F4500A5516B /* DashboardView.swift in Sources */,
 				60BA77E72A64D54900A5516B /* Track.swift in Sources */,
+				60BA77F32A66241100A5516B /* SongCell.swift in Sources */,
 				60BA77632A55E2A400A5516B /* MusicQueueApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

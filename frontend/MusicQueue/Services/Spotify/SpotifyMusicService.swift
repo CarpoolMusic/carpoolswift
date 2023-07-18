@@ -15,6 +15,7 @@ enum AppRemoteConnectionError: Error {
 
 enum SpotifyServiceError: Error {
     case invalidURL
+    case missingAccessToken
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
@@ -23,7 +24,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
     
     private var SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private var SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
-    private var accessToken = ""
+    private var accessToken: String?
     
     private let keychain = KeychainSwift(keyPrefix: "com.app.musicQueue")
     private let accessTokenKey = "SpotifyAccessToken"
@@ -70,8 +71,9 @@ class SpotifyMusicService: MusicService, ObservableObject {
         /// Note: If the token is from a long time ago and has since expried,
         /// the Spotify iOS SDK will automatically handle token swap
         /// Set initial authorization status
-        if let _ = self.retrieveAccessTokenFromKeychain() {
+        if let token = self.retrieveAccessTokenFromKeychain() {
             authorizationStatus = .authorized
+            self.accessToken = token
         } else {
             authorizationStatus = .notDetermined
         }
@@ -106,7 +108,6 @@ class SpotifyMusicService: MusicService, ObservableObject {
         
         // Set Access Token and Connect when the user initiates a session
         NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionInitiated"), object: nil, queue: .main) { [weak self] notification in
-            print("IN AUTH CALLBACK")
             if let token = notification.userInfo?["accessToken"] as? String {
                 self?.appRemote.connectionParameters.accessToken = token
                 self?.appRemote.connect()
@@ -132,7 +133,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
     func authorize() {
         // Implement Spotify's authorization process here
         let requestedScopes: SPTScope = [.appRemoteControl]
-        self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
+//        self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
         // This invokes the Auth Modal for the spotify login
         self.sessionManager.initiateSession(with: requestedScopes, options: .default)
     }
@@ -148,6 +149,8 @@ class SpotifyMusicService: MusicService, ObservableObject {
             if let access_token = parameters?[SPTAppRemoteAccessTokenKey] {
                 appRemote.connectionParameters.accessToken = access_token
                 self.accessToken = access_token
+                print("NEW TOKEN: ")
+                print(self.accessToken)
             } else if let error_description = parameters?[SPTAppRemoteErrorDescriptionKey] {
                 print(error_description)
             }
@@ -162,8 +165,10 @@ class SpotifyMusicService: MusicService, ObservableObject {
         }
         
         var request = URLRequest(url: url)
-        let accessToken = self.appRemote.connectionParameters.accessToken
-        request.addValue("Bearer \(String(describing: accessToken))", forHTTPHeaderField: "Authorization")
+        guard let accessToken = self.accessToken else {
+            throw SpotifyServiceError.invalidURL
+        }
+        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
@@ -225,6 +230,12 @@ class SpotifyMusicService: MusicService, ObservableObject {
     }
     
     func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
+        // Check if the query is empty
+        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // Return an empty array of songs (or handle it as you wish)
+            return Just([]).setFailureType(to: Error.self).eraseToAnyPublisher()
+        }
+        
         // Replacing spaces with '+' for the search query
         let formattedQuery = query.replacingOccurrences(of: " ", with: "+")
         
@@ -235,22 +246,31 @@ class SpotifyMusicService: MusicService, ObservableObject {
         
         // Building the request
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        // This token can be received from Spotify API's /v1/authentication/token endpoint
-        request.addValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
-        
+        guard let accessToken = self.accessToken else {
+            return Fail(error: SpotifyServiceError.missingAccessToken).eraseToAnyPublisher()
+        }
+        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
         // Sending the request and handling the response
-        return urlSession.dataTaskPublisher(for: request)
+        let publisher = urlSession.dataTaskPublisher(for: request)
             .tryMap { data, response in
                 let decoder = JSONDecoder()
-                let spotifyResponse = try decoder.decode(TrackResponse.self, from: data)
+                let searchResult = try decoder.decode(TrackResponse.self, from: data)
                 // Transforming Spotify's Track objects to your app's Song objects
-                return spotifyResponse.tracks.items.map { item in
+                return searchResult.tracks.items.map { item in
                     Song(id: item.id, title: item.name, artist: item.artists[0].name, votes: 0)
                 }
             }
             .receive(on: DispatchQueue.main)
+            .share()  // Use share operator to allow multiple subscriptions
             .eraseToAnyPublisher()
+
+        // Store the cancellable in the cancellables set
+        publisher
+            .sink { _ in } receiveValue: { _ in }
+            .store(in: &cancellables)
+
+        return publisher
     }
     
     func isSpotifyInstalled() -> Bool {

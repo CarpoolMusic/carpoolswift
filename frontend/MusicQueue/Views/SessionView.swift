@@ -6,20 +6,7 @@ struct SessionView: View {
     // MARK: - Properties
     
     @ObservedObject var sessionManager: SessionManager
-    
-    /// The song queue for this session
-    @State private var queue: [Song] = [
-        Song(id: "1", title: "Imagine", artist: "John Lennon", votes: 3),
-        Song(id: "2", title: "Hey Jude", artist: "The Beatles", votes: 5),
-        Song(id: "3", title: "Bohemian Rhapsody", artist: "Queen", votes: 2),
-        Song(id: "4", title: "Stairway to Heaven", artist: "Led Zeppelin", votes: 6)
-    ] {
-        didSet {
-            queue.sort {
-                $0.votes > $1.votes
-            }
-        }
-    }
+    @ObservedObject var musicService: AnyMusicService
     
     /// Boolean value determining whether user is host or not
     @State private var isUserHost = true // placeholder
@@ -36,11 +23,6 @@ struct SessionView: View {
                 Text("Session: \(sessionManager.activeSession?.id ?? "")")
                     .font(.largeTitle)
                     .padding()
-                Spacer()
-                Button(action: handleAddSongButtonTapped) {
-                    Image(systemName: "plus")
-                        .font(.largeTitle)
-                }
             }
             /// now playing section
             VStack {
@@ -95,37 +77,7 @@ struct SessionView: View {
                 .padding()
             }
             .sheet(isPresented: $isQueueOpen) {
-                QueueView(sessionManager: sessionManager)
-            }
-            
-            // The queue of songs
-            if isQueueOpen {
-                List(sessionManager.activeSession?.queue ?? [], id: \.id) { song in
-                    VStack(alignment: .leading) {
-                        Text(song.title)
-                        Text(song.artist)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    HStack {
-                        Button(action: {
-                            sessionManager.voteSong(sessionId: "\(sessionManager.activeSession?.id ?? "")", songID: song.id, vote: 1)
-                        }) {
-                            Image(systemName: "hand.thumbsup")
-                                .foregroundColor(.blue)
-                        }
-                        
-                        Button(action: {
-                            sessionManager.voteSong(sessionId: "\(sessionManager.activeSession?.id ?? "")", songID: song.id, vote: -1)
-                        }) {
-                            Image(systemName: "hand.thumbsdown")
-                                .foregroundColor(.red)
-                        }
-                        Text("\(song.votes)")
-                    }
-                    
-                }
-                .padding([.top, .bottom])
+                QueueView(sessionManager: sessionManager, musicService: musicService)
             }
         }
         .padding()
@@ -150,15 +102,10 @@ struct SessionView: View {
     
     // MARK: - Handlers
     
-    /// Handle add song button tapped
-    private func handleAddSongButtonTapped() {
-        // Implement add song logic here
-    }
-    
 }
 
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionView(sessionManager: SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: ""))))
+        SessionView(sessionManager: SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: ""))), musicService: AnyMusicService(SpotifyMusicService()))
     }
 }

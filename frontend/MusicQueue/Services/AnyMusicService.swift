@@ -5,6 +5,8 @@
 //  Created by Nolan Biscaro on 2023-07-15.
 //
 
+import MusicKit
+
 class AnyMusicService: ObservableObject {
     private let base: MusicService
 
@@ -13,6 +15,7 @@ class AnyMusicService: ObservableObject {
     }
 
     init(_ base: MusicService) {
+        print(base)
         self.base = base
     }
 
@@ -34,6 +37,10 @@ class AnyMusicService: ObservableObject {
 
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
         base.fetchArtwork(for: songID, completion: completion)
+    }
+    
+    func searchSongs(query: String) async throws ->  MusicItemCollection<Song> {
+        base.searchSongs(query: query)
     }
 }
 

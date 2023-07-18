@@ -20,6 +20,8 @@ class AppleMusicService: MusicService, ObservableObject {
     /// The current authorization status of MusicKit.
     @Published var musicAuthorizationStatus: MusicAuthorization.Status = MusicAuthorization.currentStatus
     
+    private var cancellables = Set<AnyCancellable>()
+    
     
     /// The current authorization status
     var authorizationStatus: MusicServiceAuthStatus {
@@ -72,25 +74,62 @@ class AppleMusicService: MusicService, ObservableObject {
         // Fetch the Apple music user
         return User(country: "", displayName: "", email: "")
     }
+    
+    /// Makes a new search request to MusicKit when the current search term changes.
+    private func searchSongs(for searchTerm: String) -> MusicItemCollection<Song> {
+        Task {
+            if searchTerm.isEmpty {
+                return
+            } else {
+                do {
+                    // Issue a catalog search request for songs matching the search term.
+                    var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Album.self])
+                    searchRequest.limit = 5
+                    let searchResponse = try await searchRequest.response()
+                    
+                    // Return the songs found
+                    return searchResponse.songs
+                } catch {
+                    print("Search request failed with error: \(error).")
+                    self.reset()
+                }
+            }
+        }
 
     func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
-            let safeQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            
-            guard let url = URL(string: "https://itunes.apple.com/search?term=\(safeQuery)&entity=song") else {
-                return Fail(error: MusicServiceError.invalidURL).eraseToAnyPublisher()
-            }
-            
-            // Cancelling any ongoing request before starting a new one.
-            self.cancellable?.cancel()
-            
-            self.cancellable = URLSession.shared.dataTaskPublisher(for: url)
-                .tryMap { data, _ in
-                    let searchResult = try JSONDecoder().decode(ITunesSearchResult.self, from: data)
-                    return searchResult.results.map { Song(id: "\($0.trackId)", title: $0.trackName, artist: $0.artistName, votes: 0) }
-                }
-                .receive(on: DispatchQueue.main)  // Make sure we update UI on main thread
-                .eraseToAnyPublisher()
-            
-            return self.cancellable?.eraseToAnyPublisher() ?? Fail(error: MusicServiceError.requestCancelled).eraseToAnyPublisher()
+        // Check if the query is empty
+        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // Return an empty array of songs (or handle it as you wish)
+            return Just([]).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
+
+        // Adding percent encoding for the search query
+        let formattedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+
+        // Constructing URL
+        guard let url = URL(string: "https://itunes.apple.com/search?term=\(formattedQuery)&entity=song") else {
+            return Fail(error: MusicServiceError.invalidURL).eraseToAnyPublisher()
+        }
+        
+        // Sending the request and handling the response
+        let publisher = URLSession.shared.dataTaskPublisher(for: url)
+            .tryMap { data, _ in
+                let searchResult = try JSONDecoder().decode(TrackResponse.self, from: data)
+                // Transforming Apple's Track objects to your app's Song objects
+                return searchResult.tracks.items.map { item in
+                    Song(id: item.id, title: item.name, artist: item.artists[0].name, votes: 0)
+                }
+            }
+            .receive(on: DispatchQueue.main)
+            .share()  // Use share operator to allow multiple subscriptions
+            .eraseToAnyPublisher()
+
+        // Store the cancellable in the cancellables set
+        publisher
+            .sink { _ in } receiveValue: { _ in }
+            .store(in: &cancellables)
+
+        return publisher
+    }
+
 }

@@ -21,3 +21,12 @@ protocol MusicService {
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
     func searchSongs(query: String) -> AnyPublisher<[Song], Error>
 }
+
+enum MusicServiceError: Error {
+    case networkError(Error)
+    case authenticationError
+    case invalidURL
+    case invalidQuery(Error)
+    case dataParsingError(Error)
+    // other custom error cases...
+}

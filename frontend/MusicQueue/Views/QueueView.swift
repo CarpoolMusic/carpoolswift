@@ -11,9 +11,34 @@ struct QueueView: View {
     @Environment(\.dismiss) var dismiss
     
     @ObservedObject var sessionManager: SessionManager
+    @ObservedObject var musicService: AnyMusicService
+    
+    @StateObject var songSearchViewModel: SongSearchViewModel
+    @State private var isShowingSearchView: Bool = false
+    
+    init(sessionManager: SessionManager, musicService: AnyMusicService) {
+        self.sessionManager = sessionManager
+        self.musicService = musicService
+        self._songSearchViewModel = StateObject(wrappedValue: SongSearchViewModel(musicService: musicService))
+    }
     
     var body: some View {
         VStack {
+            HStack {
+                Spacer()
+                Button(action: handleAddSongButtonTapped) {
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
+                }
+                .padding([.top])
+                .sheet(isPresented: $isShowingSearchView) {
+                    SongSearchView(viewModel: songSearchViewModel) { selectedSong in
+                        sessionManager.addSongToQueue(sessionId: sessionManager.activeSession!.id, songData: [:])
+                        
+                        isShowingSearchView = false
+                    }
+                }
+            }
             List(sessionManager.activeSession?.queue ?? [], id: \.id) { song in
                 VStack(alignment: .leading) {
                     Text(song.title)
@@ -39,6 +64,16 @@ struct QueueView: View {
                 }
             }
             .padding([.top, .bottom])
+        }
+    }
+    
+    /// Handle add song button tapped
+    private func handleAddSongButtonTapped() {
+        self.isShowingSearchView = true
+    }
+    private func test() async {
+        Task {
+            try await self.musicService.fetchUser()
         }
     }
 }

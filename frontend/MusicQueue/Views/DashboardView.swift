@@ -19,7 +19,7 @@ struct DashboardView: View {
     
     var body: some View {
         if sessionManager.activeSession != nil {
-            SessionView(sessionManager: sessionManager)
+            SessionView(sessionManager: sessionManager, musicService: musicService)
         } else {
             NavigationStack {
                 VStack {

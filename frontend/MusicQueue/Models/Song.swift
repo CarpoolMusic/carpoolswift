@@ -5,7 +5,7 @@
 //  Created by Nolan Biscaro on 2023-07-11.
 //
 
-struct Song {
+struct SongS {
     var id: String
     var title: String
     var artist: String
