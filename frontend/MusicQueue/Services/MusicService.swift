@@ -12,14 +12,17 @@ enum MusicServiceType: String {
     case apple, spotify
 }
 
-protocol MusicService {
+protocol MusicService: AnyObject {
+    
+    var searchTerm: String { get set }
+    
     var authorizationStatus: MusicServiceAuthStatus { get }
     func authorize()
     func fetchUser() async throws -> User
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void)
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void)
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
-    func searchSongs(query: String) -> AnyPublisher<[Song], Error>
+    func requestUpdatedSearchResults(for searchTerm: String)
 }
 
 enum MusicServiceError: Error {

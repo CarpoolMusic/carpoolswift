@@ -75,61 +75,54 @@ class AppleMusicService: MusicService, ObservableObject {
         return User(country: "", displayName: "", email: "")
     }
     
+    
+    // MARK: - Search results requesting
+    
+    /// The current search term the user enters.
+    @State var searchTerm = ""
+    
+    /// The albums the app loads using MusicKit that match the current search term.
+    @Published var songs: MusicItemCollection<Song> = []
+    
+    /// A reference to the storage object for recent albums the user previously viewed in the app.
+//    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared
+
     /// Makes a new search request to MusicKit when the current search term changes.
-    private func searchSongs(for searchTerm: String) -> MusicItemCollection<Song> {
+    internal func requestUpdatedSearchResults(for searchTerm: String) {
         Task {
             if searchTerm.isEmpty {
-                return
+                await self.reset()
             } else {
                 do {
-                    // Issue a catalog search request for songs matching the search term.
+                    // Issue a catalog search request for albums matching the search term.
                     var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Album.self])
                     searchRequest.limit = 5
                     let searchResponse = try await searchRequest.response()
                     
-                    // Return the songs found
-                    return searchResponse.songs
+                    // Update the user interface with the search response.
+                    let res = await apply(searchResponse, for: searchTerm)
+                    return res
                 } catch {
                     print("Search request failed with error: \(error).")
-                    self.reset()
+                    await self.reset()
                 }
             }
+            return []
         }
-
-    func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
-        // Check if the query is empty
-        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            // Return an empty array of songs (or handle it as you wish)
-            return Just([]).setFailureType(to: Error.self).eraseToAnyPublisher()
-        }
-
-        // Adding percent encoding for the search query
-        let formattedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-
-        // Constructing URL
-        guard let url = URL(string: "https://itunes.apple.com/search?term=\(formattedQuery)&entity=song") else {
-            return Fail(error: MusicServiceError.invalidURL).eraseToAnyPublisher()
-        }
-        
-        // Sending the request and handling the response
-        let publisher = URLSession.shared.dataTaskPublisher(for: url)
-            .tryMap { data, _ in
-                let searchResult = try JSONDecoder().decode(TrackResponse.self, from: data)
-                // Transforming Apple's Track objects to your app's Song objects
-                return searchResult.tracks.items.map { item in
-                    Song(id: item.id, title: item.name, artist: item.artists[0].name, votes: 0)
-                }
-            }
-            .receive(on: DispatchQueue.main)
-            .share()  // Use share operator to allow multiple subscriptions
-            .eraseToAnyPublisher()
-
-        // Store the cancellable in the cancellables set
-        publisher
-            .sink { _ in } receiveValue: { _ in }
-            .store(in: &cancellables)
-
-        return publisher
     }
-
+    
+    /// Safely updates the `albums` property on the main thread.
+    @MainActor
+    private func apply(_ searchResponse: MusicCatalogSearchResponse, for searchTerm: String) -> MusicItemCollection<Song> {
+        if self.searchTerm == searchTerm {
+            return searchResponse.songs
+        }
+        return []
+    }
+    
+    /// Safely resets the `albums` property on the main thread.
+    @MainActor
+    private func reset() {
+        self.songs = []
+    }
 }

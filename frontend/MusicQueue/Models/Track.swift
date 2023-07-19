@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Track: Codable {
+struct SpotifyTrack: Codable {
     let id: String
     let name: String
     let artists: [SpotifyArtist]
@@ -16,7 +16,7 @@ struct Track: Codable {
 
 struct TrackResponse: Codable {
     struct TrackItems: Codable {
-        let items: [Track]
+        let items: [SpotifyTrack]
     }
 
     let tracks: TrackItems

@@ -6,17 +6,27 @@
 //
 
 import MusicKit
+import Combine
 
-class AnyMusicService: ObservableObject {
+class AnyMusicService: MusicService, ObservableObject {
+    
     private let base: MusicService
+    
+    // Published songs property
+    @Published var songs: MusicItemCollection<Song> = []
+    
+    // Published search term
+    @Published var searchTerm: String = ""
+    private var cancellables = Set<AnyCancellable>()
+    
 
     var authorizationStatus: MusicServiceAuthStatus {
         base.authorizationStatus
     }
 
     init(_ base: MusicService) {
-        print(base)
         self.base = base
+        bindBase()
     }
 
     func authorize() {
@@ -39,9 +49,30 @@ class AnyMusicService: ObservableObject {
         base.fetchArtwork(for: songID, completion: completion)
     }
     
-    func searchSongs(query: String) async throws ->  MusicItemCollection<Song> {
-        base.searchSongs(query: query)
+    func requestUpdatedSearchResults(for searchTerm: String) {
+        base.requestUpdatedSearchResults(for: searchTerm)
     }
+    
+    // MARK: - Private functions
+    
+    private func bindBase() {
+        if let base = base as? AppleMusicService {
+            base.$songs.assign(to: &$songs)
+        }
+        if let base = base as? SpotifyMusicService {
+            base.$songs.assign(to: &$songs)
+        }
+        
+    }
+    
+    private func reverseBindSearchTerm() {
+        $searchTerm
+        .sink { [weak base] in
+            base?.searchTerm = $0
+        }
+        .store(in: &cancellables)
+    }
+    
 }
 
 class MusicServiceViewModel: ObservableObject {

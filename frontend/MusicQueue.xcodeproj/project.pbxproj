@@ -43,7 +43,7 @@
 		60BA77E92A64D5AE00A5516B /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77E82A64D5AE00A5516B /* Artist.swift */; };
 		60BA77ED2A65A3BC00A5516B /* SongSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */; };
 		60BA77EF2A65A43500A5516B /* SongSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77EE2A65A43400A5516B /* SongSearchView.swift */; };
-		60BA77F32A66241100A5516B /* SongCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77F22A66241100A5516B /* SongCell.swift */; };
+		60BA77F32A66241100A5516B /* MusicItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77F22A66241100A5516B /* MusicItemCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,7 +102,7 @@
 		60BA77E82A64D5AE00A5516B /* Artist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
 		60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchViewModel.swift; sourceTree = "<group>"; };
 		60BA77EE2A65A43400A5516B /* SongSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchView.swift; sourceTree = "<group>"; };
-		60BA77F22A66241100A5516B /* SongCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongCell.swift; sourceTree = "<group>"; };
+		60BA77F22A66241100A5516B /* MusicItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicItemCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,7 +219,7 @@
 				60BA77E62A64D54900A5516B /* Track.swift */,
 				60BA77E82A64D5AE00A5516B /* Artist.swift */,
 				60BA77EC2A65A3BC00A5516B /* SongSearchViewModel.swift */,
-				60BA77F22A66241100A5516B /* SongCell.swift */,
+				60BA77F22A66241100A5516B /* MusicItemCell.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -442,7 +442,7 @@
 				60BA77C52A62398D00A5516B /* SPTSessionManagerDelegate.swift in Sources */,
 				60BA77D22A632F4500A5516B /* DashboardView.swift in Sources */,
 				60BA77E72A64D54900A5516B /* Track.swift in Sources */,
-				60BA77F32A66241100A5516B /* SongCell.swift in Sources */,
+				60BA77F32A66241100A5516B /* MusicItemCell.swift in Sources */,
 				60BA77632A55E2A400A5516B /* MusicQueueApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

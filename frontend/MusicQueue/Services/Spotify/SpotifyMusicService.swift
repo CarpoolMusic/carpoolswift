@@ -8,6 +8,7 @@
 import SwiftUI
 import KeychainSwift
 import Combine
+import MusicKit
 
 enum AppRemoteConnectionError: Error {
     case notConnected
@@ -19,6 +20,14 @@ enum SpotifyServiceError: Error {
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
+   
+    var searchTerm: String
+    
+    
+    func requestUpdatedSearchResults(for searchTerm: String) {
+        // Do something
+    }
+    
     // MARK: - Properties
     
     
@@ -31,6 +40,9 @@ class SpotifyMusicService: MusicService, ObservableObject {
     
     private let appRemoteDelegate = SpotifyAppRemoteDelegate()
     private let sessionManagerDelegate = SpotifySessionManagerDelegate()
+    
+    /// The albums the app loads using MusicKit that match the current search term.
+    @Published var songs: MusicItemCollection<Song> = []
     
     /// search functionality
     private var cancellables = Set<AnyCancellable>()
@@ -258,7 +270,6 @@ class SpotifyMusicService: MusicService, ObservableObject {
                 let searchResult = try decoder.decode(TrackResponse.self, from: data)
                 // Transforming Spotify's Track objects to your app's Song objects
                 return searchResult.tracks.items.map { item in
-                    Song(id: item.id, title: item.name, artist: item.artists[0].name, votes: 0)
                 }
             }
             .receive(on: DispatchQueue.main)

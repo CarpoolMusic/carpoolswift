@@ -13,13 +13,11 @@ struct QueueView: View {
     @ObservedObject var sessionManager: SessionManager
     @ObservedObject var musicService: AnyMusicService
     
-    @StateObject var songSearchViewModel: SongSearchViewModel
     @State private var isShowingSearchView: Bool = false
     
     init(sessionManager: SessionManager, musicService: AnyMusicService) {
         self.sessionManager = sessionManager
         self.musicService = musicService
-        self._songSearchViewModel = StateObject(wrappedValue: SongSearchViewModel(musicService: musicService))
     }
     
     var body: some View {
@@ -32,38 +30,40 @@ struct QueueView: View {
                 }
                 .padding([.top])
                 .sheet(isPresented: $isShowingSearchView) {
-                    SongSearchView(viewModel: songSearchViewModel) { selectedSong in
+                    SongSearchView(musicService: musicService) { selectedSong in
                         sessionManager.addSongToQueue(sessionId: sessionManager.activeSession!.id, songData: [:])
                         
                         isShowingSearchView = false
                     }
                 }
             }
-            List(sessionManager.activeSession?.queue ?? [], id: \.id) { song in
-                VStack(alignment: .leading) {
-                    Text(song.title)
-                    Text(song.artist)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                HStack {
-                    Button(action: {
-                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: 1)
-                    }) {
-                        Image(systemName: "hand.thumbsup")
-                            .foregroundColor(.blue)
-                    }
-
-                    Button(action: {
-                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: -1)
-                    }) {
-                        Image(systemName: "hand.thumbsdown")
-                            .foregroundColor(.red)
-                    }
-                    Text("Votes: \(song.votes)")
-                }
+            List(sessionManager.activeSession?.queue ?? []) { song in
+                MusicItemCell(artwork: song.song.artwork, title: song.song.title)
+                //                VStack(alignment: .leading) {
+                //                    Text(song.title)
+                //                    Text(song.artist)
+                //                        .font(.subheadline)
+                //                        .foregroundColor(.secondary)
+                //                }
+                //                HStack {
+                //                    Button(action: {
+                //                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: 1)
+                //                    }) {
+                //                        Image(systemName: "hand.thumbsup")
+                //                            .foregroundColor(.blue)
+                //                    }
+                //
+                //                    Button(action: {
+                //                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: -1)
+                //                    }) {
+                //                        Image(systemName: "hand.thumbsdown")
+                //                            .foregroundColor(.red)
+                //                    }
+                //                    Text("Votes: \(song.votes)")
+                //                }
+                //            }
+                //            .padding([.top, .bottom])
             }
-            .padding([.top, .bottom])
         }
     }
     

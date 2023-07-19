@@ -6,40 +6,42 @@
 //
 
 import SwiftUI
+import MusicKit
+import MusicKit
 
 struct SongSearchView: View {
     
-    @ObservedObject var viewModel = SongSearchViewModel(musicService: musicService)
-    @State private var searchQuery: String = ""
+  
+    @ObservedObject var musicService: AnyMusicService
+    
     
     let onSelect: (Song) -> Void
-
+    
     var body: some View {
-        TextField("Search songs", text: $searchQuery)
-            .onChange(of: searchQuery) { newValue in
-                viewModel.searchSongs(query: newValue)
+        rootView
+    }
+    
+    // The various components of the main navigation view.
+    private var navigationViewContents: some View {
+        VStack {
+            searchResultsList
+                .animation(.default, value: musicService.songs)
             }
-            .textFieldStyle(.roundedBorder)
-            .padding()
-        Group {
-            if viewModel.isLoading {
-                ProgressView()
-            } else if let error = viewModel.error {
-                Text("Error: \(error.localizedDescription)")
-            } else {
-                List(viewModel.songs, id: \.id) { song in
-                    Button(action: { onSelect(song) }) {
-                        Text(song.title)
-                    }
-                }
-            }
+    }
+    
+    /// The top-level content view.
+    private var rootView: some View {
+        NavigationView {
+            navigationViewContents
+                .navigationTitle("Music Albums")
         }
+        .searchable(text: $musicService.searchTerm, prompt: "Albums")
     }
     
     /// A list of songs to display below the search bar.
     private var searchResultsList: some View {
-        List(viewModel.songs.isEmpty ? recentAlbumsStorage.recentlyViewedAlbums : viewModel.songs) { album in
-            AlbumCell(album)
+        List(musicService.songs.isEmpty ? [] : musicService.songs) { song in
+            MusicItemCell(artwork: song.artwork, title: song.title)
         }
     }
 }
