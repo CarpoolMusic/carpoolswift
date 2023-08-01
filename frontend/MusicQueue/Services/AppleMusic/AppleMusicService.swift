@@ -82,45 +82,44 @@ class AppleMusicService: MusicService, ObservableObject {
     @State var searchTerm = ""
     
     /// The albums the app loads using MusicKit that match the current search term.
-    @Published var songs: MusicItemCollection<Song> = []
+    @Published var songs: MusicItemCollection<CustomSong> = []
     
     /// A reference to the storage object for recent albums the user previously viewed in the app.
 //    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared
 
     /// Makes a new search request to MusicKit when the current search term changes.
     internal func requestUpdatedSearchResults(for searchTerm: String) {
+        print("IN REQUEST")
         Task {
             if searchTerm.isEmpty {
                 await self.reset()
             } else {
                 do {
                     // Issue a catalog search request for albums matching the search term.
-                    var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Album.self])
+                    var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Song.self])
                     searchRequest.limit = 5
                     let searchResponse = try await searchRequest.response()
                     
                     // Update the user interface with the search response.
-                    let res = await apply(searchResponse, for: searchTerm)
-                    return res
+                    await self.apply(searchResponse, for: searchTerm)
                 } catch {
                     print("Search request failed with error: \(error).")
                     await self.reset()
                 }
             }
-            return []
         }
     }
     
     /// Safely updates the `albums` property on the main thread.
     @MainActor
-    private func apply(_ searchResponse: MusicCatalogSearchResponse, for searchTerm: String) -> MusicItemCollection<Song> {
+    private func apply(_ searchResponse: MusicCatalogSearchResponse, for searchTerm: String) {
         if self.searchTerm == searchTerm {
-            return searchResponse.songs
+            // Convert MusicItemCollection<Song> to MusicItemCollection<CustomSong>
+            self.songs = MusicItemCollection(searchResponse.songs.map { CustomSong(musicKitSong: $0) })
         }
-        return []
     }
     
-    /// Safely resets the `albums` property on the main thread.
+    /// Safely resets the `songs` property on the main thread.
     @MainActor
     private func reset() {
         self.songs = []

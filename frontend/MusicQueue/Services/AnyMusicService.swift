@@ -13,10 +13,11 @@ class AnyMusicService: MusicService, ObservableObject {
     private let base: MusicService
     
     // Published songs property
-    @Published var songs: MusicItemCollection<Song> = []
+    @Published var songs: MusicItemCollection<CustomSong> = []
     
     // Published search term
     @Published var searchTerm: String = ""
+    
     private var cancellables = Set<AnyCancellable>()
     
 
@@ -27,6 +28,7 @@ class AnyMusicService: MusicService, ObservableObject {
     init(_ base: MusicService) {
         self.base = base
         bindBase()
+        reverseBindSearchTerm()
     }
 
     func authorize() {

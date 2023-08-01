@@ -27,8 +27,8 @@ struct SessionView: View {
             /// now playing section
             VStack {
                 albumArtPlaceholder
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+//                    .resizable()
+//                    .aspectRatio(contentMode: .fit)
                 
                 HStack {
                     Button(action: {}) {

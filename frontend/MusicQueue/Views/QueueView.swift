@@ -37,32 +37,24 @@ struct QueueView: View {
                     }
                 }
             }
-            List(sessionManager.activeSession?.queue ?? []) { song in
-                MusicItemCell(artwork: song.song.artwork, title: song.song.title)
-                //                VStack(alignment: .leading) {
-                //                    Text(song.title)
-                //                    Text(song.artist)
-                //                        .font(.subheadline)
-                //                        .foregroundColor(.secondary)
-                //                }
-                //                HStack {
-                //                    Button(action: {
-                //                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: 1)
-                //                    }) {
-                //                        Image(systemName: "hand.thumbsup")
-                //                            .foregroundColor(.blue)
-                //                    }
-                //
-                //                    Button(action: {
-                //                        sessionManager.voteSong(sessionId: "", songID: song.id, vote: -1)
-                //                    }) {
-                //                        Image(systemName: "hand.thumbsdown")
-                //                            .foregroundColor(.red)
-                //                    }
-                //                    Text("Votes: \(song.votes)")
-                //                }
-                //            }
-                //            .padding([.top, .bottom])
+            List(((sessionManager.activeSession?.queue.isEmpty)! ? [] : sessionManager.activeSession?.queue)!) { song in
+                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
+                HStack {
+                    Button(action: {
+                        sessionManager.voteSong(sessionId: "", songID: song.id.rawValue, vote: 1)
+                    }) {
+                        Image(systemName: "hand.thumbsup")
+                            .foregroundColor(.blue)
+                    }
+
+                    Button(action: {
+                        sessionManager.voteSong(sessionId: "", songID: song.id.rawValue, vote: -1)
+                    }) {
+                        Image(systemName: "hand.thumbsdown")
+                            .foregroundColor(.red)
+                    }
+                    Text("Votes: \(song.votes)")
+                }
             }
         }
     }

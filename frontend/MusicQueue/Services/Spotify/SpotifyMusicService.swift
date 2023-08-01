@@ -20,13 +20,6 @@ enum SpotifyServiceError: Error {
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
-   
-    var searchTerm: String
-    
-    
-    func requestUpdatedSearchResults(for searchTerm: String) {
-        // Do something
-    }
     
     // MARK: - Properties
     
@@ -40,9 +33,6 @@ class SpotifyMusicService: MusicService, ObservableObject {
     
     private let appRemoteDelegate = SpotifyAppRemoteDelegate()
     private let sessionManagerDelegate = SpotifySessionManagerDelegate()
-    
-    /// The albums the app loads using MusicKit that match the current search term.
-    @Published var songs: MusicItemCollection<Song> = []
     
     /// search functionality
     private var cancellables = Set<AnyCancellable>()
@@ -145,7 +135,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
     func authorize() {
         // Implement Spotify's authorization process here
         let requestedScopes: SPTScope = [.appRemoteControl]
-//        self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
+        //        self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
         // This invokes the Auth Modal for the spotify login
         self.sessionManager.initiateSession(with: requestedScopes, options: .default)
     }
@@ -169,7 +159,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
         }
     }
     
-    // MARK: - Spotify app methods
+    // MARK: - Data fetching
     
     internal func fetchUser() async throws -> User {
         guard let url = URL(string: "https://api.spotify.com/v1/me") else {
@@ -187,6 +177,25 @@ class SpotifyMusicService: MusicService, ObservableObject {
         //        return try JSONDecoder().decode(User.self, from: data)
         return User(country: "", displayName: "", email: "")
     }
+    
+    func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
+        // Implement Spotify's fetchArtwork here
+        guard appRemote.isConnected else {
+            completion(.failure(AppRemoteConnectionError.notConnected))
+            return
+        }
+        
+        //       appRemote.imageAPI?.fetchImage(forItemWithURI: "spotify:track:\(songID)", callback: { (result, error) in
+        //           if let error = error {
+        //               completion(.failure(error))
+        //           } else if let image = result as? UIImage {
+        //               completion(.success(image))
+        //           }
+        //       })
+    }
+    
+    
+    // MARK: - Playback
     
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Spotify's playback here
@@ -225,64 +234,67 @@ class SpotifyMusicService: MusicService, ObservableObject {
         })
     }
     
-    func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
-        // Implement Spotify's fetchArtwork here
-        guard appRemote.isConnected else {
-            completion(.failure(AppRemoteConnectionError.notConnected))
-            return
-        }
-        
-        //       appRemote.imageAPI?.fetchImage(forItemWithURI: "spotify:track:\(songID)", callback: { (result, error) in
-        //           if let error = error {
-        //               completion(.failure(error))
-        //           } else if let image = result as? UIImage {
-        //               completion(.success(image))
-        //           }
-        //       })
-    }
+    // MARK: - Searching
     
-    func searchSongs(query: String) -> AnyPublisher<[Song], Error> {
-        // Check if the query is empty
-        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            // Return an empty array of songs (or handle it as you wish)
-            return Just([]).setFailureType(to: Error.self).eraseToAnyPublisher()
-        }
-        
-        // Replacing spaces with '+' for the search query
-        let formattedQuery = query.replacingOccurrences(of: " ", with: "+")
-        
-        // Constructing URL
-        guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(formattedQuery)&type=track&limit=20") else {
-            return Fail(error: SpotifyServiceError.invalidURL).eraseToAnyPublisher()
-        }
-        
-        // Building the request
-        var request = URLRequest(url: url)
-        guard let accessToken = self.accessToken else {
-            return Fail(error: SpotifyServiceError.missingAccessToken).eraseToAnyPublisher()
-        }
-        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-        // Sending the request and handling the response
-        let publisher = urlSession.dataTaskPublisher(for: request)
-            .tryMap { data, response in
-                let decoder = JSONDecoder()
-                let searchResult = try decoder.decode(TrackResponse.self, from: data)
-                // Transforming Spotify's Track objects to your app's Song objects
-                return searchResult.tracks.items.map { item in
+    /// The albums the app loads using MusicKit that match the current search term.
+    @Published var songs: MusicItemCollection<CustomSong> = []
+    
+    /// The current search term the user enters.
+    var searchTerm = ""
+    
+    
+    internal func requestUpdatedSearchResults(for query: String) {
+        self.searchTerm = query
+        Task {
+            if searchTerm.isEmpty {
+                await self.reset()
+            } else {
+                do {
+                    // Replacing spaces with '+' for the search query
+                    let formattedQuery = searchTerm.replacingOccurrences(of: " ", with: "+")
+                    
+                    // Constructing URL
+                    guard let url = URL(string: "https://api.spotify.com/v1/search?q=\(formattedQuery)&type=track&limit=20") else {
+                        throw SpotifyServiceError.invalidURL
+                    }
+                    
+                    // Building the request
+                    var request = URLRequest(url: url)
+                    guard let accessToken = self.accessToken else {
+                        throw SpotifyServiceError.missingAccessToken
+                    }
+                    request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+                    
+                    
+                    // Sending the request and handling the response
+                    let (data, _) = try await URLSession.shared.data(for: request)
+                    if let stringData = String(data: data, encoding: .utf8) {
+                        print(stringData)
+                    }
+                    let searchResponse = try JSONDecoder().decode(TrackResponse.self, from: data)
+                    await self.apply(searchResponse, for: searchTerm)
+                } catch {
+                    print("Search request failed with error: \(error).")
+                    await self.reset()
                 }
             }
-            .receive(on: DispatchQueue.main)
-            .share()  // Use share operator to allow multiple subscriptions
-            .eraseToAnyPublisher()
-
-        // Store the cancellable in the cancellables set
-        publisher
-            .sink { _ in } receiveValue: { _ in }
-            .store(in: &cancellables)
-
-        return publisher
+        }
     }
+    
+    /// Safely updates the `albums` property on the main thread.
+    @MainActor
+    private func apply(_ searchResponse: TrackResponse, for searchTerm: String) {
+        if self.searchTerm == searchTerm {
+            self.songs = MusicItemCollection(searchResponse.tracks.items.map { CustomSong(spotifyTrack: $0) })
+        }
+    }
+    
+    /// Safely resets the `songs` property on the main thread.
+    @MainActor
+    private func reset() {
+        self.songs = []
+    }
+    
     
     func isSpotifyInstalled() -> Bool {
         guard let url = URL(string: "spotify:") else {

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import MusicKit
 
 enum MusicServiceType: String {
     case apple, spotify

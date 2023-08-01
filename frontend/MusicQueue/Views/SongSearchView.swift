@@ -13,12 +13,16 @@ struct SongSearchView: View {
     
   
     @ObservedObject var musicService: AnyMusicService
+    @State private var searchTerm: String = ""
     
     
     let onSelect: (Song) -> Void
     
     var body: some View {
         rootView
+            .onChange(of: searchTerm) { newSearchTerm in
+                musicService.requestUpdatedSearchResults(for: newSearchTerm)
+            }
     }
     
     // The various components of the main navigation view.
@@ -33,15 +37,15 @@ struct SongSearchView: View {
     private var rootView: some View {
         NavigationView {
             navigationViewContents
-                .navigationTitle("Music Albums")
+                .navigationTitle("Music Songs")
         }
-        .searchable(text: $musicService.searchTerm, prompt: "Albums")
+        .searchable(text: $searchTerm, prompt: "Song")
     }
     
     /// A list of songs to display below the search bar.
     private var searchResultsList: some View {
         List(musicService.songs.isEmpty ? [] : musicService.songs) { song in
-            MusicItemCell(artwork: song.artwork, title: song.title)
+            MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
         }
     }
 }
