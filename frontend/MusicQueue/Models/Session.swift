@@ -24,4 +24,8 @@ struct Session {
             }
         }
     }
+    
+    init(id: String) {
+        self.id = id
+    }    
 }

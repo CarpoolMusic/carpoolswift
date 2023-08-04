@@ -42,30 +42,30 @@ class AppleMusicService: MusicService, ObservableObject {
     func authorize() {
         // Implement Apple Music's authorization process here
         switch self.authorizationStatus {
-            case .notDetermined:
-                Task {
-                    let status = await MusicAuthorization.request()
-                        DispatchQueue.main.async {
-                            self.musicAuthorizationStatus = status
-                        }
+        case .notDetermined:
+            Task {
+                let status = await MusicAuthorization.request()
+                DispatchQueue.main.async {
+                    self.musicAuthorizationStatus = status
                 }
-            case .denied:
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsURL)
-                }
-            default:
-                fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
+            }
+        case .denied:
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+        default:
+            fatalError("No button should be displayed for current authorization status: \(musicAuthorizationStatus).")
         }
     }
-
+    
     func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Apple Music's playback here
     }
-
+    
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {
         // Implement Apple Music's stop playback here
     }
-
+    
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
         // Implement Apple Music's fetchArtwork here
     }
@@ -78,27 +78,34 @@ class AppleMusicService: MusicService, ObservableObject {
     
     // MARK: - Search results requesting
     
-    /// The current search term the user enters.
-    @State var searchTerm = ""
-    
     /// The albums the app loads using MusicKit that match the current search term.
     @Published var songs: MusicItemCollection<CustomSong> = []
     
     /// A reference to the storage object for recent albums the user previously viewed in the app.
-//    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared
-
+    //    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared
+    
+    /// The current search term the user enters.
+    var searchTerm = ""
+    
     /// Makes a new search request to MusicKit when the current search term changes.
-    internal func requestUpdatedSearchResults(for searchTerm: String) {
-        print("IN REQUEST")
+    internal func requestUpdatedSearchResults(for query: String) {
+        self.searchTerm = query
+        print(query)
         Task {
-            if searchTerm.isEmpty {
+            if self.searchTerm.isEmpty {
+                print(self.searchTerm)
                 await self.reset()
             } else {
                 do {
+                    print("SErarchign")
                     // Issue a catalog search request for albums matching the search term.
                     var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Song.self])
                     searchRequest.limit = 5
                     let searchResponse = try await searchRequest.response()
+                    
+                    for song in searchResponse.songs {
+                        print("RETUNRED \(song)")
+                    }
                     
                     // Update the user interface with the search response.
                     await self.apply(searchResponse, for: searchTerm)
@@ -114,6 +121,7 @@ class AppleMusicService: MusicService, ObservableObject {
     @MainActor
     private func apply(_ searchResponse: MusicCatalogSearchResponse, for searchTerm: String) {
         if self.searchTerm == searchTerm {
+            print(searchResponse)
             // Convert MusicItemCollection<Song> to MusicItemCollection<CustomSong>
             self.songs = MusicItemCollection(searchResponse.songs.map { CustomSong(musicKitSong: $0) })
         }

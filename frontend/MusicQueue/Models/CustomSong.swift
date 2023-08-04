@@ -31,5 +31,16 @@ struct CustomSong: MusicItem, Equatable, Identifiable {
         self.artworkURL = URL(string: spotifyTrack.artworkURL)!
         self.artist = spotifyTrack.artistName
         self.votes = 0
-    }    
+    }
+    
+    /// Converts the song object into a dictionary with its basic info
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id.rawValue,
+            "title": title,
+            "artworkURL": artworkURL.absoluteString,
+            "artist": artist,
+            "votes": votes
+        ]
+    }
 }

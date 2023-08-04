@@ -11,7 +11,7 @@ struct SpotifyTrack: Codable {
     let id: String
     let name: String
     let artists: [Artist]
-    let album: Album
+    let album: SpotifyAlbum
     // computed properties
     var artistName: String {artists.first?.name ?? "Unkown Artist"}
     var artworkURL: String {album.images.first?.url ?? "Unkown URL"}
@@ -27,7 +27,7 @@ struct SongImage: Codable {
     let url: String
 }
 
-struct Album: Codable {
+struct SpotifyAlbum: Codable {
     let images: [SongImage]
 }
 

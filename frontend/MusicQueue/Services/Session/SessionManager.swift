@@ -15,6 +15,45 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
         self.socketService.delegate = self
     }
     
+    // MARK: - Send to server methods
+    func handleError(_ error: SocketError) {
+        // Emit error event to the server
+        socketService.emit(event: "error", with: ["error": error.localizedDescription])
+    }
+    
+    func connect() {
+        socketService.connect()
+    }
+    
+    func disconnect() {
+        socketService.disconnect()
+    }
+    
+    func createSession() {
+        socketService.emit(event: "create session", with: [:])
+    }
+    
+    func joinSession(sessionID: String) {
+        socketService.emit(event: "join session", with: [sessionID: "sessionID"])
+    }
+    
+    func leaveSession(sessionID: String) {
+        socketService.emit(event: "leave session", with: [sessionID: "sessionID"])
+    }
+    
+    func addSongToQueue(sessionId: String, song: CustomSong) {
+        socketService.emit(event: "add song", with: ["sessionId": sessionId, "songData": song.toDictionary()] as [String : Any])
+        self.activeSession?.queue.append(song)
+    }
+    
+    func removeSongFromQueue(sessionId: String, songID: String) {
+        socketService.emit(event: "remove song", with: ["sessionId": sessionId, "songID": songID])
+    }
+    
+    func voteSong(sessionId: String, songID: String, vote: Int) {
+        socketService.emit(event: "vote song", with: ["sessionId": sessionId, "songID": songID, "vote": vote] as [String : Any])
+    }
+    
     // MARK: - Socket.IO messages
     func handleEvent(_ event: SocketEvent) {
         switch event {
@@ -44,47 +83,12 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
             print("Unhandled event: \(event)")
         }
     }
-    
-    func handleError(_ error: SocketError) {
-        // Emit error event to the server
-        socketService.emit(event: "error", with: ["error": error.localizedDescription])
-    }
-    
-    func connect() {
-        socketService.connect()
-    }
-    
-    func disconnect() {
-        socketService.disconnect()
-    }
-    
-    func createSession() {
-        socketService.emit(event: "create session", with: [:])
-    }
-    
-    func joinSession(sessionID: String) {
-        socketService.emit(event: "join session", with: [sessionID: "sessionID"])
-    }
-    
-    func leaveSession(sessionID: String) {
-        socketService.emit(event: "leave session", with: [sessionID: "sessionID"])
-    }
-    
-    func addSongToQueue(sessionId: String, songData: [String: Any]) {
-        socketService.emit(event: "add song", with: ["sessionId": sessionId, "songData": songData] as [String : Any])
-    }
-    
-    func removeSongFromQueue(sessionId: String, songID: String) {
-        socketService.emit(event: "remove song", with: ["sessionId": sessionId, "songID": songID])
-    }
-    
-    func voteSong(sessionId: String, songID: String, vote: Int) {
-        socketService.emit(event: "vote song", with: ["sessionId": sessionId, "songID": songID, "vote": vote] as [String : Any])
-    }
 }
 
+    
+
+// MARK: - Socket Service Delegate methods (Recieve from server events)
 extension SessionManager: SocketServiceDelegate {
-    // MARK: - Socket Service Delegate methods
     
     func socketDidConnect() {
         print("Client connected")

@@ -16,7 +16,7 @@ struct SongSearchView: View {
     @State private var searchTerm: String = ""
     
     
-    let onSelect: (Song) -> Void
+    let onSelect: (CustomSong) -> Void
     
     var body: some View {
         rootView
@@ -45,7 +45,11 @@ struct SongSearchView: View {
     /// A list of songs to display below the search bar.
     private var searchResultsList: some View {
         List(musicService.songs.isEmpty ? [] : musicService.songs) { song in
-            MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
+            Button(action: {
+                onSelect(song)
+            }) {
+                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
+            }
         }
     }
 }
