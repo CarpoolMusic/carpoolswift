@@ -18,9 +18,6 @@ struct SessionView: View {
     
     // MARK: - View
     var body: some View {
-        /// Boolean value determining whether user is host or not
-        @State var isUserHost = sessionManager.isHost()
-        
         VStack {
             HStack {
                 Text("Session: \(sessionManager.activeSession?.id ?? "")")
@@ -33,22 +30,10 @@ struct SessionView: View {
                 nowPlayingSection
                 Spacer()
                 
-                HStack {
-                    Button(action: {}) {
-                        Image(systemName: "backward.fill")
-                    }
-                    .disabled(!isUserHost)
-                    Button(action: {isPlaying.toggle()}) {
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    }
-                    .disabled(!isUserHost)
-                    Button(action: {}) {
-                        Image(systemName: "forward.fill")
-                    }
-                    .disabled(!isUserHost)
-                }
-                .font(.largeTitle)
-                .padding(.top)
+                audioControlSection
+                    .padding(.top)
+                    .font(.largeTitle)
+                
             }
             
             Spacer()
@@ -102,7 +87,7 @@ struct SessionView: View {
         let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
         
-        if let currentSong = sessionManager.getNextSong() {
+        if let currentSong = self.sessionManager.currentSong {
             Group {
                 
                 if let uiImage = uiImage {
@@ -130,6 +115,53 @@ struct SessionView: View {
                 .frame(width: screenWidth * 0.85, height: screenHeight * 0.3)
                 .clipped()
         }
+    }
+    
+    // MARK: - Audio control
+    var audioControlSection: some View {
+        /// Boolean value determining whether user is host or not
+        @State var isUserHost = sessionManager.isHost()
+        
+        return HStack {
+            Button(action: {}) {
+                Image(systemName: "backward.fill")
+            }
+            .disabled(!isUserHost)
+            Button(action: {handlePlayPauseButtonPressed()}) {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+            }
+            .disabled(!isUserHost)
+            Button(action: {self.musicService.ne}) {
+                Image(systemName: "forward.fill")
+            }
+            .disabled(!isUserHost)
+        }
+        
+    }
+    
+    func handlePlayPauseButtonPressed() {
+        // need to pause
+        if self.isPlaying {
+            musicService.pausePlayback()
+        } else {
+            Task {
+                // otherwise we play
+                if (self.sessionManager.currentSong != nil) {
+                    await musicService.resumePlayback()
+                    print("TRYING TO START ")
+                } else {
+                    print("STARTING NEW SONG")
+                    // Get the next song up and play
+                    if let nextSong = self.sessionManager.getNextSong() {
+                        do {
+                            await musicService.startPlayback(song: nextSong)
+                        }
+                    }
+                }
+            }
+            print("AFTER")
+        }
+        self.isPlaying.toggle()
     }
     
     

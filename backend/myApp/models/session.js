@@ -4,7 +4,7 @@ class Session {
   constructor(hostId) {
     this.hostId = hostId;
     this.sessionId = uuid.v4();
-    this.members = new Set();
+    this.members = new Set([hostId]);
     this.queue = []; // The queue of songs
   }
 
@@ -17,6 +17,9 @@ class Session {
   }
 
   isMember(socketId) {
+    console.log(socketId)
+    console.log(this.members)
+    console.log(this.members.has(socketId))
     return this.members.has(socketId);
   }
 

@@ -39,12 +39,24 @@ class AnyMusicService: MusicService, ObservableObject {
         try await base.fetchUser()
     }
 
-    func startPlayback(songID: String) {
-        base.startPlayback(songID: songID)
+    func startPlayback(song: CustomSong) async {
+        await base.startPlayback(song: song)
+    }
+    
+    func resumePlayback() async {
+        await base.resumePlayback()
     }
 
-    func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {
-        base.stopPlayback(completion: completion)
+    func pausePlayback() {
+        base.pausePlayback()
+    }
+    
+    func skipToNextSong() async {
+        await base.skipToNextSong()
+    }
+    
+    func skipToPrevSong() async {
+        await base.skipToPrevSong()
     }
 
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {

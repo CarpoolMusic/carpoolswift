@@ -19,7 +19,7 @@ struct CustomSong: MusicItem, Equatable, Identifiable {
     init(musicKitSong: Song) {
         self.id = musicKitSong.id
         self.title = musicKitSong.title
-        self.artworkURL = (musicKitSong.artwork?.url(width: 10, height: 10)!)!
+        self.artworkURL = (musicKitSong.artwork?.url(width: 100, height: 100)!)!
         self.artist = musicKitSong.artistName
         self.votes = 0 // You would need to determine how to set votes, as it doesn't exist in the Song object
     }
@@ -32,6 +32,25 @@ struct CustomSong: MusicItem, Equatable, Identifiable {
         self.artist = spotifyTrack.artistName
         self.votes = 0
     }
+    
+    init?(dictionary: [String: Any]) {
+        guard let idString = dictionary["id"] as? String,
+              let title = dictionary["title"] as? String,
+              let artworkURLString = dictionary["artworkURL"] as? String,
+              let artworkURL = URL(string: artworkURLString),
+              let artist = dictionary["artist"] as? String,
+              let votes = dictionary["votes"] as? Int
+        else {
+            return nil
+        }
+
+        self.id = MusicItemID(idString)
+        self.title = title
+        self.artworkURL = artworkURL
+        self.artist = artist
+        self.votes = votes
+    }
+
     
     /// Converts the song object into a dictionary with its basic info
     func toDictionary() -> [String: Any] {

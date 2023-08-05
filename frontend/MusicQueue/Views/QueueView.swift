@@ -14,6 +14,7 @@ struct QueueView: View {
     @ObservedObject var musicService: AnyMusicService
     
     @State private var isShowingSearchView: Bool = false
+    @State private var updateQueue = false
     
     init(sessionManager: SessionManager, musicService: AnyMusicService) {
         self.sessionManager = sessionManager
@@ -39,7 +40,7 @@ struct QueueView: View {
                     }
                 }
             }
-            List(((sessionManager.activeSession?.queue.isEmpty)! ? [] : sessionManager.activeSession?.queue)!) { song in
+            List(sessionManager.activeSession?.queue ?? []) { song in
                 MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
                 HStack {
                     Button(action: {
@@ -57,6 +58,9 @@ struct QueueView: View {
                     }
                     Text("Votes: \(song.votes)")
                 }
+            }
+            .onReceive(sessionManager.$queueUpdated) { _ in
+                self.updateQueue.toggle()
             }
         }
     }

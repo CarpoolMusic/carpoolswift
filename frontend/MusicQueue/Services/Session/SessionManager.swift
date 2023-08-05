@@ -10,8 +10,9 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     
     @Published var connected: Bool?
     @Published var activeSession: Session?
+    @Published var queueUpdated: Bool = false
     
-    @State private var currentSong: CustomSong?
+    var currentSong: CustomSong?
     var lastSong: CustomSong?
     
     init(socketService: SocketServiceProtocol) {
@@ -27,11 +28,14 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     }
     
     func getNextSong() -> CustomSong? {
-        if let nextSong =  activeSession?.queue.first {
-            self.activeSession?.queue.removeFirst()
+        if let nextSong = activeSession?.queue.first {
             self.lastSong = currentSong
+            print("SONG: \(nextSong)")
             self.currentSong = nextSong
+            // remove the song from the queue
+//            self.removeSongFromQueue(sessionId: self.activeSession?.id ?? "", songID: nextSong.id.rawValue)
         }
+        print("NEXT SONG: \(String(describing: self.currentSong))")
         return currentSong
     }
     
@@ -55,7 +59,6 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     }
     
     func createSession() {
-        print("CREATIN SESSION")
         socketService.emit(event: "create session", with: [:])
     }
     
@@ -68,9 +71,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     }
     
     func addSongToQueue(sessionId: String, song: CustomSong) {
-        print("ADDING SONG \(sessionId)")
         socketService.emit(event: "add song", with: ["sessionId": sessionId, "songData": song.toDictionary()] as [String : Any])
-        self.activeSession?.queue.append(song)
     }
     
     func removeSongFromQueue(sessionId: String, songID: String) {
@@ -93,7 +94,6 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
             self.connected = false
         case .sessionCreated(let sessionId):
             // Set the intial values of the session and then load
-            print("OTHER: \(sessionId)")
             self.activeSession = Session(id: sessionId, hostId: self.socketService.getSocketId())
         case .sessionJoined(let sessionId):
             // Do something when a session is joined.
@@ -107,7 +107,15 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
             print()
         case .queueUpdated(let queue):
             // DO something when the queue is updated
-            print()
+            var newQueue: [CustomSong] = []
+            for songDict in queue {
+                if let song = CustomSong(dictionary: songDict) {
+                    newQueue.append(song)
+                }
+            }
+            // Update the queue
+            self.activeSession?.queue = newQueue
+            self.queueUpdated.toggle()
         default:
             print("Unhandled event: \(event)")
         }

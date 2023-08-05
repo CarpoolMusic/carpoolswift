@@ -20,10 +20,6 @@ enum SpotifyServiceError: Error {
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
-    func startPlayback(songID: String) {
-        // Do nothign
-    }
-    
     
     // MARK: - Properties
     
@@ -201,7 +197,7 @@ class SpotifyMusicService: MusicService, ObservableObject {
     
     // MARK: - Playback
     
-    func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func startPlayback(song: CustomSong) {
         // Implement Spotify's playback here
         
         // Wake up the Spotfy app
@@ -209,33 +205,25 @@ class SpotifyMusicService: MusicService, ObservableObject {
         
         // Check if connected
         guard appRemote.isConnected else {
-            completion(.failure(AppRemoteConnectionError.notConnected))
+            print("Error in startPlayback, appRemote is not connected")
             return
         }
         
-        appRemote.playerAPI?.play("spotify:track:\(songID)", callback: { (result, error) in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        })
+        appRemote.playerAPI?.play("spotify:track:\(song.id)")
     }
     
-    func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {
+    func resumePlayback() {
+        // Do nothign
+    }
+    
+    func pausePlayback() {
         // Implement Spotify's stop playback here
         guard appRemote.isConnected else {
-            completion(.failure(AppRemoteConnectionError.notConnected))
+            print("error in stopPlayback, appRemote is not conncted")
             return
         }
         
-        appRemote.playerAPI?.pause({ (result, error) in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        })
+        appRemote.playerAPI?.pause()
     }
     
     // MARK: - Searching

@@ -105,15 +105,17 @@ module.exports = function (io) {
             }
 
             if (!session.isMember(socket.id)) {
-                socket.emit('error', 'You are not a member of this session');
+                socket.emit('error', `You are not a member of this session, ${session.sessionId} `);
                 return;
             }
 
             // Create the song object
-            const song = new Song(songData.songID, songData.name, songData.artist, socket.id);
+            const song = new Song(songData.id, songData.title, songData.artworkURL, songData.artist, socket.id);
 
             // Add the song to the session queue
             session.addSong(song);
+
+            console.log(session.queue)
 
             // Broadcast the updated queue to all members in the session
             io.to(sessionId).emit('queue updated', session.queue);

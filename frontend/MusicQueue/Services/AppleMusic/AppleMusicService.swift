@@ -22,6 +22,7 @@ class AppleMusicService: MusicService, ObservableObject {
     @Published var musicAuthorizationStatus: MusicAuthorization.Status = MusicAuthorization.currentStatus
     
     private var cancellables = Set<AnyCancellable>()
+    private let player = SystemMusicPlayer.shared
     
     
     /// The current authorization status
@@ -59,26 +60,49 @@ class AppleMusicService: MusicService, ObservableObject {
         }
     }
     
-    func startPlayback(songID: String) {
-        Task {
-            do {
-                let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(songID))
-                let song = try await songRequest.response()
-                guard let song = song.items.first else {
-                    throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
-                }
-                
-                let player = SystemMusicPlayer.shared
-                try await player.queue.insert(song, position: .afterCurrentEntry)
-                try await player.play()
-            } catch {
-                print("Failed trying to play SystemMusicPlayer for song")
+    func startPlayback(song: CustomSong) async {
+        do {
+            let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
+            let songs = try await songRequest.response()
+            guard let song = songs.items.first else {
+                throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
             }
+            
+            try await player.queue.insert(song, position: .afterCurrentEntry)
+            try await player.play()
+            print("Playing the song")
+        } catch {
+            print("Failed trying to play SystemMusicPlayer for song \(error)")
         }
     }
     
-    func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {
-        // Implement Apple Music's stop playback here
+    func resumePlayback() async {
+        do {
+            try await player.play()
+        } catch {
+            print("Failed to resume playback for Error: \(error)")
+        }
+        
+    }
+    
+    func skipToNextSong() async {
+        do {
+            try await player.skipToNextEntry()
+        } catch {
+            print("Failed to skip to next song \(error)")
+        }
+    }
+    
+    func skipToPrevSong() async {
+        do {
+            try await player.skipToPreviousEntry()
+        } catch {
+            print("Failed to skip to previous song \(error)")
+        }
+    }
+    
+    func pausePlayback() {
+        player.pause()
     }
     
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
