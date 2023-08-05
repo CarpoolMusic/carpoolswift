@@ -39,8 +39,8 @@ class AnyMusicService: MusicService, ObservableObject {
         try await base.fetchUser()
     }
 
-    func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        base.startPlayback(songID: songID, completion: completion)
+    func startPlayback(songID: String) {
+        base.startPlayback(songID: songID)
     }
 
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {

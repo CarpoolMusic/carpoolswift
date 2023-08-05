@@ -33,6 +33,10 @@ class SocketService: SocketServiceProtocol {
         socket.emit(event, items)
     }
     
+    func getSocketId() -> String {
+        return socket.sid ?? ""
+    }
+    
     private func setupHandlers() {
         self.socket.on(clientEvent: .connect) { [weak self] data, ack in
             self?.delegate?.socketDidConnect()

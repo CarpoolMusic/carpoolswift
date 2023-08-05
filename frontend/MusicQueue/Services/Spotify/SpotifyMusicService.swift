@@ -20,6 +20,10 @@ enum SpotifyServiceError: Error {
 }
 
 class SpotifyMusicService: MusicService, ObservableObject {
+    func startPlayback(songID: String) {
+        // Do nothign
+    }
+    
     
     // MARK: - Properties
     

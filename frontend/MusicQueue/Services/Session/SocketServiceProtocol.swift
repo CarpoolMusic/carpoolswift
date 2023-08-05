@@ -37,5 +37,6 @@ protocol SocketServiceProtocol: AnyObject {
     func connect()
     func disconnect()
     func emit(event: String, with items: [String: Any])
+    func getSocketId() -> String
 }
 

@@ -8,8 +8,8 @@ struct SessionView: View {
     @ObservedObject var sessionManager: SessionManager
     @ObservedObject var musicService: AnyMusicService
     
-    /// Boolean value determining whether user is host or not
-    @State private var isUserHost = true // placeholder
+    @State private var isPlaying = false
+    
     
     /// Boolean value determining if the queue is being displayed
     @State private var isQueueOpen = false
@@ -18,6 +18,9 @@ struct SessionView: View {
     
     // MARK: - View
     var body: some View {
+        /// Boolean value determining whether user is host or not
+        @State var isUserHost = sessionManager.isHost()
+        
         VStack {
             HStack {
                 Text("Session: \(sessionManager.activeSession?.id ?? "")")
@@ -26,17 +29,17 @@ struct SessionView: View {
             }
             /// now playing section
             VStack {
-                albumArtPlaceholder
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fit)
+                Spacer()
+                nowPlayingSection
+                Spacer()
                 
                 HStack {
                     Button(action: {}) {
                         Image(systemName: "backward.fill")
                     }
                     .disabled(!isUserHost)
-                    Button(action: {}) {
-                        Image(systemName: "playpause.fill")
+                    Button(action: {isPlaying.toggle()}) {
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     }
                     .disabled(!isUserHost)
                     Button(action: {}) {
@@ -87,6 +90,49 @@ struct SessionView: View {
             try? await loadSongs()
         }
     }
+    
+    
+    // MARK: - Now playing view
+    @ViewBuilder
+    var nowPlayingSection: some View {
+        
+        @State var uiImage: UIImage? = nil
+        
+        // Get screen dimenesions
+        let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
+        
+        if let currentSong = sessionManager.getNextSong() {
+            Group {
+                
+                if let uiImage = uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: screenWidth / 2, height: screenHeight / 2)
+                        .clipped()
+                } else {
+                    ProgressView() // or some placeholder content
+                }
+            }
+            .task {
+                do {
+                    let (data, _) = try await URLSession.shared.data(from: currentSong.artworkURL)
+                    uiImage = UIImage(data: data)
+                } catch {
+                    // handle error
+                    print("Failed to load image from \(String(describing: currentSong.artworkURL)): \(error)")
+                }
+            }
+        } else {
+            albumArtPlaceholder
+                .resizable()
+                .frame(width: screenWidth * 0.85, height: screenHeight * 0.3)
+                .clipped()
+        }
+    }
+    
+    
     
     // MARK: - Loading songs
     /// Loads songs asynchronously.

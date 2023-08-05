@@ -10,6 +10,7 @@ import MusicKit
 import Combine
 
 class AppleMusicService: MusicService, ObservableObject {
+    
     private var cancellable: AnyCancellable?
     
     // MARK: - Properties
@@ -58,8 +59,22 @@ class AppleMusicService: MusicService, ObservableObject {
         }
     }
     
-    func startPlayback(songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        // Implement Apple Music's playback here
+    func startPlayback(songID: String) {
+        Task {
+            do {
+                let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(songID))
+                let song = try await songRequest.response()
+                guard let song = song.items.first else {
+                    throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+                }
+                
+                let player = SystemMusicPlayer.shared
+                try await player.queue.insert(song, position: .afterCurrentEntry)
+                try await player.play()
+            } catch {
+                print("Failed trying to play SystemMusicPlayer for song")
+            }
+        }
     }
     
     func stopPlayback(completion: @escaping (Result<Void, Error>) -> Void) {

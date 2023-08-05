@@ -10,6 +10,7 @@ import MusicKit
 
 struct Session {
     let id: String
+    let hostId: String
     var participants: [User] = []
     /// The song queue for this session
     var queue: [CustomSong] = [
@@ -25,7 +26,8 @@ struct Session {
         }
     }
     
-    init(id: String) {
+    init(id: String, hostId: String) {
         self.id = id
+        self.hostId = hostId
     }    
 }

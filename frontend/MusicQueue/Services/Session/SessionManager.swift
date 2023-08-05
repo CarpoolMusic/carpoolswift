@@ -1,5 +1,6 @@
 import Foundation
 import SocketIO
+import SwiftUI
 
 class SessionManager: ObservableObject, SessionManagerProtocol {
     
@@ -10,10 +11,34 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     @Published var connected: Bool?
     @Published var activeSession: Session?
     
+    @State private var currentSong: CustomSong?
+    var lastSong: CustomSong?
+    
     init(socketService: SocketServiceProtocol) {
         self.socketService = socketService
         self.socketService.delegate = self
     }
+    
+    
+    // MARK: - Session methods
+    
+    func isHost() -> Bool {
+        return self.activeSession?.hostId == self.socketService.getSocketId()
+    }
+    
+    func getNextSong() -> CustomSong? {
+        if let nextSong =  activeSession?.queue.first {
+            self.activeSession?.queue.removeFirst()
+            self.lastSong = currentSong
+            self.currentSong = nextSong
+        }
+        return currentSong
+    }
+    
+    func getLastSong() {
+        
+    }
+    
     
     // MARK: - Send to server methods
     func handleError(_ error: SocketError) {
@@ -30,6 +55,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     }
     
     func createSession() {
+        print("CREATIN SESSION")
         socketService.emit(event: "create session", with: [:])
     }
     
@@ -42,6 +68,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     }
     
     func addSongToQueue(sessionId: String, song: CustomSong) {
+        print("ADDING SONG \(sessionId)")
         socketService.emit(event: "add song", with: ["sessionId": sessionId, "songData": song.toDictionary()] as [String : Any])
         self.activeSession?.queue.append(song)
     }
@@ -54,6 +81,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
         socketService.emit(event: "vote song", with: ["sessionId": sessionId, "songID": songID, "vote": vote] as [String : Any])
     }
     
+    
     // MARK: - Socket.IO messages
     func handleEvent(_ event: SocketEvent) {
         switch event {
@@ -65,7 +93,8 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
             self.connected = false
         case .sessionCreated(let sessionId):
             // Set the intial values of the session and then load
-            self.activeSession = Session(id: sessionId)
+            print("OTHER: \(sessionId)")
+            self.activeSession = Session(id: sessionId, hostId: self.socketService.getSocketId())
         case .sessionJoined(let sessionId):
             // Do something when a session is joined.
             print()

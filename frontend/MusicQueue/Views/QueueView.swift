@@ -31,8 +31,9 @@ struct QueueView: View {
                 .padding([.top])
                 .sheet(isPresented: $isShowingSearchView) {
                     SongSearchView(musicService: musicService) { selectedSong in
-                        print("SONG: \(selectedSong)")
-                        sessionManager.addSongToQueue(sessionId: sessionManager.activeSession!.id, song: selectedSong)
+                        if let session = sessionManager.activeSession {
+                            sessionManager.addSongToQueue(sessionId: session.id, song: selectedSong)
+                        }
                         
                         isShowingSearchView = false
                     }
