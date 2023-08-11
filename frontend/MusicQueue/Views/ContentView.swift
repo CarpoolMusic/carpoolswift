@@ -9,42 +9,37 @@ import SwiftUI
 
 struct ContentView: View {
     
-    // Observed music services from main
-    @EnvironmentObject var spotifyMusicService: SpotifyMusicService
-    @EnvironmentObject var appleMusicService: AppleMusicService
-    
-    // Observed session manager from main
-    @EnvironmentObject var sessionManager: SessionManager
-    
-    @State var selectedMusicServiceType: MusicServiceType? = {
-        if let stringValue = UserDefaults.standard.string(forKey: "musicServiceType"),
-           let rawValue = MusicServiceType(rawValue: stringValue) {
-            return rawValue
-        }
-        return .none
-    }()
-    
+    @ObservedObject var contentViewModel = ContentViewModel()
     
     var body: some View {
-        VStack {
-            switch selectedMusicServiceType {
-            case .spotify:
-                if spotifyMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: AnyMusicService(spotifyMusicService), sessionManager: sessionManager)
-                } else {
-                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
-                }
-            case .apple:
-                if appleMusicService.authorizationStatus == .authorized {
-                    DashboardView(musicService: AnyMusicService(appleMusicService), sessionManager: sessionManager)
-                } else {
-                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
-                }
-            case .none:
-                // The user has not selected a music service yet
-                AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $selectedMusicServiceType)
-            }
+        contentViewModel.currentView
+    }
+}
+
+class ContentViewModel: ObservableObject {
+    
+    @Published var currentView: AnyView
+    
+    private let userPreferences: UserPreferences
+    private let musicService: AnyMusicService
+    
+    init() {
+        let selectedMusicServiceType = userPreferences.selectedMusicServiceType
+        
+        if selectedMusicServiceType == .unselected {
+            currentView = AuthorizationView()
+        } else {
+            musicService = getMusicServiceFromType(type: selectedMusicServiceType)
+            currentView = musicService.isAuthorized() ? DashboardView() : AuthorizationView()
         }
+        
+    }
+    
+    private func getMusicServiceFromType(type: MusicServiceType) -> AnyMusicService? {
+        return userPreferences.selectedMusicServiceType == .apple ? AnyMusicService(AppleMusicService()) :
+        userPreferences.selectedMusicServiceType == .spotify ? AnyMusicService(SpotifyMusicService()) :
+        nil
+        
     }
 }
 

@@ -8,9 +8,9 @@
 import MusicKit
 import Combine
 
-class AnyMusicService: MusicService, ObservableObject {
+class AnyMusicService: MusicServiceProtocol, ObservableObject {
     
-    private let base: MusicService
+    private let base: MusicServiceProtocol
     
     // Published songs property
     @Published var songs: MusicItemCollection<CustomSong> = []
@@ -25,11 +25,16 @@ class AnyMusicService: MusicService, ObservableObject {
         base.authorizationStatus
     }
 
-    init(_ base: MusicService) {
+    init(_ base: MusicServiceProtocol) {
         self.base = base
         bindBase()
         reverseBindSearchTerm()
     }
+    
+    func isAuthorized() -> Bool {
+        return base.authorizationStatus == .authorized
+    }
+    
 
     func authorize() {
         base.authorize()
@@ -51,12 +56,12 @@ class AnyMusicService: MusicService, ObservableObject {
         base.pausePlayback()
     }
     
-    func skipToNextSong() async {
-        await base.skipToNextSong()
+    func skipToNextSong() {
+        base.skipToNextSong()
     }
     
-    func skipToPrevSong() async {
-        await base.skipToPrevSong()
+    func skipToPrevSong() {
+        base.skipToPrevSong()
     }
 
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void) {

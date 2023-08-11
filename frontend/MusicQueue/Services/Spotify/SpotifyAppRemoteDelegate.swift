@@ -11,6 +11,7 @@ class SpotifyAppRemoteDelegate: NSObject, SPTAppRemoteDelegate {
     
     func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
         print("Connected to Spotify")
+        print("AAAAAAAAAAAAAAAAAAA")
 
         // Connection was successful, you can begin issuing commands
         appRemote.playerAPI?.delegate = playerStateDelegate

@@ -12,7 +12,7 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     @Published var activeSession: Session?
     @Published var queueUpdated: Bool = false
     
-    var currentSong: CustomSong?
+    @Published var currentSong: CustomSong?
     var lastSong: CustomSong?
     
     init(socketService: SocketServiceProtocol) {
@@ -30,10 +30,9 @@ class SessionManager: ObservableObject, SessionManagerProtocol {
     func getNextSong() -> CustomSong? {
         if let nextSong = activeSession?.queue.first {
             self.lastSong = currentSong
-            print("SONG: \(nextSong)")
             self.currentSong = nextSong
             // remove the song from the queue
-//            self.removeSongFromQueue(sessionId: self.activeSession?.id ?? "", songID: nextSong.id.rawValue)
+            self.removeSongFromQueue(sessionId: self.activeSession?.id ?? "", songID: nextSong.id.rawValue)
         }
         print("NEXT SONG: \(String(describing: self.currentSong))")
         return currentSong

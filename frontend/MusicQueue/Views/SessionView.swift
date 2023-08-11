@@ -89,7 +89,6 @@ struct SessionView: View {
         
         if let currentSong = self.sessionManager.currentSong {
             Group {
-                
                 if let uiImage = uiImage {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -123,7 +122,7 @@ struct SessionView: View {
         @State var isUserHost = sessionManager.isHost()
         
         return HStack {
-            Button(action: {}) {
+            Button(action: {self.musicService.skipToPrevSong()}) {
                 Image(systemName: "backward.fill")
             }
             .disabled(!isUserHost)
@@ -131,7 +130,7 @@ struct SessionView: View {
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
             }
             .disabled(!isUserHost)
-            Button(action: {self.musicService.ne}) {
+            Button(action: {self.musicService.skipToNextSong()}) {
                 Image(systemName: "forward.fill")
             }
             .disabled(!isUserHost)
@@ -148,9 +147,7 @@ struct SessionView: View {
                 // otherwise we play
                 if (self.sessionManager.currentSong != nil) {
                     await musicService.resumePlayback()
-                    print("TRYING TO START ")
                 } else {
-                    print("STARTING NEW SONG")
                     // Get the next song up and play
                     if let nextSong = self.sessionManager.getNextSong() {
                         do {
@@ -159,7 +156,6 @@ struct SessionView: View {
                     }
                 }
             }
-            print("AFTER")
         }
         self.isPlaying.toggle()
     }

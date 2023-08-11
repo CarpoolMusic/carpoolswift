@@ -9,11 +9,12 @@ import SwiftUI
 import MusicKit
 import Combine
 
-class AppleMusicService: MusicService, ObservableObject {
+class AppleMusicService: MusicServiceProtocol, ObservableObject {
     
     private var cancellable: AnyCancellable?
     
     // MARK: - Properties
+    
     
     /// Opens a URL using the appropriate system service.
     @Environment(\.openURL) private var openURL
@@ -60,6 +61,20 @@ class AppleMusicService: MusicService, ObservableObject {
         }
     }
     
+    // MARK: - Playback
+    
+    /// The state of the MusicKit player to use for Apple Music playback.
+    private var playerState = ApplicationMusicPlayer.shared.state
+    
+    /// `true` when the album detail view sets a playback queue on the player.
+    private var isPlaybackQueueSet = false
+    
+    /// `true` when the player is playing.
+    private var isPlaying: Bool {
+        return (playerState.playbackStatus == .playing)
+    }
+    
+    /// The action to perform when the user taps the Play/Pause button.
     func startPlayback(song: CustomSong) async {
         do {
             let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
@@ -67,8 +82,9 @@ class AppleMusicService: MusicService, ObservableObject {
             guard let song = songs.items.first else {
                 throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
             }
-            
-            try await player.queue.insert(song, position: .afterCurrentEntry)
+            player.queue = [song]
+            try await player.prepareToPlay()
+            isPlaybackQueueSet = true
             try await player.play()
             print("Playing the song")
         } catch {
@@ -85,19 +101,23 @@ class AppleMusicService: MusicService, ObservableObject {
         
     }
     
-    func skipToNextSong() async {
-        do {
-            try await player.skipToNextEntry()
-        } catch {
-            print("Failed to skip to next song \(error)")
+    func skipToNextSong() {
+        Task {
+            do {
+                try await player.skipToNextEntry()
+            } catch {
+                print("Failed to skip to next song \(error)")
+            }
         }
     }
     
-    func skipToPrevSong() async {
-        do {
-            try await player.skipToPreviousEntry()
-        } catch {
-            print("Failed to skip to previous song \(error)")
+    func skipToPrevSong() {
+        Task {
+            do {
+                try await player.skipToPreviousEntry()
+            } catch {
+                print("Failed to skip to previous song \(error)")
+            }
         }
     }
     

@@ -19,7 +19,15 @@ enum SpotifyServiceError: Error {
     case missingAccessToken
 }
 
-class SpotifyMusicService: MusicService, ObservableObject {
+class SpotifyMusicService: MusicServiceProtocol, ObservableObject {
+    func skipToNextSong() {
+        // Do nothing
+    }
+    
+    func skipToPrevSong() {
+        // Do nothing
+    }
+    
     
     // MARK: - Properties
     
@@ -96,7 +104,9 @@ class SpotifyMusicService: MusicService, ObservableObject {
     func setupNotificationObservers() {
         // Re-connect when the user re-opens the application
         NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            if let _ = self?.appRemote.connectionParameters.accessToken {
+            print("Active again")
+            if let _ = self?.retrieveAccessTokenFromKeychain() {
+                print("RECOONNECTING")
                 self?.appRemote.connect()
             }
         }
@@ -198,22 +208,27 @@ class SpotifyMusicService: MusicService, ObservableObject {
     // MARK: - Playback
     
     func startPlayback(song: CustomSong) {
-        // Implement Spotify's playback here
+        print("Starting the playback")
+        // Ensure app remote is connected
+        guard appRemote.isConnected else {
+            print("error in startPlayback, appRemote is not conncted")
+            return
+        }
+        print("Playing")
         
         // Wake up the Spotfy app
         appRemote.authorizeAndPlayURI("")
-        
-        // Check if connected
-        guard appRemote.isConnected else {
-            print("Error in startPlayback, appRemote is not connected")
-            return
-        }
-        
+        // Play the song
         appRemote.playerAPI?.play("spotify:track:\(song.id)")
     }
     
     func resumePlayback() {
-        // Do nothign
+        print("RESUMING THE PLAYBACKA")
+        guard appRemote.isConnected else {
+            print("error in resumeplayback, appRemote is not connected")
+            return
+        }
+        appRemote.playerAPI?.resume()
     }
     
     func pausePlayback() {
@@ -225,6 +240,30 @@ class SpotifyMusicService: MusicService, ObservableObject {
         
         appRemote.playerAPI?.pause()
     }
+    
+    func skipToNext() {
+        appRemote.playerAPI?.skip(toNext: {
+            result, error in
+            if let error = error {
+                print("Error: Cannot skip to next song \(error)")
+            } else {
+                // Handle succ
+            }
+        })
+    }
+    
+    func skipToPrevious()  {
+        appRemote.playerAPI?.skip(toPrevious: {
+            result, error in
+            if let error = error {
+                print("Error: Cannot skip to next song \(error)")
+            } else {
+                // Handle succ
+            }
+        })
+        
+    }
+    
     
     // MARK: - Searching
     

@@ -10,10 +10,10 @@ import Combine
 import MusicKit
 
 enum MusicServiceType: String {
-    case apple, spotify
+    case apple, spotify, unselected
 }
 
-protocol MusicService: AnyObject {
+protocol MusicServiceProtocol: AnyObject {
     
     var searchTerm: String { get set }
     
@@ -23,8 +23,8 @@ protocol MusicService: AnyObject {
     func startPlayback(song: CustomSong) async
     func resumePlayback() async
     func pausePlayback()
-    func skipToNextSong() async
-    func skipToPrevSong() async
+    func skipToNextSong()
+    func skipToPrevSong()
     func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
     func requestUpdatedSearchResults(for searchTerm: String)
 }

@@ -26,7 +26,7 @@ struct AuthorizationView: View {
     @Binding var musicServiceType: MusicServiceType?
     
     /// The generic music service interface
-    var musicService: MusicService? {
+    var musicService: MusicServiceProtocol? {
         switch musicServiceType {
         case .apple:
             return appleMusicService
