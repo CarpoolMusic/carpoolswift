@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import KeychainSwift
 import Combine
 import MusicKit
 
@@ -35,9 +34,6 @@ class SpotifyMusicService: MusicServiceProtocol, ObservableObject {
     private var SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private var SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     private var accessToken: String?
-    
-    private let keychain = KeychainSwift(keyPrefix: "com.app.musicQueue")
-    private let accessTokenKey = "SpotifyAccessToken"
     
     private let appRemoteDelegate = SpotifyAppRemoteDelegate()
     private let sessionManagerDelegate = SpotifySessionManagerDelegate()
@@ -143,10 +139,15 @@ class SpotifyMusicService: MusicServiceProtocol, ObservableObject {
     // MARK: - Authorization methods
     
     func authorize() {
-        // Implement Spotify's authorization process here
         let requestedScopes: SPTScope = [.appRemoteControl]
-        //        self.appRemote.connectionParameters.accessToken = self.sessionManager.session?.accessToken
-        // This invokes the Auth Modal for the spotify login
+        /// This invokes the Auth Modal for the spotify login
+        self.sessionManager.initiateSession(with: requestedScopes, options: .default)
+    }
+    
+    func invokeAuthorizatioModal() {
+        /// Set requested scopes
+        let requestedScopes: SPTScope = [.appRemoteControl]
+        /// This invokes the authorization modal
         self.sessionManager.initiateSession(with: requestedScopes, options: .default)
     }
     
@@ -340,16 +341,5 @@ class SpotifyMusicService: MusicServiceProtocol, ObservableObject {
         }
         UIApplication.shared.open(url)
     }
-    
-    
-    // MARK: - Keychain methods
-    
-    private func saveAccessTokenToKeychain(_ token: String) {
-        keychain.set(token, forKey: accessTokenKey)
-    }
-    
-    private func retrieveAccessTokenFromKeychain() -> String? {
-        let token = keychain.get(accessTokenKey)
-        return token
-    }
+        
 }

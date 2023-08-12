@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		60551F282A87E419002AA8F9 /* MusicServiceAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F272A87E419002AA8F9 /* MusicServiceAuthorization.swift */; };
+		60551F2A2A87E505002AA8F9 /* SpotifyAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F292A87E505002AA8F9 /* SpotifyAuthorization.swift */; };
+		60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */; };
+		60551F2E2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2D2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift */; };
 		60A4ED9C2A86A44800FADC40 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A4ED9B2A86A44800FADC40 /* UserPreferences.swift */; };
 		60BA77632A55E2A400A5516B /* MusicQueueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77622A55E2A400A5516B /* MusicQueueApp.swift */; };
 		60BA77652A55E2A400A5516B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BA77642A55E2A400A5516B /* ContentView.swift */; };
@@ -65,6 +69,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		60551F272A87E419002AA8F9 /* MusicServiceAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicServiceAuthorization.swift; sourceTree = "<group>"; };
+		60551F292A87E505002AA8F9 /* SpotifyAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAuthorization.swift; sourceTree = "<group>"; };
+		60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifySessionManager.swift; sourceTree = "<group>"; };
+		60551F2D2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyAppRemoteManager.swift; sourceTree = "<group>"; };
 		60A4ED9B2A86A44800FADC40 /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		60BA775F2A55E2A400A5516B /* MusicQueue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicQueue.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60BA77622A55E2A400A5516B /* MusicQueueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicQueueApp.swift; sourceTree = "<group>"; };
@@ -235,6 +243,7 @@
 				60BA77BF2A62378600A5516B /* Spotify */,
 				60BA77AD2A5F284300A5516B /* MusicServiceProtocol.swift */,
 				60BA77D52A6389A900A5516B /* AnyMusicService.swift */,
+				60551F272A87E419002AA8F9 /* MusicServiceAuthorization.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -246,6 +255,9 @@
 				60BA77C02A6237AB00A5516B /* SpotifyAppRemoteDelegate.swift */,
 				60BA77C22A62392D00A5516B /* SpotifyPlayerStateDelegate.swift */,
 				60BA77C42A62398D00A5516B /* SPTSessionManagerDelegate.swift */,
+				60551F292A87E505002AA8F9 /* SpotifyAuthorization.swift */,
+				60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */,
+				60551F2D2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift */,
 			);
 			path = Spotify;
 			sourceTree = "<group>";
@@ -422,12 +434,15 @@
 				60BA77AE2A5F284300A5516B /* MusicServiceProtocol.swift in Sources */,
 				60BA77D62A6389A900A5516B /* AnyMusicService.swift in Sources */,
 				60BA77972A55F8FB00A5516B /* SessionManager.swift in Sources */,
+				60551F2A2A87E505002AA8F9 /* SpotifyAuthorization.swift in Sources */,
 				60BA77DB2A64463B00A5516B /* SocketService.swift in Sources */,
+				60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */,
 				60BA77C32A62392D00A5516B /* SpotifyPlayerStateDelegate.swift in Sources */,
 				60BA77902A55F2A800A5516B /* SessionCreationView.swift in Sources */,
 				60BA77AC2A5E65A600A5516B /* ChatView.swift in Sources */,
 				60BA77CD2A6300C600A5516B /* User.swift in Sources */,
 				60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */,
+				60551F282A87E419002AA8F9 /* MusicServiceAuthorization.swift in Sources */,
 				60BA77B02A5F286300A5516B /* AppleMusicService.swift in Sources */,
 				60BA77ED2A65A3BC00A5516B /* SongSearchViewModel.swift in Sources */,
 				60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */,
@@ -441,6 +456,7 @@
 				60BA77C12A6237AB00A5516B /* SpotifyAppRemoteDelegate.swift in Sources */,
 				60BA77652A55E2A400A5516B /* ContentView.swift in Sources */,
 				60BA778D2A55E39100A5516B /* AuthorizationView.swift in Sources */,
+				60551F2E2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift in Sources */,
 				60BA77B22A5F288500A5516B /* SpotifyMusicService.swift in Sources */,
 				60BA77C52A62398D00A5516B /* SPTSessionManagerDelegate.swift in Sources */,
 				60A4ED9C2A86A44800FADC40 /* UserPreferences.swift in Sources */,

@@ -20,24 +20,6 @@ struct AuthorizationView: View {
     @Environment(\.openURL) private var openURL
     
     
-    @ObservedObject var appleMusicService: AppleMusicService
-    @ObservedObject var spotifyMusicService: SpotifyMusicService
-    
-    @Binding var musicServiceType: MusicServiceType?
-    
-    /// The generic music service interface
-    var musicService: MusicServiceProtocol? {
-        switch musicServiceType {
-        case .apple:
-            return appleMusicService
-        case .spotify:
-            return spotifyMusicService
-        case .none:
-            return nil
-        }
-    }
-    
-    
     // MARK: - View
     
     /// A decleration of the UI that this view presents.
@@ -199,6 +181,14 @@ struct AuthorizationView: View {
                 }
         }
     }
+}
+
+class AuthorizationViewModel: ObservableObject {
+    
+    func handleAppleButtonPressed() {
+        
+    }
+    
 }
 
 // MARK: - Previews
