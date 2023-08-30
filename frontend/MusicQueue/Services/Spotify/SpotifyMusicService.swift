@@ -94,48 +94,6 @@ class SpotifyMusicService: MusicServiceProtocol, ObservableObject {
     }
     
     
-    // MARK: - Notification Methods
-    
-    // Notifications from Delegates or UIApplication
-    func setupNotificationObservers() {
-        // Re-connect when the user re-opens the application
-        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            print("Active again")
-            if let _ = self?.retrieveAccessTokenFromKeychain() {
-                print("RECOONNECTING")
-                self?.appRemote.connect()
-            }
-        }
-        
-        // Clean up if user is disconnecting
-        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            if self?.appRemote.isConnected == true {
-                self?.appRemote.disconnect()
-            }
-        }
-        
-        // Set Access Token and Connect when the user initiates a session
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionInitiated"), object: nil, queue: .main) { [weak self] notification in
-            if let token = notification.userInfo?["accessToken"] as? String {
-                self?.appRemote.connectionParameters.accessToken = token
-                self?.appRemote.connect()
-                // Save the token in the keychain for session persistence
-                self?.saveAccessTokenToKeychain(token)
-                // update the authorzations status of the user
-                // Note that we only confirm authorization once we have the token
-                self?.authorizationStatus = .authorized
-            }
-        }
-        
-        // Update the user token when session manager performs token swap
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("SpotifySessionRenewed"), object: nil, queue: .main) { [weak self] notification in
-            if let token = notification.userInfo?["accessToken"] as? String {
-                // Save the token in the keychain for session persistence
-                self?.saveAccessTokenToKeychain(token)
-            }
-        }
-    }
-    
     // MARK: - Authorization methods
     
     func authorize() {

@@ -8,7 +8,15 @@
 import MusicKit
 import Combine
 
-class AnyMusicService: MusicServiceProtocol, ObservableObject {
+class MusicServiceAuthenticationController: MusicServiceAuthenticationProtocol, ObservableObject {
+    var authorizationStatus: MusicServiceAuthStatus
+    
+    func initiateAuthorization() {
+        <#code#>
+    }
+}
+
+class AnyMusicService: ObservableObject {
     
     private let base: MusicServiceProtocol
     

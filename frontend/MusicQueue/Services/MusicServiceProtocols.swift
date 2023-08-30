@@ -13,20 +13,26 @@ enum MusicServiceType: String {
     case apple, spotify, unselected
 }
 
-protocol MusicServiceProtocol: AnyObject {
-    
-    var searchTerm: String { get set }
-    
+protocol MusicServiceAuthenticationProtocol: AnyObject {
+    /// determines whether the user is currently authenticated with the underlying music service
     var authorizationStatus: MusicServiceAuthStatus { get }
+    
+    /// authorizes the user with the underlying music service
     func authorize()
-    func fetchUser() async throws -> User
+}
+
+protocol MusicServicePlayback: AnyObject {
     func startPlayback(song: CustomSong) async
     func resumePlayback() async
     func pausePlayback()
     func skipToNextSong()
     func skipToPrevSong()
-    func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
+}
+
+protocol MusicServiceMediaController: AnyObject {
+    var searchTerm: String { get set }
     func requestUpdatedSearchResults(for searchTerm: String)
+    func fetchArtwork(for songID: String, completion: @escaping (Result<UIImage, Error>) -> Void)
 }
 
 enum MusicServiceError: Error {

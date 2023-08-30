@@ -27,166 +27,86 @@ struct AuthorizationView: View {
         ZStack {
             gradient
             VStack {
+                Spacer()
+                
+                AppTitleView(title: "Carpool", subtitle: "Some slogan")
                 
                 Spacer()
                 
-                Text("Carpool")
-                    .foregroundColor(.primary)
-                    .font(.largeTitle.weight(.semibold))
-                    .shadow(radius: 2)
-                    .padding(.bottom, 1)
-                Text("Some slogan")
-                    .foregroundColor(.primary)
-                    .font(.title2.weight(.medium))
-                    .multilineTextAlignment(.center)
-                    .shadow(radius: 1)
-                    .padding(.bottom, 16)
+                /// Apple music login button
+                LoginButtonView(action: handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
                 
-                Spacer()
-                
-                Button(action: handleAppleButtonPressed) {
-                       HStack {
-                           Text("Log in with Apple Music")
-                               .font(.headline)
-                           Image(systemName: "applelogo") // Replace this with your Apple Music logo
-                               .resizable()
-                               .aspectRatio(contentMode: .fit)
-                               .frame(height: 24)
-                       }
-                       .foregroundColor(.white)
-                       .padding([.leading, .trailing], 10)
-                       .frame(maxWidth: .infinity)
-                       .padding()
-                   }
-                   .background(Color(red: 211/255, green: 17/255, blue: 69/255))
-                   .cornerRadius(30)
-                   .padding([.leading, .trailing], 20)
-                   
-                   Button(action: handleSpotifyButtonPressed) {
-                       HStack {
-                           Text("Log in with Spotify")
-                               .font(.headline)
-                           Image(systemName: "appleLogo") // Replace this with your Spotify logo
-                               .resizable()
-                               .aspectRatio(contentMode: .fit)
-                               .frame(height: 24)
-                       }
-                       .foregroundColor(.white)
-                       .padding([.leading, .trailing], 10)
-                       .frame(maxWidth: .infinity)
-                       .padding()
-                   }
-                   .background(Color(red: 29/255, green: 185/255, blue: 84/255))
-                   .cornerRadius(30)
-                   .padding([.leading, .trailing], 20)
-                   .padding([.bottom], 40)
+                LoginButtonView(action: handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
             }
-            .colorScheme(.dark)
         }
     }
     
-    /// Constructs a gradient to use as the view background.
-    private var gradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color(red: (130.0 / 255.0), green: (109.0 / 255.0), blue: (204.0 / 255.0)),
-                Color(red: (130.0 / 255.0), green: (130.0 / 255.0), blue: (211.0 / 255.0)),
-                Color(red: (131.0 / 255.0), green: (160.0 / 255.0), blue: (218.0 / 255.0))
-            ]),
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-        .flipsForRightToLeftLayoutDirection(false)
-        .ignoresSafeArea()
-    }
-    
-    /// A button that the user taps to continue using the app according to the current
-    /// authorization status.
-    private var buttonText: Text {
+    struct LoginButtonView: View {
+        let action: () -> Void
         let buttonText: Text
-        switch musicService?.authorizationStatus {
-            case .notDetermined:
-                buttonText = Text("Continue")
-            case .denied:
-                buttonText = Text("Open Settings")
-            default:
-            fatalError("No button should be displayed for current authorization status: \(musicService!.authorizationStatus).")
-        }
-        return buttonText
-    }
-    
-    /// Button that user taps to sign in with Apple Music.
-    private var appleButtonText: Text {
-        return Text("Sign in with Apple Music") + Text(Image(systemName: ""))
-    }
-    
-    /// BUtton that user taps to sign in with Spotify.
-    private var spotifyButtonText: Text {
-        return Text("Sign in with Spotify") + Text(Image(systemName: ""))
-    }
-
-    // MARK: - Methods
-    private func handleAppleButtonPressed() {
-        // Set the corresponding music service
-        musicServiceType = .apple
-        // Set the service type in UserDefaults
-        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
-        musicService?.authorize()
-    }
-    
-    private func handleSpotifyButtonPressed() {
-        // Set the corresponding music service
-        musicServiceType = .spotify
-        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
-        musicService?.authorize()
-    }
-    // MARK: - Presentation coordinator
-
-    /// A presentation coordinator to use in conjuction with `SheetPresentationModifier`.
-    class PresentationCoordinator: ObservableObject {
-        static let shared = PresentationCoordinator()
+        let buttonStyle: ButtonBackgroundStyle
+        let buttonImage: Image
         
-        private init() {
-            let authorizationStatus = MusicAuthorization.currentStatus
-            musicAuthorizationStatus = authorizationStatus
-            isWelcomeViewPresented = (authorizationStatus != .authorized)
-        }
-        
-        @Published var musicAuthorizationStatus: MusicAuthorization.Status {
-            didSet {
-                isWelcomeViewPresented = (musicAuthorizationStatus != .authorized)
-            }
-        }
-        
-        @Published var isWelcomeViewPresented: Bool
-    }
-
-    // MARK: - Sheet presentation modifier
-
-    /// A view modifier that changes the presentation and dismissal behavior of the welcome view.
-    fileprivate struct SheetPresentationModifier: ViewModifier {
-        @StateObject private var presentationCoordinator = PresentationCoordinator.shared
-        
-        // Create instances of AppleMusicService and SpotifyMusicService
-        @ObservedObject var appleMusicService = AppleMusicService()
-        @ObservedObject var spotifyMusicService = SpotifyMusicService()
-        
-        @Binding var musicServiceType: MusicServiceType?
-        
-        func body(content: Content) -> some View {
-            content
-                .sheet(isPresented: $presentationCoordinator.isWelcomeViewPresented) {
-                    AuthorizationView(appleMusicService: appleMusicService, spotifyMusicService: spotifyMusicService, musicServiceType: $musicServiceType)
-                        .interactiveDismissDisabled()
+        var body: some View {
+            Button(action: action) {
+                HStack {
+                    buttonText
+                    buttonImage
                 }
+            }
+            .buttonStyle(ButtonBackgroundStyle())
         }
     }
-}
+    
+    struct ButtonBackgroundStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .padding()
+                .background(configuration.isPressed ? Color.gray : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8.0)
+        }
+    }
+    
+    struct AppTitleView: View {
+        let title: String
+        let subtitle: String
+        
+        var body: some View {
+            Text(title)
+                .foregroundColor(.primary)
+                .font(.largeTitle.weight(.semibold))
+                .shadow(radius: 2)
+                .padding(.bottom, 1)
+            Text(subtitle)
+                .foregroundColor(.primary)
+                .font(.title2.weight(.medium))
+                .multilineTextAlignment(.center)
+                .shadow(radius: 1)
+                .padding(.bottom, 16)
+        }
+        
+    }
+    
+// MARK: - View Model
 
 class AuthorizationViewModel: ObservableObject {
     
-    func handleAppleButtonPressed() {
-        
+    var musicServiceType: MusicServiceType?
+    
+    private func handleAppleButtonPressed() {
+        /// Set the corresponding music service
+        musicServiceType = .apple
+        // Set the service type in UserDefaults
+        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
+//        musicService?.authorize()
+        /// authorize with apple
+    }
+    
+    private func handleSpotifyButtonPressed() {
+        /// Set the corresponding music service
+        musicServiceType = .spotify
+        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
     }
     
 }

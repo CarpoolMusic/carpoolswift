@@ -22,18 +22,27 @@ class SpotifyAppRemoteManager {
         return appRemote
     }()
     
-    
-    func extractAccessTokenFromURL(url: URL) throws -> String {
-        let parameters = self.appRemote.authorizationParameters(from: url);
-        
-        if let access_token = parameters?[SPTAppRemoteAccessTokenKey] {
-                appRemote.connectionParameters.accessToken = access_token
-                return access_token
-        } else {
-            let error_description = parameters?[SPTAppRemoteErrorDescriptionKey] ?? "No error description"
-            throw AppRemoteManagerError.missingAccessToken(error_description)
-        }
+    func connect(accessToken: String) {
+        setAccessToken(accessToken: accessToken)
+        self.appRemote.connect()
     }
+    
+    private func setAccessToken(accessToken: String) {
+        self.appRemote.connectionParameters.accessToken = accessToken
+    }
+    
+    
+//    func extractAccessTokenFromURL(url: URL) throws -> String {
+//        let parameters = self.appRemote.authorizationParameters(from: url);
+//
+//        if let access_token = parameters?[SPTAppRemoteAccessTokenKey] {
+//                appRemote.connectionParameters.accessToken = access_token
+//                return access_token
+//        } else {
+//            let error_description = parameters?[SPTAppRemoteErrorDescriptionKey] ?? "No error description"
+//            throw AppRemoteManagerError.missingAccessToken(error_description)
+//        }
+//    }
     
 }
 

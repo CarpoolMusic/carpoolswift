@@ -17,6 +17,7 @@ class SpotifyAppRemoteDelegate: NSObject, SPTAppRemoteDelegate {
                 debugPrint(error.localizedDescription)
             }
         })
+        print("Connection to app remote success")
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
