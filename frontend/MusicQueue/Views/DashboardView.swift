@@ -9,13 +9,7 @@ import SwiftUI
 
 struct DashboardView: View {
     
-    @ObservedObject var musicService: AnyMusicService
-    @ObservedObject var sessionManager: SessionManager
-    
-    @State private var sessionID: String = ""
-    @State private var showingAlert = false
-    @State private var isCreateSessionButtonPressed = false
-    @State private var isJoinSessionButtonPressed = false
+    @ObservedObject dashboardViewModel = DashboardViewModel()
     
     var body: some View {
         if sessionManager.activeSession != nil {
@@ -105,6 +99,19 @@ struct DashboardView: View {
     private func handleCreateSessionButtonPressed () {
         self.isCreateSessionButtonPressed = true
     }
+}
+
+// MARK: - View Model
+
+class DashboardViewModel: ObservedObject {
+    @ObservedObject var musicService: AnyMusicService
+    @ObservedObject var sessionManager: SessionManager
+    
+    @State private var sessionID: String = ""
+    @State private var showingAlert = false
+    @State private var isCreateSessionButtonPressed = false
+    @State private var isJoinSessionButtonPressed = false
+    
 }
 
 struct DashboardView_Previews: PreviewProvider {

@@ -19,13 +19,14 @@ struct AuthorizationView: View {
     /// Opens a URL using the appropriate system service.
     @Environment(\.openURL) private var openURL
     
+    @ObservedObject var authorizationViewModel = AuthorizationViewModel()
+    
     
     // MARK: - View
     
     /// A decleration of the UI that this view presents.
     var body: some View {
         ZStack {
-            gradient
             VStack {
                 Spacer()
                 
@@ -34,9 +35,10 @@ struct AuthorizationView: View {
                 Spacer()
                 
                 /// Apple music login button
-                LoginButtonView(action: handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                LoginButtonView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
                 
-                LoginButtonView(action: handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                /// Spotify login button
+                LoginButtonView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
             }
         }
     }
@@ -94,19 +96,30 @@ class AuthorizationViewModel: ObservableObject {
     
     var musicServiceType: MusicServiceType?
     
-    private func handleAppleButtonPressed() {
-        /// Set the corresponding music service
-        musicServiceType = .apple
-        // Set the service type in UserDefaults
-        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
-//        musicService?.authorize()
-        /// authorize with apple
+    func handleAppleButtonPressed() {
+        setMusicTypeInUserDefaults(type: .apple)
+        let appleMusicService = AppleMusicService()
+        appleMusicService.authorize()
     }
     
-    private func handleSpotifyButtonPressed() {
-        /// Set the corresponding music service
-        musicServiceType = .spotify
-        UserDefaults.standard.set(musicServiceType?.rawValue, forKey: "musicServiceType")
+    func handleSpotifyButtonPressed() {
+        setMusicTypeInUserDefaults(type: .spotify)
+        let appRemote = SpotifyAppRemoteManager()
+        let sessionManager = SpotifySessionManager(appRemote: appRemote)
+        let authenticationController = SpotifyAuthenticationController(sessionManager: sessionManager) { authenticated in
+            if (authenticated) {
+                // Successfully authenticated so move on to dashboard
+                DashboardView()
+            } else {
+                // Handle auth failure with message and new attempt
+            }
+        }
+        authenticationController.authenticate()
+        
+    }
+    
+    func setMusicTypeInUserDefaults(type: MusicServiceType) {
+        UserDefaults.standard.set(type.rawValue, forKey: "musicServiceType")
     }
     
 }

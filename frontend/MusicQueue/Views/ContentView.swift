@@ -20,7 +20,6 @@ struct ContentView: View {
                     .scaleEffect(1.5)
                     .background(Color.black.opacity(0.5).ignoresSafeArea())
             }
-            
         }
     }
 }
@@ -52,7 +51,7 @@ class ContentViewModel: ObservableObject {
         /// Attempt to authorize the user with their selected music service
         let musicService = getMusicServiceFromType(type: serviceType)
         musicService.authorize()
-        currentView = musicService.isAuthorized() ? DashboardView() : AuthorizationView()
+        currentView = musicService.isAuthorized() ? DashboardView(musicService) : AuthorizationView()
     }
     
     private func getMusicServiceFromType(type: MusicServiceType) -> AnyMusicService {

@@ -16,23 +16,26 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
     
     private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     
-    /// implicitly assigned by passing in
-    private let sessionManager: SpotifySessionManager
-    private let appRemote: SpotifyAppRemoteManager
+    let sessionManager: SpotifySessionManager
     
     var authorizationStatus: MusicServiceAuthStatus = .notDetermined
     
-    init(){}
+    var authenticated: ((Bool) -> Void)? // Closure to determine if the authentication callback was successful
+    
+    init(sessionManager: SpotifySessionManager, authenticated: ((Bool) -> Void)? = nil) {
+        self.sessionManager = sessionManager
+        self.authenticated = authenticated
+    }
     
     // MARK: - Public protocol methods
     
-    func authorize() {
+    func authenticate() {
         let requestedScopes: SPTScope = [.appRemoteControl]
-        initiateAuthorizationModal(requestedScopes: requestedScopes)
+        initiateAuthenticationModal(requestedScopes: requestedScopes)
     }
     // MARK: - Private methods
     
-    private func initiateAuthorizationModal(requestedScopes: SPTScope) {
+    private func initiateAuthenticationModal(requestedScopes: SPTScope) {
         /// Initiate the spotify authentication modal by making call to the session manager
         sessionManager.initiateSession(scope: requestedScopes)
     }
@@ -44,9 +47,12 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
                 /// save the access token for later use
                 self.saveAccessTokenToKeychain(accessToken)
                 self.authorizationStatus = .authorized
+                /// Notify the session manager that we are back from auth
+                sessionManager.notifyReturnFromAuth(url: url)
+                authenticated?(true)
+            } else {
+                authenticated?(false)
             }
-            /// Notify the session manager that we are back from auth
-            sessionManager.notifyReturnFromAuth(url: url)
         }
     }
     

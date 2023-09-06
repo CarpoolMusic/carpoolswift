@@ -18,7 +18,7 @@ protocol MusicServiceAuthenticationProtocol: AnyObject {
     var authorizationStatus: MusicServiceAuthStatus { get }
     
     /// authorizes the user with the underlying music service
-    func authorize()
+    func authenticate()
 }
 
 protocol MusicServicePlayback: AnyObject {
