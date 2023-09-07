@@ -12,52 +12,39 @@ struct ContentView: View {
     @ObservedObject var contentViewModel = ContentViewModel()
     
     var body: some View {
-        ZStack {
-            contentViewModel.currentView
-            if contentViewModel.isAuthorizing {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                    .scaleEffect(1.5)
-                    .background(Color.black.opacity(0.5).ignoresSafeArea())
-            }
+        if contentViewModel.isAuthenticated {
+            DashboardView()
         }
+        AuthorizationView()
     }
 }
 
 class ContentViewModel: ObservableObject {
     
-    @Published var currentView: AnyView
+    @Published var isAuthenticated = false
     
-    /// `true` if we are currently trying to authorize the user
-    @Published var isAuthorizing = false
     
     init() {
         let userPreferences: UserPreferences
         let selectedMusicServiceType = userPreferences.selectedMusicServiceType
-        
-        /// If the user has not selected a music service yet, send them to auth page
-        /// Otherwise attempt to authorize them
-        if selectedMusicServiceType == .unselected {
-            currentView = AnyView(AuthorizationView())
-        } else {
-            authorizeWithSelectedService(serviceType: selectedMusicServiceType)
-        }
-    }
-    
-    private func authorizeWithSelectedService(serviceType: MusicServiceType) {
-        /// Notify the view that we are currently trying to authorize
-        self.isAuthorizing = true
-        
-        /// Attempt to authorize the user with their selected music service
-        let musicService = getMusicServiceFromType(type: serviceType)
-        musicService.authorize()
-        currentView = musicService.isAuthorized() ? DashboardView(musicService) : AuthorizationView()
+        let musicService = getMusicServiceFromType(type: selectedMusicServiceType)
+        self.isAuthenticated = musicService.isAuthorized()
     }
     
     private func getMusicServiceFromType(type: MusicServiceType) -> AnyMusicService {
-        return userPreferences.selectedMusicServiceType == .apple ? AnyMusicService(AppleMusicService()) : AnyMusicService(SpotifyMusicService())
-        
+        return type == .apple ? AnyMusicService(AppleMusicService()) : AnyMusicService(SpotifyMusicService())
     }
+    
+//    private func authorizeWithSelectedService(serviceType: MusicServiceType) {
+//        /// Notify the view that we are currently trying to authorize
+//        self.isAuthorizing = true
+//
+//        /// Attempt to authorize the user with their selected music service
+//        let musicService = getMusicServiceFromType(type: serviceType)
+//        musicService.authorize()
+//        currentView = musicService.isAuthorized() ? DashboardView(musicService) : AuthorizationView()
+//    }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {

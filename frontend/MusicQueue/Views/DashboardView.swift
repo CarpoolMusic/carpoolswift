@@ -9,86 +9,47 @@ import SwiftUI
 
 struct DashboardView: View {
     
-    @ObservedObject dashboardViewModel = DashboardViewModel()
+    @ObservedObject var dashboardViewModel = DashboardViewModel()
     
     var body: some View {
+        let sessionManager = dashboardViewModel.sessionManager
         if sessionManager.activeSession != nil {
-            SessionView(sessionManager: sessionManager, musicService: musicService)
+            SessionView(sessionManager: sessionManager)
         } else {
             NavigationStack {
                 VStack {
-                    Text("Join a music session or create a new one.")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                        .padding()
+                    TitleView("Join a music session or create a new one.")
                     
-                    TextField("Enter Session ID", text: $sessionID)
+                    TextFieldView("Enter a Session ID", )
+                    TextField("Enter Session ID", text: $dashboardViewModel.sessionID)
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
                         .padding(.horizontal)
                     
-                    Button(action: {
-                        // Action to join session
-                        handleJoinSessionButtonPressed()
-                    }) {
-                        Text("Join Session")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
-                    .alert(isPresented: $showingAlert) {
-                        Alert(title: Text("Missing Session ID"), message: Text("Please enter a sessioID to join a session."), dismissButton: .default(Text("OK")))
-                    }
-                    .onReceive(sessionManager.$connected) { isConnected in
-                        if self.isJoinSessionButtonPressed {
-                            self.sessionManager.joinSession(sessionID: sessionID)
-                            self.isJoinSessionButtonPressed = false
-                        }
-                    }
+                    ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed(), buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
                     
                     Spacer()
                     
-                    Button(action: {
-                        // Action to create session
-                        handleCreateSessionButtonPressed()
-                    }) {
-                        Text("Create Session")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.green)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
+                    ButtonView(action: dashboardViewModel.handleCreateSessionButtonPressed(), buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
                 }
-                .onAppear(perform: loadUser)
-                .navigationDestination(isPresented: $isCreateSessionButtonPressed) {
-                    SessionCreationView(sessionManager: sessionManager)
-                }
-                .navigationTitle("Dashboard")
-            }
-        }
-        
-    }
-    
-    private func loadUser() {
-        Task {
-            do {
-                let user = try await musicService.fetchUser()
-                // handle user
-            } catch {
-                // handle error
             }
         }
     }
     
-    private func handleJoinSessionButtonPressed () {
+    
+}
+
+// MARK: - View Model
+
+class DashboardViewModel: ObservableObject {
+    
+    @State private var sessionID: String = ""
+    @State private var showingAlert = false
+    @State private var isCreateSessionButtonPressed = false
+    @State private var isJoinSessionButtonPressed = false
+    
+    func handleJoinSessionButtonPressed () {
         if sessionID.isEmpty {
             showingAlert = true
         } else {
@@ -96,21 +57,9 @@ struct DashboardView: View {
         }
     }
     
-    private func handleCreateSessionButtonPressed () {
+    func handleCreateSessionButtonPressed () {
         self.isCreateSessionButtonPressed = true
     }
-}
-
-// MARK: - View Model
-
-class DashboardViewModel: ObservedObject {
-    @ObservedObject var musicService: AnyMusicService
-    @ObservedObject var sessionManager: SessionManager
-    
-    @State private var sessionID: String = ""
-    @State private var showingAlert = false
-    @State private var isCreateSessionButtonPressed = false
-    @State private var isJoinSessionButtonPressed = false
     
 }
 
@@ -120,6 +69,6 @@ struct DashboardView_Previews: PreviewProvider {
     static var mockSessionManager = SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: "")))
     
     static var previews: some View {
-        DashboardView(musicService: AnyMusicService(mockMusicService), sessionManager: mockSessionManager)
+        DashboardView()
     }
 }
