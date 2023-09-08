@@ -38,11 +38,11 @@ struct TitleView: View {
 }
 
 struct TextFieldView: View {
-    let defaultText: String
-    let text: Binding<String>
+    let displayText: String
+    let inputText: Binding<String>
     
     var body: some View {
-        TextField(defaultText, text: text)
+        TextField(displayText, text: inputText)
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(10)

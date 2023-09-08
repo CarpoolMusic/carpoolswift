@@ -12,42 +12,51 @@ struct DashboardView: View {
     @ObservedObject var dashboardViewModel = DashboardViewModel()
     
     var body: some View {
-        let sessionManager = dashboardViewModel.sessionManager
-        if sessionManager.activeSession != nil {
-            SessionView(sessionManager: sessionManager)
-        } else {
-            NavigationStack {
-                VStack {
-                    TitleView("Join a music session or create a new one.")
-                    
-                    TextFieldView("Enter a Session ID", )
-                    TextField("Enter Session ID", text: $dashboardViewModel.sessionID)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                    
-                    ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed(), buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
-                    
-                    Spacer()
-                    
-                    ButtonView(action: dashboardViewModel.handleCreateSessionButtonPressed(), buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
-                }
+        NavigationStack {
+            VStack {
+                TitleView(title: "Join a music session or create a new one.")
+                
+                TextFieldView(displayText: "Enter a Session ID", inputText: dashboardViewModel.$sessionID)
+                TextField("Enter Session ID", text: $dashboardViewModel.sessionID)
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                
+                ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
+                
+                Spacer()
+                
+                ButtonView(action: dashboardViewModel.handleCreateSessionButtonPressed, buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
             }
         }
     }
-    
-    
 }
 
 // MARK: - View Model
 
 class DashboardViewModel: ObservableObject {
     
-    @State private var sessionID: String = ""
+    @State var sessionID: String = ""
     @State private var showingAlert = false
     @State private var isCreateSessionButtonPressed = false
     @State private var isJoinSessionButtonPressed = false
+    
+    // Determines whether or not the appRemote is connected
+    // gray out buttons if not connected and make them active otherwise
+    @State var connectionStatus: ConnectionStatus
+    
+    let appRemote: SpotifyAppRemoteManager
+    let sessionManager: SessionManager
+    let tempAccessToken = ""
+    
+    init() {
+        self.appRemote = SpotifyAppRemoteManager()
+        appRemote.connect(accessToken: tempAccessToken)
+        // monitor the connection status
+        connectionStatus = appRemote.connectionStatus
+    }
+    
     
     func handleJoinSessionButtonPressed () {
         if sessionID.isEmpty {

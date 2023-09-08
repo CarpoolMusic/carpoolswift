@@ -5,11 +5,11 @@
 //  Created by Nolan Biscaro on 2023-08-12.
 //
 
-class SpotifySessionManager {
+class SpotifySessionManager: NSObject {
     
     private let sessionManagerDelegate: SPTSessionManagerDelegate
     private let configuration: SPTConfiguration
-    private let appRemote: SpotifyAppRemoteManager
+    internal let appRemote: SpotifyAppRemoteManager
 
     /// Session manager used to handle authenticated sessions
     private lazy var sessionManager: SPTSessionManager = {
@@ -25,7 +25,7 @@ class SpotifySessionManager {
 
     init(appRemote: SpotifyAppRemoteManager) {
         self.appRemote = appRemote
-        self.sessionManagerDelegate = SpotifySessionManagerDelegate(appRemote: appRemote)
+        self.sessionManagerDelegate = self
     }
     
     func initiateSession(scope: SPTScope) {

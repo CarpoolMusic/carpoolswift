@@ -5,7 +5,8 @@
 //  Created by Nolan Biscaro on 2023-09-06.
 //
 import SwiftUI
-struct ButtonView: View {
+
+struct ButtonImageView: View {
         let action: () -> Void
         let buttonText: Text
         let buttonStyle: ButtonBackgroundStyle
@@ -16,6 +17,21 @@ struct ButtonView: View {
                 HStack {
                     buttonText
                     buttonImage
+                }
+            }
+            .buttonStyle(ButtonBackgroundStyle())
+        }
+    }
+
+struct ButtonView: View {
+        let action: () -> Void
+        let buttonText: Text
+        let buttonStyle: ButtonBackgroundStyle
+        
+        var body: some View {
+            Button(action: action) {
+                HStack {
+                    buttonText
                 }
             }
             .buttonStyle(ButtonBackgroundStyle())

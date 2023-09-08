@@ -5,11 +5,19 @@
 //  Created by Nolan Biscaro on 2023-08-12.
 //
 
-class SpotifyAppRemoteManager {
+enum ConnectionStatus {
+    case success
+    case failure(String)
+    case undetermined
+}
+
+class SpotifyAppRemoteManager: NSObject {
     
     private let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
-    private let appRemoteDelegate = SpotifyAppRemoteDelegate()
+    
+    // Determines whether or not appRemote is connected
+    @Published var connectionStatus : ConnectionStatus = .undetermined
     
     lazy var configuration = SPTConfiguration(
         clientID: SpotifyClientID,
@@ -18,12 +26,15 @@ class SpotifyAppRemoteManager {
     
     lazy var appRemote: SPTAppRemote = {
         let appRemote = SPTAppRemote(configuration: configuration, logLevel: .debug)
-        appRemote.delegate = appRemoteDelegate
+        appRemote.delegate = self
         return appRemote
     }()
     
     func connect(accessToken: String) {
         setAccessToken(accessToken: accessToken)
+        // wake up the spotify app before trying to connect
+        self.appRemote.authorizeAndPlayURI("")
+        // connection handled in delegate
         self.appRemote.connect()
     }
     

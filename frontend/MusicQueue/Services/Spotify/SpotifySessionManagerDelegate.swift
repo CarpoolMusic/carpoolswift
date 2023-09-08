@@ -5,13 +5,7 @@
 //  Created by Nolan Biscaro on 2023-07-14.
 //
 
-class SpotifySessionManagerDelegate: NSObject, SPTSessionManagerDelegate {
-    
-    private var appRemote: SpotifyAppRemoteManager
-    
-    init(appRemote: SpotifyAppRemoteManager) {
-        self.appRemote = appRemote
-    }
+extension SpotifySessionManager: SPTSessionManagerDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         /// create new session connection

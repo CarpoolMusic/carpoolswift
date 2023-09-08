@@ -38,13 +38,14 @@ struct AuthorizationView: View {
                 Spacer()
                 
                 /// Apple music login button
-                ButtonView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                ButtonImageView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
                 
                 /// Spotify login button
-                ButtonView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                ButtonImageView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
             }
         }
     }
+    
     // MARK: - View Model
     
     class AuthorizationViewModel: ObservableObject {
@@ -75,6 +76,7 @@ struct AuthorizationView: View {
                     // Handle auth failure with message and new attempt
                 }
             }
+            // called here and callback above will set authenticated to true when complete
             authenticationController.authenticate()
             
         }

@@ -5,32 +5,28 @@
 //  Created by Nolan Biscaro on 2023-07-14.
 //
 
-class SpotifyAppRemoteDelegate: NSObject, SPTAppRemoteDelegate {
-    
-    private let playerStateDelegate = SpotifyPlayerStateDelegate()
+extension SpotifyAppRemoteManager: SPTAppRemoteDelegate {
     
     func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
         // Connection was successful, you can begin issuing commands
-        appRemote.playerAPI?.delegate = playerStateDelegate
-        appRemote.playerAPI?.subscribe(toPlayerState: { (result, error) in
-            if let error = error {
-                debugPrint(error.localizedDescription)
-            }
-        })
-        print("Connection to app remote success")
+        self.connectionStatus = .success
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
-        print("Disconnected from Spotify")
+        let errMsg = "Disconneted From Spotify"
+        print(errMsg)
             if let error = error {
                 print("Error: \(error)")
             }
+        connectionStatus = .failure(errMsg)
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
+        let errMsg = "Disconnected from Spotify"
         print("Disconnected from Spotify")
         if let error = error {
             print("Error: \(error)")
         }
-    }    
+        connectionStatus = .failure(errMsg)
+    }
 }
