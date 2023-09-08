@@ -5,6 +5,15 @@
 //  Created by Nolan Biscaro on 2023-07-16.
 //
 
+protocol SocketServiceProtocol: AnyObject {
+    var delegate: SocketServiceDelegate? { get set }
+    
+    func connect()
+    func disconnect()
+    func emit(event: String, with items: [String: Any])
+    func getSocketId() -> String
+}
+
 enum SocketEvent {
     case connected
     case disconnected
@@ -31,12 +40,4 @@ protocol SocketServiceDelegate: AnyObject {
     func socketDidReceiveEvent(event: String, with items: [Any])
 }
 
-protocol SocketServiceProtocol: AnyObject {
-    var delegate: SocketServiceDelegate? { get set }
-    
-    func connect()
-    func disconnect()
-    func emit(event: String, with items: [String: Any])
-    func getSocketId() -> String
-}
 

@@ -7,7 +7,8 @@
 
 import SocketIO
 
-class SocketService: SocketServiceProtocol {
+/// Responsible for all the low level socket communication with the server
+class SocketConnectionHandler: SocketServiceProtocol {
     
     weak var delegate: SocketServiceDelegate?
     
@@ -15,7 +16,6 @@ class SocketService: SocketServiceProtocol {
     private let socket: SocketIOClient
     
     init(url: URL) {
-        print("URL", url)
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
         self.socket = self.manager.defaultSocket
         self.setupHandlers()
