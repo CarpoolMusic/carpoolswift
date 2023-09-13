@@ -26,14 +26,6 @@ enum SocketEvent {
     case error(String)
 }
 
-enum SocketError: Error {
-    case invalidData
-    case connectionFailed
-    case genericError(String)
-    case permissionsError(String)
-    // other error cases
-}
-
 protocol SocketServiceDelegate: AnyObject {
     func socketDidConnect()
     func socketDidDisconnect(with error: Error?)

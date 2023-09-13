@@ -5,8 +5,6 @@ struct SessionView: View {
     
     // MARK: - Properties
     
-    @ObservedObject var sessionManager: SessionManager
-    @ObservedObject var musicService: AnyMusicService
     
     @State private var isPlaying = false
     
@@ -175,6 +173,10 @@ struct SessionView: View {
     }
     
     // MARK: - Handlers
+    
+}
+
+class SessionViewModel: ObservableObject {
     
 }
 

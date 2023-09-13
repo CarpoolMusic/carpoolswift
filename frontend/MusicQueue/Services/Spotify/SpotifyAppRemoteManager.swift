@@ -4,13 +4,6 @@
 //
 //  Created by Nolan Biscaro on 2023-08-12.
 //
-
-enum ConnectionStatus {
-    case success
-    case failure(String)
-    case undetermined
-}
-
 class SpotifyAppRemoteManager: NSObject {
     
     private let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"

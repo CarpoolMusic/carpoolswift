@@ -15,6 +15,8 @@ class SocketConnectionHandler: SocketServiceProtocol {
     private let manager: SocketManager
     private let socket: SocketIOClient
     
+    var connected = false
+    
     init(url: URL) {
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
         self.socket = self.manager.defaultSocket

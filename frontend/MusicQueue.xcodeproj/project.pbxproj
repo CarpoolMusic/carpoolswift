@@ -14,6 +14,8 @@
 		607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04972AAAAD95004DB82F /* SocketEventSender.swift */; };
 		607B049A2AAAAFA2004DB82F /* SessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04992AAAAFA2004DB82F /* SessionHandler.swift */; };
 		607B049C2AAAB731004DB82F /* SocketEventReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */; };
+		607B049E2AB12AB3004DB82F /* SocketError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B049D2AB12AB3004DB82F /* SocketError.swift */; };
+		607B04A02AB14F19004DB82F /* ConnectionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B049F2AB14F19004DB82F /* ConnectionStatus.swift */; };
 		609D8FC22A9D60A4005C237E /* SpotifyNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609D8FC12A9D60A4005C237E /* SpotifyNotificationManager.swift */; };
 		609D8FC42AA95B7F005C237E /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609D8FC32AA95B7F005C237E /* Buttons.swift */; };
 		609D8FC62AA95E47005C237E /* Titles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609D8FC52AA95E47005C237E /* Titles.swift */; };
@@ -82,6 +84,8 @@
 		607B04972AAAAD95004DB82F /* SocketEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventSender.swift; sourceTree = "<group>"; };
 		607B04992AAAAFA2004DB82F /* SessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHandler.swift; sourceTree = "<group>"; };
 		607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventReceiver.swift; sourceTree = "<group>"; };
+		607B049D2AB12AB3004DB82F /* SocketError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketError.swift; sourceTree = "<group>"; };
+		607B049F2AB14F19004DB82F /* ConnectionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStatus.swift; sourceTree = "<group>"; };
 		609D8FC12A9D60A4005C237E /* SpotifyNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyNotificationManager.swift; sourceTree = "<group>"; };
 		609D8FC32AA95B7F005C237E /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		609D8FC52AA95E47005C237E /* Titles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Titles.swift; sourceTree = "<group>"; };
@@ -245,6 +249,7 @@
 				60A4ED9B2A86A44800FADC40 /* UserPreferences.swift */,
 				609D8FC32AA95B7F005C237E /* Buttons.swift */,
 				609D8FC52AA95E47005C237E /* Titles.swift */,
+				607B049F2AB14F19004DB82F /* ConnectionStatus.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -303,6 +308,7 @@
 				607B04972AAAAD95004DB82F /* SocketEventSender.swift */,
 				607B04992AAAAFA2004DB82F /* SessionHandler.swift */,
 				607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */,
+				607B049D2AB12AB3004DB82F /* SocketError.swift */,
 			);
 			path = Session;
 			sourceTree = "<group>";
@@ -477,11 +483,13 @@
 				60BA77C12A6237AB00A5516B /* SpotifyAppRemoteDelegate.swift in Sources */,
 				60BA77652A55E2A400A5516B /* ContentView.swift in Sources */,
 				607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */,
+				607B049E2AB12AB3004DB82F /* SocketError.swift in Sources */,
 				60BA778D2A55E39100A5516B /* AuthorizationView.swift in Sources */,
 				609D8FC62AA95E47005C237E /* Titles.swift in Sources */,
 				609D8FC42AA95B7F005C237E /* Buttons.swift in Sources */,
 				60551F2E2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift in Sources */,
 				60BA77B22A5F288500A5516B /* SpotifyMusicService.swift in Sources */,
+				607B04A02AB14F19004DB82F /* ConnectionStatus.swift in Sources */,
 				60BA77C52A62398D00A5516B /* SpotifySessionManagerDelegate.swift in Sources */,
 				60A4ED9C2A86A44800FADC40 /* UserPreferences.swift in Sources */,
 				60BA77D22A632F4500A5516B /* DashboardView.swift in Sources */,

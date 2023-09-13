@@ -23,7 +23,13 @@ struct DashboardView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                 
+                    .navigationDestination(
+                        isPresented: $dashboardViewModel.sessionJoined) {
+                            SessionView()
+                        }
+
                 ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
+
                 
                 Spacer()
                 
@@ -39,35 +45,36 @@ class DashboardViewModel: ObservableObject {
     
     @State var sessionID: String = ""
     @State private var showingAlert = false
-    @State private var isCreateSessionButtonPressed = false
-    @State private var isJoinSessionButtonPressed = false
     
     // Determines whether or not the appRemote is connected
     // gray out buttons if not connected and make them active otherwise
-    @State var connectionStatus: ConnectionStatus
+    // We can use the same method with socketConnection
+    @State var appRemoteConnectionStatus: ConnectionStatus = .undetermined
+    @State var socketConnectionStatus: ConnectionStatus = .undetermined
     
-    let appRemote: SpotifyAppRemoteManager
-    let sessionManager: SessionManager
-    let tempAccessToken = ""
-    
-    init() {
-        self.appRemote = SpotifyAppRemoteManager()
-        appRemote.connect(accessToken: tempAccessToken)
-        // monitor the connection status
-        connectionStatus = appRemote.connectionStatus
-    }
+    @Published var socketConnection: SocketConnectionHandler?
     
     
-    func handleJoinSessionButtonPressed () {
-        if sessionID.isEmpty {
+    // notifies the view when to move to sessionView
+    @Published var sessionJoined: Bool = false
+    
+    func handleJoinSessionButtonPressed() {
+        guard !sessionID.isEmpty else {
             showingAlert = true
-        } else {
-            sessionManager.joinSession(sessionID: sessionID)
+            return
+        }
+        if let socketUrl = URL(string: "http://localhost:8080") {
+            // Note: we need to handle some sort of sync here to lock-step
+            socketConnection = SocketConnectionHandler(url: socketUrl)
+            socketConnection!.connect()
+            
+            let socketEventSender = SocketEventSender(connection: socketConnection!)
+            socketEventSender.joinSession(sessionID: sessionID)
+            self.sessionJoined = true
         }
     }
     
     func handleCreateSessionButtonPressed () {
-        self.isCreateSessionButtonPressed = true
     }
     
 }

@@ -24,14 +24,6 @@ class SocketEventSender {
         self.connection = connection
     }
     
-    func connect() {
-        connection.connect()
-    }
-    
-    func disconnect() {
-        connection.disconnect()
-    }
-    
     func createSession() {
         let event = SocketSendEvent.createSession
         connection.emit(event: event.rawValue, with: [:])
