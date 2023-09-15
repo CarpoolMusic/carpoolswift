@@ -23,10 +23,6 @@ struct DashboardView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                 
-                    .navigationDestination(
-                        isPresented: $dashboardViewModel.inSession) {
-                            SessionView()
-                        }
 
                 ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
 
@@ -48,9 +44,11 @@ struct DashboardView: View {
 
 class DashboardViewModel: ObservableObject {
     
-    @Published private var sessionID: String
+    @Published var sessionId: String = ""
+    @Published var connected = false
+    @Published var sessionIsActive = false
         
-    var socketConnection: SocketConnectionHandler
+    var socketConnectionHandler: SocketConnectionHandler
     var socketEventSender: SocketEventSender
     var sessionManager: SessionManager
     
@@ -58,22 +56,39 @@ class DashboardViewModel: ObservableObject {
         guard let url = URL(string: "http://localhost:8080")
         else { return }
         
-        socketConnection = SocketConnectionHandler(url: url)
-        
-        // Connect to the server
-        socketEventSender = SocketEventSender(connection: socketConnection)
-        socketEventSender.connect()
+        // create connection and connect
+        socketConnectionHandler = SocketConnectionHandler(url: url)
+        socketConnectionHandler.connect()
         
         // new session to either create or join
-        self.sessionManager = SessionManager()
+        self.sessionManager = SessionManager(socketConnectionHandler: socketConnectionHandler)
+        
+        // subscribe session to socket events
+        let subscription = socketConnectionHandler.eventPublisher
+            .sink { event, items in
+                self.handleSubscriptionEvents(event: event, items: items)
+            }
+        
     }
     
     func handleJoinSessionButtonPressed() {
-        self.socketEventSender.joinSession(sessionID: sessionID)
+        self.sessionManager.joinSession(sessionId: sessionId)
     }
     
     func handleCreateSessionButtonPressed() {
-        
+        self.sessionManager.createSession()
+    }
+    
+    // MARK: - Subsctiption Events
+    func handleSubscriptionEvents(event: String, items: [Any]) {
+        switch event {
+        case "connected":
+            self.connected = true
+        case "sessionJoined":
+            self.sessionIsActive = true
+        default:
+            print("Unhandled event")
+        }
     }
     
 }
