@@ -16,15 +16,15 @@ struct DashboardView: View {
             VStack {
                 TitleView(title: "Join a music session or create a new one.")
                 
-                TextFieldView(displayText: "Enter a Session ID", inputText: dashboardViewModel.$sessionID)
-                TextField("Enter Session ID", text: $dashboardViewModel.sessionID)
+                TextFieldView(displayText: "Enter a Session ID", inputText: $dashboardViewModel.sessionId)
+                TextField("Enter Session ID", text: $dashboardViewModel.sessionId)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .padding(.horizontal)
                 
                     .navigationDestination(
-                        isPresented: $dashboardViewModel.sessionJoined) {
+                        isPresented: $dashboardViewModel.inSession) {
                             SessionView()
                         }
 
@@ -34,7 +34,12 @@ struct DashboardView: View {
                 Spacer()
                 
                 ButtonView(action: dashboardViewModel.handleCreateSessionButtonPressed, buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
+                
             }
+        }
+        .navigationDestination(
+        isPresented: $dashboardViewModel.sessionIsActive) {
+            SessionView()
         }
     }
 }
@@ -43,47 +48,37 @@ struct DashboardView: View {
 
 class DashboardViewModel: ObservableObject {
     
-    @State var sessionID: String = ""
-    @State private var showingAlert = false
+    @Published private var sessionID: String
+        
+    var socketConnection: SocketConnectionHandler
+    var socketEventSender: SocketEventSender
+    var sessionManager: SessionManager
     
-    // Determines whether or not the appRemote is connected
-    // gray out buttons if not connected and make them active otherwise
-    // We can use the same method with socketConnection
-    @State var appRemoteConnectionStatus: ConnectionStatus = .undetermined
-    @State var socketConnectionStatus: ConnectionStatus = .undetermined
-    
-    @Published var socketConnection: SocketConnectionHandler?
-    
-    
-    // notifies the view when to move to sessionView
-    @Published var sessionJoined: Bool = false
-    
-    func handleJoinSessionButtonPressed() {
-        guard !sessionID.isEmpty else {
-            showingAlert = true
-            return
-        }
-        if let socketUrl = URL(string: "http://localhost:8080") {
-            // Note: we need to handle some sort of sync here to lock-step
-            socketConnection = SocketConnectionHandler(url: socketUrl)
-            socketConnection!.connect()
-            
-            let socketEventSender = SocketEventSender(connection: socketConnection!)
-            socketEventSender.joinSession(sessionID: sessionID)
-            self.sessionJoined = true
-        }
+    init() {
+        guard let url = URL(string: "http://localhost:8080")
+        else { return }
+        
+        socketConnection = SocketConnectionHandler(url: url)
+        
+        // Connect to the server
+        socketEventSender = SocketEventSender(connection: socketConnection)
+        socketEventSender.connect()
+        
+        // new session to either create or join
+        self.sessionManager = SessionManager()
     }
     
-    func handleCreateSessionButtonPressed () {
+    func handleJoinSessionButtonPressed() {
+        self.socketEventSender.joinSession(sessionID: sessionID)
+    }
+    
+    func handleCreateSessionButtonPressed() {
+        
     }
     
 }
 
 struct DashboardView_Previews: PreviewProvider {
-    // Just choose a mock music service
-    static var mockMusicService = AppleMusicService()
-    static var mockSessionManager = SessionManager(socketService: SocketService(url: URL(string: "") ?? URL(fileURLWithPath: "")))
-    
     static var previews: some View {
         DashboardView()
     }

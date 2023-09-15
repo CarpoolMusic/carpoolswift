@@ -6,6 +6,7 @@
 //
 
 import SocketIO
+import Combine
 
 /// Responsible for all the low level socket communication with the server
 class SocketConnectionHandler: SocketServiceProtocol {
@@ -40,16 +41,23 @@ class SocketConnectionHandler: SocketServiceProtocol {
     }
     
     private func setupHandlers() {
-        self.socket.on(clientEvent: .connect) { [weak self] data, ack in
-            self?.delegate?.socketDidConnect()
-        }
-        
-        self.socket.on(clientEvent: .disconnect) { [weak self] data, ack in
-            self?.delegate?.socketDidDisconnect(with: nil)
-        }
+//        self.socket.on(clientEvent: .connect) { [weak self] data, ack in
+//            print("connected")
+//        }
+//
+//        self.socket.on(clientEvent: .disconnect) { [weak self] data, ack in
+//            print("disconnecetd")
+//        }
         
         self.socket.onAny { [weak self] event in
-            self?.delegate?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
+            self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
         }
+    }
+    
+    // MARK: - Subscription
+    var eventPublisher = PassthroughSubject<(String, [Any]), Never>()
+    
+    func socketDidReceiveEvent(event: String, with items: [Any]) {
+        eventPublisher.send((event, items))
     }
 }
