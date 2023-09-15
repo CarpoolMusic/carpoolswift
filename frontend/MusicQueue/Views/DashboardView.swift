@@ -24,11 +24,13 @@ struct DashboardView: View {
                     .padding(.horizontal)
                 
                     .navigationDestination(
-                        isPresented: $dashboardViewModel.sessionJoined) {
+                        isPresented: $dashboardViewModel.inSession) {
                             SessionView()
                         }
 
                 ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
+                    .disabled(!dashboardViewModel.connected)
+                    .opacity(dashboardViewModel.connected ? 1.0 : 0.5)
 
                 
                 Spacer()
@@ -43,40 +45,33 @@ struct DashboardView: View {
 
 class DashboardViewModel: ObservableObject {
     
-    @State var sessionID: String = ""
-    @State private var showingAlert = false
+    @Published private var sessionID: String
+        
+    var socketConnection: SocketConnectionHandler
+    var socketEventSender: SocketEventSender
+    var sessionManager: SessionManager
     
-    // Determines whether or not the appRemote is connected
-    // gray out buttons if not connected and make them active otherwise
-    // We can use the same method with socketConnection
-    @State var appRemoteConnectionStatus: ConnectionStatus = .undetermined
-    @State var socketConnectionStatus: ConnectionStatus = .undetermined
-    
-    @Published var socketConnection: SocketConnectionHandler?
-    
-    
-    // notifies the view when to move to sessionView
-    @Published var sessionJoined: Bool = false
+    init() {
+        guard let url = URL(string: "http://localhost:8080")
+        else { return }
+        
+        socketConnection = SocketConnectionHandler(url: url)
+        
+        // Connect to the server
+        socketEventSender = SocketEventSender(connection: socketConnection)
+        socketEventSender.connect()
+        
+        // new session to either create or join
+        self.sessionManager = SessionManager()
+    }
     
     func handleJoinSessionButtonPressed() {
-        guard !sessionID.isEmpty else {
-            showingAlert = true
-            return
-        }
-        if let socketUrl = URL(string: "http://localhost:8080") {
-            // Note: we need to handle some sort of sync here to lock-step
-            socketConnection = SocketConnectionHandler(url: socketUrl)
-            socketConnection!.connect()
-            
-            let socketEventSender = SocketEventSender(connection: socketConnection!)
-            socketEventSender.joinSession(sessionID: sessionID)
-            self.sessionJoined = true
-        }
+        self.socketEventSender.joinSession(sessionID: sessionID)
     }
     
-    func handleCreateSessionButtonPressed () {
+    func handleCreateSessionButtonPressed() {
+        
     }
-    
 }
 
 struct DashboardView_Previews: PreviewProvider {
