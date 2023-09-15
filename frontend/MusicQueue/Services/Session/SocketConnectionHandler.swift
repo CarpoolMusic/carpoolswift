@@ -9,14 +9,12 @@ import SocketIO
 import Combine
 
 /// Responsible for all the low level socket communication with the server
-class SocketConnectionHandler: SocketServiceProtocol {
+class SocketConnectionHandler {
     
-    weak var delegate: SocketServiceDelegate?
+    weak var delegate: SocketEventReceiver?
     
     private let manager: SocketManager
     private let socket: SocketIOClient
-    
-    var connected = false
     
     init(url: URL) {
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
@@ -24,16 +22,12 @@ class SocketConnectionHandler: SocketServiceProtocol {
         self.setupHandlers()
     }
     
-    func connect() {
-        self.socket.connect()
-    }
-    
-    func disconnect() {
-        self.socket.disconnect()
-    }
-    
     func emit(event: String, with items: [String: Any] = [:]) {
         socket.emit(event, items)
+    }
+    
+    func getConnectionStatus() -> SocketIOStatus {
+        return self.socket.status
     }
     
     func getSocketId() -> String {

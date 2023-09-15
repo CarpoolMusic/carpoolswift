@@ -25,6 +25,8 @@ struct DashboardView: View {
                 
 
                 ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
+                    .disabled(!dashboardViewModel.connected)
+                    .opacity(dashboardViewModel.connected ? 1.0 : 0.5)
 
                 
                 Spacer()
@@ -90,7 +92,6 @@ class DashboardViewModel: ObservableObject {
             print("Unhandled event")
         }
     }
-    
 }
 
 struct DashboardView_Previews: PreviewProvider {
