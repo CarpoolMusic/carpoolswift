@@ -51,15 +51,13 @@ class DashboardViewModel: ObservableObject {
     @Published var sessionIsActive = false
         
     var socketConnectionHandler: SocketConnectionHandler
-    var socketEventSender: SocketEventSender
     var sessionManager: SessionManager
     
     init() {
-        guard let url = URL(string: "http://localhost:8080")
-        else { return }
+        let url = URL(string: "http://localhost:8080")
         
         // create connection and connect
-        socketConnectionHandler = SocketConnectionHandler(url: url)
+        self.socketConnectionHandler = SocketConnectionHandler(url: url!)
         socketConnectionHandler.connect()
         
         // new session to either create or join

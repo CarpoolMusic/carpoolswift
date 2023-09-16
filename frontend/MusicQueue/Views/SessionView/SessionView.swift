@@ -5,15 +5,6 @@ struct SessionView: View {
     
     // MARK: - Properties
     
-    
-    @State private var isPlaying = false
-    
-    
-    /// Boolean value determining if the queue is being displayed
-    @State private var isQueueOpen = false
-    
-    let albumArtPlaceholder = Image(systemName: "photo")
-    
     // MARK: - View
     var body: some View {
         VStack {
@@ -81,60 +72,34 @@ struct SessionView: View {
         
         @State var uiImage: UIImage? = nil
         
-        // Get screen dimenesions
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
         
-        if let currentSong = self.sessionManager.currentSong {
-            Group {
-                if let uiImage = uiImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: screenWidth / 2, height: screenHeight / 2)
-                        .clipped()
-                } else {
-                    ProgressView() // or some placeholder content
-                }
-            }
-            .task {
-                do {
-                    let (data, _) = try await URLSession.shared.data(from: currentSong.artworkURL)
-                    uiImage = UIImage(data: data)
-                } catch {
-                    // handle error
-                    print("Failed to load image from \(String(describing: currentSong.artworkURL)): \(error)")
-                }
-            }
-        } else {
-            albumArtPlaceholder
-                .resizable()
-                .frame(width: screenWidth * 0.85, height: screenHeight * 0.3)
-                .clipped()
-        }
     }
     
     // MARK: - Audio control
     var audioControlSection: some View {
-        /// Boolean value determining whether user is host or not
-        @State var isUserHost = sessionManager.isHost()
-        
-        return HStack {
-            Button(action: {self.musicService.skipToPrevSong()}) {
-                Image(systemName: "backward.fill")
-            }
-            .disabled(!isUserHost)
-            Button(action: {handlePlayPauseButtonPressed()}) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-            }
-            .disabled(!isUserHost)
-            Button(action: {self.musicService.skipToNextSong()}) {
-                Image(systemName: "forward.fill")
-            }
-            .disabled(!isUserHost)
-        }
         
     }
+}
+
+class SessionViewModel: ObservableObject {
+    
+    @State private var isPlaying = false
+    @State private var isQueueOpen = false
+    
+    // MARK: - Loading songs
+    /// Loads songs asynchronously.
+    private func loadSongs() async throws {
+        // Code to load songs
+    }
+    
+    // MARK: - Playback
+    /// The action to perform when the user taps the Leave Session button.
+    private func handleLeaveSessionButtonSelected() {
+        // Implement session leave logic here
+    }
+    
+    // MARK: - Handlers
+    
     
     func handlePlayPauseButtonPressed() {
         // need to pause
@@ -157,26 +122,6 @@ struct SessionView: View {
         }
         self.isPlaying.toggle()
     }
-    
-    
-    
-    // MARK: - Loading songs
-    /// Loads songs asynchronously.
-    private func loadSongs() async throws {
-        // Code to load songs
-    }
-    
-    // MARK: - Playback
-    /// The action to perform when the user taps the Leave Session button.
-    private func handleLeaveSessionButtonSelected() {
-        // Implement session leave logic here
-    }
-    
-    // MARK: - Handlers
-    
-}
-
-class SessionViewModel: ObservableObject {
     
 }
 

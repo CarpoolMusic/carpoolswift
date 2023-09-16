@@ -22,6 +22,14 @@ class SocketConnectionHandler {
         self.setupHandlers()
     }
     
+    func connect() {
+        socket.connect()
+    }
+    
+    func disconnect() {
+        socket.disconnect()
+    }
+    
     func emit(event: String, with items: [String: Any] = [:]) {
         socket.emit(event, items)
     }
@@ -35,14 +43,6 @@ class SocketConnectionHandler {
     }
     
     private func setupHandlers() {
-//        self.socket.on(clientEvent: .connect) { [weak self] data, ack in
-//            print("connected")
-//        }
-//
-//        self.socket.on(clientEvent: .disconnect) { [weak self] data, ack in
-//            print("disconnecetd")
-//        }
-        
         self.socket.onAny { [weak self] event in
             self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
         }
