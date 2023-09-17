@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct DashboardView: View {
     
@@ -36,8 +37,8 @@ struct DashboardView: View {
             }
         }
         .navigationDestination(
-        isPresented: $dashboardViewModel.sessionIsActive) {
-            SessionView()
+            isPresented: $dashboardViewModel.sessionManager.isActive) {
+                SessionView(sessionManager: dashboardViewModel.sessionManager)
         }
     }
 }
@@ -47,8 +48,10 @@ struct DashboardView: View {
 class DashboardViewModel: ObservableObject {
     
     @Published var sessionId: String = ""
-    @Published var connected = false
-    @Published var sessionIsActive = false
+    @Published var connected: Bool
+    @Published var sessionIsActive: Binding<Bool>
+    
+    private var cancellable: AnyCancellable?
         
     var socketConnectionHandler: SocketConnectionHandler
     var sessionManager: SessionManager
@@ -63,11 +66,7 @@ class DashboardViewModel: ObservableObject {
         // new session to either create or join
         self.sessionManager = SessionManager(socketConnectionHandler: socketConnectionHandler)
         
-        // subscribe session to socket events
-        let subscription = socketConnectionHandler.eventPublisher
-            .sink { event, items in
-                self.handleSubscriptionEvents(event: event, items: items)
-            }
+        self.attachConnectionSubscriber()
         
     }
     
@@ -79,17 +78,13 @@ class DashboardViewModel: ObservableObject {
         self.sessionManager.createSession()
     }
     
-    // MARK: - Subsctiption Events
-    func handleSubscriptionEvents(event: String, items: [Any]) {
-        switch event {
-        case "connected":
-            self.connected = true
-        case "sessionJoined":
-            self.sessionIsActive = true
-        default:
-            print("Unhandled event")
-        }
+    func attachConnectionSubscriber() {
+        cancellable = socketConnectionHandler.$connected
+            .sink { status in
+                self.connected = status
+            }
     }
+    
 }
 
 struct DashboardView_Previews: PreviewProvider {

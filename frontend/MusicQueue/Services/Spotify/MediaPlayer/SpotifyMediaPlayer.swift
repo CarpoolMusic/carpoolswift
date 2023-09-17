@@ -6,15 +6,7 @@
 //
 import MusicKit
 
-class SpotifyMediaPlayer: MediaPlayerProtocol {
-    func enqueueSong(song: Song) async throws {
-        <#code#>
-    }
-    
-    func getPlayerState() -> PlayerState {
-        <#code#>
-    }
-    
+class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
     let appRemote: SPTAppRemote
     
     internal var playerState: SPTAppRemotePlayerState
@@ -61,6 +53,10 @@ class SpotifyMediaPlayer: MediaPlayerProtocol {
         self.appRemote.playerAPI?.resume()
     }
     
+    func togglePlayPause() async throws {
+        self.playerState.isPaused ? self.play() : self.pause()
+    }
+    
     func skipToNext() {
         self.appRemote.playerAPI?.skip(toNext: defaultCallback)
     }
@@ -69,12 +65,25 @@ class SpotifyMediaPlayer: MediaPlayerProtocol {
         self.appRemote.playerAPI?.skip(toPrevious: defaultCallback)
     }
     
-    func enqueueTrackUri(trackUri: String) {
-        self.appRemote.playerAPI?.enqueueTrackUri(trackUri)
-    }
-    
     func getPlayerState() -> SPTAppRemotePlayerState {
         return self.playerState
     }
     
+    func enqueueSong(song: Song) async throws {
+        let trackUri = song.id.rawValue
+        self.appRemote.playerAPI?.enqueueTrackUri(trackUri)
+    }
+    
+    func getPlayerState() -> PlayerState {
+        if self.playerState.isPaused {
+            return PlayerState.paused
+        }
+        else {
+            return PlayerState.playing
+        }
+    }
+    
+    func isPlaying() -> Bool {
+        return !self.playerState.isPaused
+    }
 }

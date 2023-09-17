@@ -5,12 +5,18 @@ import SwiftUI
 class SessionManager: ObservableObject {
     
     // MARK: - State
-    private var isActive: Bool = false
+    @Published var isActive: Bool = false
+    
     private var socketConnectionHandler: SocketConnectionHandler
     private var socketEventSender: SocketEventSender
+    private var _isHost: Bool
     
-    init(socketConnectionHandler: SocketConnectionHandler) {
-        self.socketConnectionHandler = socketConnectionHandler
+    // MARK: - Session data
+    private var sessionId: String
+    private var queue: Array<GenericSong> = []
+    
+    //MARK: - Session data
+    init(socketConnectionHandler: SocketConnectionHandler) { self.socketConnectionHandler = socketConnectionHandler
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
         
         // subscribe session to socket events
@@ -45,5 +51,17 @@ class SessionManager: ObservableObject {
     
     func joinSession(sessionId: String) {
         self.socketEventSender.joinSession(sessionID: sessionId)
+    }
+    
+    func leaveSession() {
+        self.socketEventSender.leaveSession(sessionID: self.sessionId)
+    }
+    
+    func isHost() -> Bool {
+        return self._isHost
+    }
+    
+    func getQueueItems() -> Array<GenericSong> {
+        return self.queue
     }
 }

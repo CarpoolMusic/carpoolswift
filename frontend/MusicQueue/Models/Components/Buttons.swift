@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-struct ButtonImageView: View {
+struct ButtonImageTextView: View {
         let action: () -> Void
         let buttonText: Text
         let buttonStyle: ButtonBackgroundStyle

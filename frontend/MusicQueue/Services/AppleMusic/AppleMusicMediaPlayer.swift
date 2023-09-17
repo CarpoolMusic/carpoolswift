@@ -36,6 +36,10 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     func pause() async throws {
         self.player.pause()
     }
+    
+    func togglePlayPause() async throws {
+        try await self.isPlaying() ? self.pause() : self.play()
+    }
 
     func skipToNext() async throws {
         try await self.player.skipToNextEntry()
@@ -59,9 +63,13 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
             return PlayerState.undetermined
         }
     }
+    
+    func isPlaying() -> Bool {
+        return self.player.state.playbackStatus == .playing
+    }
 
     /// Prepares the current queue for playback, interrupting any active (nonmixable) audio sessions.
     private func prepareToPlay() async throws {
-        try await self.player.prepareToPlay()
+        return try await self.player.prepareToPlay()
     }    
 }

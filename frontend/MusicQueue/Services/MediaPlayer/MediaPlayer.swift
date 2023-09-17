@@ -17,16 +17,17 @@ protocol MediaPlayerProtocol {
     func playSong(song: Song) async throws -> Void
     func pause() async throws -> Void
     func resume() async throws -> Void
+    func togglePlayPause() async throws -> Void
     func skipToNext() async throws -> Void
     func skipToPrevious() async throws -> Void
     func enqueueSong(song: Song) async throws -> Void
     func getPlayerState() -> PlayerState
+    func isPlaying() -> Bool
 }
 
 class MediaPlayer: NSObject, MediaPlayerProtocol {
     
     private let mediaPlayer: MediaPlayerProtocol
-    private let playerState: PlayerState
     
     init(with mediaPlayer: MediaPlayerProtocol) {
         self.mediaPlayer = mediaPlayer
@@ -70,7 +71,27 @@ class MediaPlayer: NSObject, MediaPlayerProtocol {
         try await mediaPlayer.enqueueSong(song: song)
     }
     
+    func getQueueItems() -> Array<Song> {
+        return mediaPlayer.getQueueItems()
+    }
+    
     func getPlayerState() -> PlayerState {
         return mediaPlayer.getPlayerState()
+    }
+    
+    func isPlaying() -> Bool {
+        return self.mediaPlayer.isPlaying()
+    }
+    
+    /// Used in cases where async is not aloud and we need to call one of the media player methods (ex. in button action)
+    func performMediaPlayerAction(_ action: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await action()
+            } catch {
+                // Handle error
+                print("An error ocurred: \(error)")
+            }
+        }
     }
 }

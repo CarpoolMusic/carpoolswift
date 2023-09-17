@@ -8,39 +8,18 @@
 import SwiftUI
 
 struct QueueView: View {
-    @Environment(\.dismiss) var dismiss
     
-    @ObservedObject var sessionManager: SessionManager
-    @ObservedObject var musicService: AnyMusicService
+    private var sessionManager: SessionManager
     
-    @State private var isShowingSearchView: Bool = false
-    @State private var updateQueue = false
-    
-    init(sessionManager: SessionManager, musicService: AnyMusicService) {
+    init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
-        self.musicService = musicService
     }
     
     var body: some View {
         VStack {
             HStack {
-                Spacer()
-                Button(action: handleAddSongButtonTapped) {
-                    Image(systemName: "plus")
-                        .font(.largeTitle)
-                }
-                .padding([.top])
-                .sheet(isPresented: $isShowingSearchView) {
-                    SongSearchView(musicService: musicService) { selectedSong in
-                        if let session = sessionManager.activeSession {
-                            sessionManager.addSongToQueue(sessionId: session.id, song: selectedSong)
-                        }
-                        
-                        isShowingSearchView = false
-                    }
-                }
             }
-            List(sessionManager.activeSession?.queue ?? []) { song in
+            List(sessionManager.getQueueItems(), id: \.uri) { song in
                 MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
                 HStack {
                     Button(action: {
@@ -64,14 +43,14 @@ struct QueueView: View {
             }
         }
     }
+}
+
+class QueueViewModel {
+    
+    @State private var isShowingSearchView: Bool = false
+    @State private var updateQueue = false
     
     /// Handle add song button tapped
     private func handleAddSongButtonTapped() {
-        self.isShowingSearchView = true
-    }
-    private func test() async {
-        Task {
-            try await self.musicService.fetchUser()
-        }
     }
 }

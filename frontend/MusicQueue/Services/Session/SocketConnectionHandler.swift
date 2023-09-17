@@ -10,6 +10,8 @@ import Combine
 
 /// Responsible for all the low level socket communication with the server
 class SocketConnectionHandler {
+   
+    @Published var connected: Bool = false
     
     weak var delegate: SocketEventReceiver?
     
@@ -52,6 +54,14 @@ class SocketConnectionHandler {
     var eventPublisher = PassthroughSubject<(String, [Any]), Never>()
     
     func socketDidReceiveEvent(event: String, with items: [Any]) {
-        eventPublisher.send((event, items))
+        /// Check to see if the event is specific to connection, otherwise forward to subscribers
+        switch event {
+        case "connected":
+            self.connected = true
+        case "disconnected":
+            self.connected = false
+        default:
+            eventPublisher.send((event, items))
+        }
     }
 }
