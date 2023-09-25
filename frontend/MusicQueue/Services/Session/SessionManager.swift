@@ -40,6 +40,10 @@ class SessionManager: ObservableObject {
             self.isActive = true
         case "sessionLeft":
             self.isActive = false
+        case "songVoted":
+            print("Song voted")
+            voteSong(songId: items[0] as! Int, vote: items[1] as! Int)
+            
         default:
             print("Unhandled event: \(event)")
         }
@@ -55,6 +59,10 @@ class SessionManager: ObservableObject {
     
     func leaveSession() {
         self.socketEventSender.leaveSession(sessionID: self.sessionId)
+    }
+    
+    func voteSong(songId: Int, vote: Int) {
+        
     }
     
     func isHost() -> Bool {

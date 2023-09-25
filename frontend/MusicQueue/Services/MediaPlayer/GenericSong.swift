@@ -6,10 +6,13 @@
 //
 
 protocol GenericSong {
+    var id: Int { get }
     var title: String { get }
     var artist: String { get }
     var album: String { get }
     var duration: TimeInterval { get }
-    var uri: String { get }
+    var uri: URL { get }
+    var artworkURL: URL { get }
     var artwork: UIImage { get }
+    var votes: Int { get }
 }

@@ -31,6 +31,10 @@ class SpotifyAppRemoteManager: NSObject {
         self.appRemote.connect()
     }
     
+    func getAccessToken() -> String {
+        return self.appRemote.connectionParameters.accessToken ?? ""
+    }
+    
     private func setAccessToken(accessToken: String) {
         self.appRemote.connectionParameters.accessToken = accessToken
     }

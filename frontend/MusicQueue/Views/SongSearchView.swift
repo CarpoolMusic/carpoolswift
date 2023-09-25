@@ -11,14 +11,17 @@ import MusicKit
 
 struct SongSearchView: View {
     
-  
-    @ObservedObject var musicService: AnyMusicService
-    @State private var searchTerm: String = ""
-    
-    
-    let onSelect: (CustomSong) -> Void
-    
     var body: some View {
+        List(musicService.songs.isEmpty ? [] : musicService.songs) { song in
+            Button(action: {
+                onSelect(song)
+            }) {
+                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
+            }
+        }
+        
+        
+        
         rootView
             .onChange(of: searchTerm) { newSearchTerm in
                 musicService.requestUpdatedSearchResults(for: newSearchTerm)
@@ -44,12 +47,10 @@ struct SongSearchView: View {
     
     /// A list of songs to display below the search bar.
     private var searchResultsList: some View {
-        List(musicService.songs.isEmpty ? [] : musicService.songs) { song in
-            Button(action: {
-                onSelect(song)
-            }) {
-                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
-            }
-        }
     }
+}
+
+class SongSearchViewController {
+    @State private var searchTerm: String = ""
+    
 }

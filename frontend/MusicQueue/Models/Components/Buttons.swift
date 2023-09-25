@@ -23,7 +23,20 @@ struct ButtonImageTextView: View {
         }
     }
 
-struct ButtonView: View {
+struct ButtonImageView: View {
+    let action: () -> Void
+    let buttonImage: Image
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                buttonImage
+            }
+        }
+    }
+}
+
+struct ButtonTextView: View {
         let action: () -> Void
         let buttonText: Text
         let buttonStyle: ButtonBackgroundStyle

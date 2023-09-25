@@ -17,7 +17,15 @@ struct SessionView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                TitleView(title: "Session View")
+                HStack {
+                    TitleView(title: "Session View")
+                    Button(action: {
+                        sessionViewModel.handleSearchButtonPressed()
+                    }) {
+                        Image(systemName: "search")
+                    }
+                }
+                
                 NowPlayingView(currentlyPlayingArt: nil)
                 
                 Spacer()
@@ -32,6 +40,9 @@ struct SessionView: View {
         .navigationDestination(isPresented: $sessionViewModel.isQueueOpen) {
             QueueView(sessionManager: sessionManager)
         }
+        .navigationDestination(isPresented: $sessionViewModel.isSearching) {
+            SongSearchView()
+        }
     }
 }
 
@@ -40,10 +51,15 @@ class SessionViewModel: ObservableObject {
     @State private var isPlaying = false
     
     @Published var isQueueOpen = false
+    @Published var isSearching = false
     @Published var sessionIsActive: Binding<Bool>
     
     init(sessionManager: SessionManager) {
         self.sessionIsActive = sessionIsActive
+    }
+    
+    func handleSearchButtonPressed() {
+        self.isSearching = true
     }
     
     // MARK: - Loading songs
