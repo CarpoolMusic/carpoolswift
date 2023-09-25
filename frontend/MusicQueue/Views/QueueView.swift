@@ -26,7 +26,6 @@ struct QueueView: View {
                         Image(systemName: "hand.thumbsup")
                             .foregroundColor(.blue)
                     }
-
                     Button(action: {
                         sessionManager.voteSong(songId: song.id, vote: -1)
                     }) {

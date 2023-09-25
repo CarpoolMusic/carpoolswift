@@ -9,6 +9,7 @@ import SwiftUI
 struct displayArt: View {
     
     var body: some View {
+        Spacer()
         
     }
     

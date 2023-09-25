@@ -9,7 +9,7 @@ import SwiftUI
 import MusicKit
 import Combine
 
-class AppleMusicService: MusicServiceProtocol, ObservableObject {
+class AppleMusicService: ObservableObject {
     
     private var cancellable: AnyCancellable?
     
@@ -75,7 +75,7 @@ class AppleMusicService: MusicServiceProtocol, ObservableObject {
     }
     
     /// The action to perform when the user taps the Play/Pause button.
-    func startPlayback(song: CustomSong) async {
+    func startPlayback(song: GenericSong) async {
         do {
             let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
             let songs = try await songRequest.response()
@@ -138,7 +138,7 @@ class AppleMusicService: MusicServiceProtocol, ObservableObject {
     // MARK: - Search results requesting
     
     /// The albums the app loads using MusicKit that match the current search term.
-    @Published var songs: MusicItemCollection<CustomSong> = []
+    @Published var songs: MusicItemCollection<Song> = []
     
     /// A reference to the storage object for recent albums the user previously viewed in the app.
     //    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared

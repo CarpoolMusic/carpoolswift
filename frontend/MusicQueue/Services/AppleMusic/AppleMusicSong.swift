@@ -4,6 +4,7 @@
 //
 //  Created by Nolan Biscaro on 2023-09-17.
 //
+import SwiftUI
 import MusicKit
 
 struct AppleMusicSong: GenericSong {
@@ -12,7 +13,12 @@ struct AppleMusicSong: GenericSong {
     init(_ song: Song) {
         self.song = song
     }
-
+    
+    var id: Int = 0
+    //    var id: Int {
+//        return song.id.rawValue
+//    }
+    
     var title: String {
         return song.title
     }
@@ -29,11 +35,13 @@ struct AppleMusicSong: GenericSong {
         return song.duration ?? 0
     }
 
-    var uri: String {
-        return song.id.rawValue
+    var uri: URL {
+        return song.url!
     }
     
-    var artwork: UIImage {
-        return UImage(url: song.artwork.url)
+    var artworkURL: URL {
+        return song.artistURL!
     }
+    
+    var votes: Int = 0
 }

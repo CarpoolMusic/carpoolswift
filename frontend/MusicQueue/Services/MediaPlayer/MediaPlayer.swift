@@ -26,7 +26,7 @@ protocol MediaPlayerProtocol {
 }
 
 class MediaPlayer: NSObject, MediaPlayerProtocol {
-    
+    /// Generic media player interface
     private let mediaPlayer: MediaPlayerProtocol
     
     init(with mediaPlayer: MediaPlayerProtocol) {
@@ -69,10 +69,6 @@ class MediaPlayer: NSObject, MediaPlayerProtocol {
     
     func enqueueSong(song: Song) async throws {
         try await mediaPlayer.enqueueSong(song: song)
-    }
-    
-    func getQueueItems() -> Array<Song> {
-        return mediaPlayer.getQueueItems()
     }
     
     func getPlayerState() -> PlayerState {

@@ -10,7 +10,8 @@ struct SessionView: View {
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
-        sessionViewModel = SessionViewModel(sessionManager: sessionManager)
+        self.mediaPlayer = MediaPlayer(with: <#MediaPlayerProtocol#>)
+        self.sessionViewModel = SessionViewModel(sessionManager: sessionManager)
     }
     
     // MARK: - View

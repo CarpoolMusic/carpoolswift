@@ -29,6 +29,10 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
     
     // MARK: - Public protocol methods
     
+    var isAuthorized: Bool {
+        return self.authorizationStatus == .authorized
+    }
+    
     func authenticate() {
         let requestedScopes: SPTScope = [.appRemoteControl]
         initiateAuthenticationModal(requestedScopes: requestedScopes)

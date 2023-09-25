@@ -13,6 +13,5 @@ protocol GenericSong {
     var duration: TimeInterval { get }
     var uri: URL { get }
     var artworkURL: URL { get }
-    var artwork: UIImage { get }
     var votes: Int { get }
 }

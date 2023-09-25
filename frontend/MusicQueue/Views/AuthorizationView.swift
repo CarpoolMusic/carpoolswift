@@ -38,10 +38,10 @@ struct AuthorizationView: View {
                 Spacer()
                 
                 /// Apple music login button
-                ButtonImageView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                ButtonImageTextView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
                 
                 /// Spotify login button
-                ButtonImageView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                ButtonImageTextView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
             }
         }
     }
@@ -90,10 +90,6 @@ struct AuthorizationView: View {
 // MARK: - Previews
 
 struct AuthorizationView_Previews: PreviewProvider {
-    // Create instances of AppleMusicService and SpotifyMusicService
-    @ObservedObject static var appleMusicService = AppleMusicService()
-    @ObservedObject static var spotifyMusicService = SpotifyMusicService()
-    
     static var previews: some View {
         AuthorizationView()
     }

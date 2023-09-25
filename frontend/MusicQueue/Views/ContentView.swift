@@ -25,32 +25,13 @@ class ContentViewModel: ObservableObject {
     
     
     init() {
-        let userPreferences: UserPreferences
+        let userPreferences: UserPreferences = UserPreferences()
         let selectedMusicServiceType = userPreferences.selectedMusicServiceType
-        let musicService = getMusicServiceFromType(type: selectedMusicServiceType)
-        self.isAuthenticated = musicService.isAuthorized()
     }
-    
-    private func getMusicServiceFromType(type: MusicServiceType) -> AnyMusicService {
-        return type == .apple ? AnyMusicService(AppleMusicService()) : AnyMusicService(SpotifyMusicService())
-    }
-    
-//    private func authorizeWithSelectedService(serviceType: MusicServiceType) {
-//        /// Notify the view that we are currently trying to authorize
-//        self.isAuthorizing = true
-//
-//        /// Attempt to authorize the user with their selected music service
-//        let musicService = getMusicServiceFromType(type: serviceType)
-//        musicService.authorize()
-//        currentView = musicService.isAuthorized() ? DashboardView(musicService) : AuthorizationView()
-//    }
-    
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
-            .environmentObject(SpotifyMusicService())
-            .environmentObject(AppleMusicService())
     }
 }

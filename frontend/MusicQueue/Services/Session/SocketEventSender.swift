@@ -24,13 +24,13 @@ class SocketEventSender {
         self.connection = connection
     }
     
-    func connect() {
-        self.socket.connect()
-    }
-    
-    func disconnect() {
-        self.socket.disconnect()
-    }
+//    func connect() {
+//        self.socket.connect()
+//    }
+//
+//    func disconnect() {
+//        self.socket.disconnect()
+//    }
     
     func createSession() {
         let event = SocketSendEvent.createSession
@@ -47,7 +47,7 @@ class SocketEventSender {
         connection.emit(event: event.rawValue, with: [sessionID: sessionID])
     }
     
-    func addSong(sessionId: String, song: CustomSong) {
+    func addSong(sessionId: String, song: GenericSong) {
         let event = SocketSendEvent.addSong
         connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songData": song.toDictionary()] as [String : Any])
     }
