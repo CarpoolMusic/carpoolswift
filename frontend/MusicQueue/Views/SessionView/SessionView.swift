@@ -4,13 +4,9 @@ import SwiftUI
 struct SessionView: View {
     
     // MARK: - Properties
-    private var sessionManager: SessionManager
-    private var mediaPlayer: MediaPlayer
     @ObservedObject var sessionViewModel: SessionViewModel
     
     init(sessionManager: SessionManager) {
-        self.sessionManager = sessionManager
-        self.mediaPlayer = MediaPlayer(with: <#MediaPlayerProtocol#>)
         self.sessionViewModel = SessionViewModel(sessionManager: sessionManager)
     }
     
@@ -51,12 +47,18 @@ class SessionViewModel: ObservableObject {
     
     @State private var isPlaying = false
     
+    @Published var sessionManager: SessionManager
+    @Published var mediaPlayer: MediaPlayer
+    
     @Published var isQueueOpen = false
     @Published var isSearching = false
-    @Published var sessionIsActive: Binding<Bool>
+    @Published var sessionIsActive: Bool
     
     init(sessionManager: SessionManager) {
-        self.sessionIsActive = sessionIsActive
+        self.sessionManager = sessionManager
+        self.sessionIsActive = sessionManager.isActive
+        let service = UserDefaults.standard.string(forKey: "musicServiceType")
+        self.mediaPlayer = MediaPlayer(with: AppleMusicMediaPlayer())
     }
     
     func handleSearchButtonPressed() {

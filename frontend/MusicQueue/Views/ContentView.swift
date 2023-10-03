@@ -22,12 +22,6 @@ struct ContentView: View {
 class ContentViewModel: ObservableObject {
     
     @Published var isAuthenticated = false
-    
-    
-    init() {
-        let userPreferences: UserPreferences = UserPreferences()
-        let selectedMusicServiceType = userPreferences.selectedMusicServiceType
-    }
 }
 
 struct ContentView_Previews: PreviewProvider {

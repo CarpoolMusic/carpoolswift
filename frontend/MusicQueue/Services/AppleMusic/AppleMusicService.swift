@@ -182,7 +182,7 @@ class AppleMusicService: ObservableObject {
         if self.searchTerm == searchTerm {
             print(searchResponse)
             // Convert MusicItemCollection<Song> to MusicItemCollection<CustomSong>
-            self.songs = MusicItemCollection(searchResponse.songs.map { CustomSong(musicKitSong: $0) })
+//            self.songs = MusicItemCollection(searchResponse.songs.map { CustomSong(musicKitSong: $0) })
         }
     }
     

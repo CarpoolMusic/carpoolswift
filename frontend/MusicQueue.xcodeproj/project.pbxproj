@@ -25,6 +25,7 @@
 		607168702AC221B600485AD4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6071686F2AC221B600485AD4 /* Alamofire */; };
 		607168722AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */; };
 		607168742AC238AF00485AD4 /* AppleAuthenticationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168732AC238AF00485AD4 /* AppleAuthenticationController.swift */; };
+		607168762ACB9C8900485AD4 /* TokenVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168752ACB9C8900485AD4 /* TokenVault.swift */; };
 		607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04972AAAAD95004DB82F /* SocketEventSender.swift */; };
 		607B049A2AAAAFA2004DB82F /* SessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04992AAAAFA2004DB82F /* SessionHandler.swift */; };
 		607B049C2AAAB731004DB82F /* SocketEventReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */; };
@@ -101,6 +102,7 @@
 		6071686C2AC2180B00485AD4 /* SpotifySongBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifySongBrowser.swift; sourceTree = "<group>"; };
 		607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicServiceAuthenticationProtocol.swift; sourceTree = "<group>"; };
 		607168732AC238AF00485AD4 /* AppleAuthenticationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuthenticationController.swift; sourceTree = "<group>"; };
+		607168752ACB9C8900485AD4 /* TokenVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenVault.swift; sourceTree = "<group>"; };
 		607B04972AAAAD95004DB82F /* SocketEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventSender.swift; sourceTree = "<group>"; };
 		607B04992AAAAFA2004DB82F /* SessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHandler.swift; sourceTree = "<group>"; };
 		607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventReceiver.swift; sourceTree = "<group>"; };
@@ -330,6 +332,7 @@
 				60BA77D72A6445C300A5516B /* Session */,
 				60BA77C62A6241CE00A5516B /* AppleMusic */,
 				60BA77BF2A62378600A5516B /* Spotify */,
+				607168752ACB9C8900485AD4 /* TokenVault.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -556,6 +559,7 @@
 				60BA77C12A6237AB00A5516B /* SpotifyAppRemoteDelegate.swift in Sources */,
 				60BA77652A55E2A400A5516B /* ContentView.swift in Sources */,
 				607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */,
+				607168762ACB9C8900485AD4 /* TokenVault.swift in Sources */,
 				607B049E2AB12AB3004DB82F /* SocketError.swift in Sources */,
 				60BA778D2A55E39100A5516B /* AuthorizationView.swift in Sources */,
 				609D8FC62AA95E47005C237E /* Titles.swift in Sources */,

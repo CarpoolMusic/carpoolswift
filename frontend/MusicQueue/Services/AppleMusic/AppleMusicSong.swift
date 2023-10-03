@@ -15,6 +15,7 @@ struct AppleMusicSong: GenericSong {
     }
     
     var id: Int = 0
+    var votes: Int = 0
     //    var id: Int {
 //        return song.id.rawValue
 //    }
@@ -43,5 +44,19 @@ struct AppleMusicSong: GenericSong {
         return song.artistURL!
     }
     
-    var votes: Int = 0
+    func toJSONData() -> Data? {
+        let encoder = JSONEncoder()
+        
+        let encodableSong = EncodableGenericSong(
+            id: self.id,
+            votes: self.votes,
+            title: self.title,
+            artist: self.artist,
+            album: self.album,
+            duration: self.duration,
+            uri: self.uri
+        )
+        
+        return try? encoder.encode(encodableSong)
+    }
 }

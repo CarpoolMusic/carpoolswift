@@ -6,13 +6,15 @@
 //
 import MusicKit
 
-class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
+class SpotifyMediaPlayer: MediaPlayerProtocol {
+    let appRemoteManager: SpotifyAppRemoteManager
     let appRemote: SPTAppRemote
     
     internal var playerState: SPTAppRemotePlayerState
     
-    init(appRemote: SPTAppRemote) {
-        self.appRemote = appRemote
+    init() {
+        self.appRemoteManager = SpotifyAppRemoteManager()
+        self.appRemote = appRemoteManager.appRemote
         /// subsribe to changes from the player state
         self.appRemote.playerAPI?.subscribe()
     }

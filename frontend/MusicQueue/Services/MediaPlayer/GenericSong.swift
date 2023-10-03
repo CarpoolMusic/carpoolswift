@@ -14,4 +14,16 @@ protocol GenericSong {
     var uri: URL { get }
     var artworkURL: URL { get }
     var votes: Int { get }
+    func toJSONData() -> Data?
+}
+
+// Inner struct to convert only the properties we need
+struct EncodableGenericSong: Codable {
+    var id: Int
+    var votes: Int
+    var title: String
+    var artist: String
+    var album: String
+    var duration: TimeInterval
+    var uri: URL
 }

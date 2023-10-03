@@ -7,9 +7,13 @@
 
 class SpotifySessionManager: NSObject {
     
-    private let sessionManagerDelegate: SPTSessionManagerDelegate
-    private let configuration: SPTConfiguration
-    internal let appRemote: SpotifyAppRemoteManager
+    let SpotifyClientID = "[your spotify client id here]"
+    let SpotifyRedirectURL = URL(string: "spotify-ios-quick-start://spotify-login-callback")!
+
+    lazy var configuration = SPTConfiguration(
+      clientID: SpotifyClientID,
+      redirectURL: SpotifyRedirectURL
+    )
 
     /// Session manager used to handle authenticated sessions
     private lazy var sessionManager: SPTSessionManager = {
@@ -19,15 +23,10 @@ class SpotifySessionManager: NSObject {
             self.configuration.tokenRefreshURL = tokenRefreshURL
             self.configuration.playURI = ""
         }
-        let manager = SPTSessionManager(configuration: self.configuration, delegate: sessionManagerDelegate)
+        let manager = SPTSessionManager(configuration: self.configuration, delegate: self)
         return manager
     }()
 
-    init(appRemote: SpotifyAppRemoteManager) {
-        self.appRemote = appRemote
-        self.sessionManagerDelegate = self
-    }
-    
     func initiateSession(scope: SPTScope) {
         self.sessionManager.initiateSession(with: scope)
     }

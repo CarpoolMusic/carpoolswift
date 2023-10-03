@@ -7,11 +7,10 @@
 import Foundation
 
 struct SpotifySong: GenericSong {
-    
 //    var id: String = UUID().uuidString
     var id: Int = 0
+    var votes: Int = 0
     
-
     private let track: SPTAppRemoteTrack
 
     init(_ track: SPTAppRemoteTrack) {
@@ -42,5 +41,30 @@ struct SpotifySong: GenericSong {
         return URL(string: "")!
     }
     
-    var votes: Int = 0
+    func toJSONData() -> Data? {
+        let encoder = JSONEncoder()
+        
+        // Inner struct to convert only the properties we need
+        struct EncodableSpotifySong: Codable {
+            var id: Int
+            var votes: Int
+            var title: String
+            var artist: String
+            var album: String
+            var duration: TimeInterval
+            var uri: URL
+        }
+        
+        let encodableSong = EncodableGenericSong(
+            id: self.id,
+            votes: self.votes,
+            title: self.title,
+            artist: self.artist,
+            album: self.album,
+            duration: self.duration,
+            uri: self.uri
+        )
+        
+        return try? encoder.encode(encodableSong)
+    }
 }

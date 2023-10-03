@@ -59,6 +59,7 @@ struct AuthorizationView: View {
             appleMusicService.authorize()
             if appleMusicService.authorizationStatus == .authorized {
                 self.isAuthenticated = true
+                UserDefaults.standard.set("apple", forKey: "musicServiceType")
                 
             } else {
                 // Handle auth failure
@@ -67,11 +68,11 @@ struct AuthorizationView: View {
         
         func handleSpotifyButtonPressed() {
             setMusicTypeInUserDefaults(type: .spotify)
-            let appRemote = SpotifyAppRemoteManager()
-            let sessionManager = SpotifySessionManager(appRemote: appRemote)
+            let sessionManager = SpotifySessionManager()
             let authenticationController = SpotifyAuthenticationController(sessionManager: sessionManager) { authenticated in
                 if (authenticated) {
                     self.isAuthenticated = true
+                UserDefaults.standard.set("spotify", forKey: "musicServiceType")
                 } else {
                     // Handle auth failure with message and new attempt
                 }
