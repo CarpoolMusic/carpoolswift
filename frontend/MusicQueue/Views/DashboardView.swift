@@ -25,14 +25,14 @@ struct DashboardView: View {
                     .padding(.horizontal)
                 
 
-                ButtonView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
+                ButtonTextView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
                     .disabled(!dashboardViewModel.connected)
                     .opacity(dashboardViewModel.connected ? 1.0 : 0.5)
 
                 
                 Spacer()
                 
-                ButtonView(action: dashboardViewModel.handleCreateSessionButtonPressed, buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
+                ButtonTextView(action: dashboardViewModel.handleCreateSessionButtonPressed, buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
                 
             }
         }
@@ -48,10 +48,9 @@ struct DashboardView: View {
 class DashboardViewModel: ObservableObject {
     
     @Published var sessionId: String = ""
-    @Published var connected: Bool
-    @Published var sessionIsActive: Binding<Bool>
+    @Published var connected: Bool = false
     
-    private var cancellable: AnyCancellable?
+    private var cancellable: AnyCancellable? = nil
         
     var socketConnectionHandler: SocketConnectionHandler
     var sessionManager: SessionManager
@@ -65,6 +64,7 @@ class DashboardViewModel: ObservableObject {
         
         // new session to either create or join
         self.sessionManager = SessionManager(socketConnectionHandler: socketConnectionHandler)
+        
         
         self.attachConnectionSubscriber()
         

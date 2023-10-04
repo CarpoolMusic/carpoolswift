@@ -8,13 +8,14 @@ import SwiftUI
 import MusicKit
 
 struct AppleMusicSong: GenericSong {
+    
     private let song: Song
 
     init(_ song: Song) {
         self.song = song
     }
     
-    var id: Int = 0
+    var id: String = "-1"
     var votes: Int = 0
     //    var id: Int {
 //        return song.id.rawValue

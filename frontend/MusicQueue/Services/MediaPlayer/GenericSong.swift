@@ -6,7 +6,7 @@
 //
 
 protocol GenericSong {
-    var id: Int { get }
+    var id: String { get }
     var title: String { get }
     var artist: String { get }
     var album: String { get }
@@ -19,7 +19,7 @@ protocol GenericSong {
 
 // Inner struct to convert only the properties we need
 struct EncodableGenericSong: Codable {
-    var id: Int
+    var id: String
     var votes: Int
     var title: String
     var artist: String

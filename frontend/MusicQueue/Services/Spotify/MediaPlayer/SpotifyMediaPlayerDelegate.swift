@@ -8,7 +8,7 @@
 extension SpotifyMediaPlayer: SPTAppRemotePlayerStateDelegate {
     
     func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
-        self.playerState = playerState
+        self.isPaused = playerState.isPaused
     }
     
 }

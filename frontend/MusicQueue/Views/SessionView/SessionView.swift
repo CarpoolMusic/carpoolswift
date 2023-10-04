@@ -27,15 +27,15 @@ struct SessionView: View {
                 
                 Spacer()
                 
-                AudioControlView(mediaPlayer: mediaPlayer, isHost: sessionManager.isHost())
+                AudioControlView(mediaPlayer: sessionViewModel.mediaPlayer, isHost: sessionViewModel.sessionManager.isHost())
                 
                 Spacer()
                 
-                MenuBarView(sessionManager: sessionManager, sessionViewModel: sessionViewModel)
+                MenuBarView(sessionManager: sessionViewModel.sessionManager, sessionViewModel: sessionViewModel)
             }
         }
         .navigationDestination(isPresented: $sessionViewModel.isQueueOpen) {
-            QueueView(sessionManager: sessionManager)
+            QueueView(sessionManager: sessionViewModel.sessionManager)
         }
         .navigationDestination(isPresented: $sessionViewModel.isSearching) {
             SongSearchView()
@@ -58,7 +58,7 @@ class SessionViewModel: ObservableObject {
         self.sessionManager = sessionManager
         self.sessionIsActive = sessionManager.isActive
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
-        self.mediaPlayer = MediaPlayer(with: AppleMusicMediaPlayer())
+        self.mediaPlayer = MediaPlayer(with: (service == "apple" ? AppleMusicMediaPlayer() : SpotifyMediaPlayer()))
     }
     
     func handleSearchButtonPressed() {

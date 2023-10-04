@@ -8,7 +8,7 @@ import Foundation
 
 struct SpotifySong: GenericSong {
 //    var id: String = UUID().uuidString
-    var id: Int = 0
+    var id: String = "0"
     var votes: Int = 0
     
     private let track: SPTAppRemoteTrack
@@ -46,7 +46,7 @@ struct SpotifySong: GenericSong {
         
         // Inner struct to convert only the properties we need
         struct EncodableSpotifySong: Codable {
-            var id: Int
+            var id: String
             var votes: Int
             var title: String
             var artist: String

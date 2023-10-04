@@ -21,8 +21,8 @@ class TokenVault {
         return false
     }
     
-    func retrieveToken() -> String {
-        var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                    ]
-    }
+//    func retrieveToken() -> String {
+//        var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+//                                    ]
+//    }
 }

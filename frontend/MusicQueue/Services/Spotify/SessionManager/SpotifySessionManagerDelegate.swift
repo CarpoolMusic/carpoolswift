@@ -9,10 +9,10 @@ extension SpotifySessionManager: SPTSessionManagerDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         /// create new session connection
-        self.appRemote.connect(accessToken: session.accessToken)
+//        self.appRemote.connect(accessToken: session.accessToken)
         
         /// Debugging
-        print("success", session)
+        print("here is where I would impl session connection", session)
     }
     
     func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {

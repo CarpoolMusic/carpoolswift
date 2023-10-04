@@ -6,13 +6,12 @@
 //
 import MusicKit
 
-class SpotifyMediaPlayer: MediaPlayerProtocol {
+class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
     let appRemoteManager: SpotifyAppRemoteManager
     let appRemote: SPTAppRemote
+    var isPaused: Bool = true
     
-    internal var playerState: SPTAppRemotePlayerState
-    
-    init() {
+    override init() {
         self.appRemoteManager = SpotifyAppRemoteManager()
         self.appRemote = appRemoteManager.appRemote
         /// subsribe to changes from the player state
@@ -30,7 +29,7 @@ class SpotifyMediaPlayer: MediaPlayerProtocol {
                     print("There has been an error")
                 }
                 else {
-                    print("This is the result from the callback")
+                    print("This is the result from the callback \(String(describing: result))")
                 }
             }
         }
@@ -56,7 +55,13 @@ class SpotifyMediaPlayer: MediaPlayerProtocol {
     }
     
     func togglePlayPause() async throws {
-        self.playerState.isPaused ? self.play() : self.pause()
+        self.appRemote.playerAPI?.getPlayerState({playerState, error in
+            if let error = error {
+                print("There has been an error \(error)")
+            } else if let playerState = playerState as? SPTAppRemotePlayerState {
+                playerState.isPaused ? self.play() : self.pause()
+            }
+        })
     }
     
     func skipToNext() {
@@ -67,25 +72,23 @@ class SpotifyMediaPlayer: MediaPlayerProtocol {
         self.appRemote.playerAPI?.skip(toPrevious: defaultCallback)
     }
     
-    func getPlayerState() -> SPTAppRemotePlayerState {
-        return self.playerState
-    }
-    
     func enqueueSong(song: Song) async throws {
         let trackUri = song.id.rawValue
         self.appRemote.playerAPI?.enqueueTrackUri(trackUri)
     }
     
     func getPlayerState() -> PlayerState {
-        if self.playerState.isPaused {
-            return PlayerState.paused
-        }
-        else {
-            return PlayerState.playing
-        }
+//        if self.playerState.isPaused {
+//            return PlayerState.paused
+//        }
+//        else {
+//            return PlayerState.playing
+//        }
+        return PlayerState.undetermined
     }
     
     func isPlaying() -> Bool {
-        return !self.playerState.isPaused
+//        return !self.playerState.isPaused
+        return false
     }
 }

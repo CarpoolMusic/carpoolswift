@@ -49,7 +49,7 @@ class SocketEventSender {
     
     func addSong(sessionId: String, song: GenericSong) {
         let event = SocketSendEvent.addSong
-        connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songData": song.toDictionary()] as [String : Any])
+        connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songData": song.toJSONData()!] as [String : Any])
     }
     
     func removeSong(sessionId: String, songID: String) {

@@ -9,18 +9,19 @@ class SessionManager: ObservableObject {
     
     private var socketConnectionHandler: SocketConnectionHandler
     private var socketEventSender: SocketEventSender
-    private var _isHost: Bool
+    private var _isHost: Bool = false
     
     // MARK: - Session data
-    private var sessionId: String
+    private var sessionId: String = "-1"
     private var queue: Array<GenericSong> = []
     
     //MARK: - Session data
-    init(socketConnectionHandler: SocketConnectionHandler) { self.socketConnectionHandler = socketConnectionHandler
+    init(socketConnectionHandler: SocketConnectionHandler) {
+        self.socketConnectionHandler = socketConnectionHandler
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
         
         // subscribe session to socket events
-        let subscription = socketConnectionHandler.eventPublisher
+        _ = socketConnectionHandler.eventPublisher
             .sink { event, items in
                 self.handleEvent(event: event, items: items)
             }

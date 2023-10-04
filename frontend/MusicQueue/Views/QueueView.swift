@@ -16,25 +16,26 @@ struct QueueView: View {
     }
     
     var body: some View {
-        VStack {
-            List(sessionManager.getQueueItems(), id: \.uri) { song in
-                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
-                HStack {
-                    Button(action: {
-                        sessionManager.voteSong(songId: song.id, vote: 1)
-                    }) {
-                        Image(systemName: "hand.thumbsup")
-                            .foregroundColor(.blue)
-                    }
-                    Button(action: {
-                        sessionManager.voteSong(songId: song.id, vote: -1)
-                    }) {
-                        Image(systemName: "hand.thumbsdown")
-                            .foregroundColor(.red)
-                    }
-                }
-            }
-        }
+        VStack{}
+//        VStack {
+//            List(sessionManager.getQueueItems(), id: \.uri) { song in
+//                MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
+//                HStack {
+//                    Button(action: {
+//                        sessionManager.voteSong(songId: song.id, vote: 1)
+//                    }) {
+//                        Image(systemName: "hand.thumbsup")
+//                            .foregroundColor(.blue)
+//                    }
+//                    Button(action: {
+//                        sessionManager.voteSong(songId: song.id, vote: -1)
+//                    }) {
+//                        Image(systemName: "hand.thumbsdown")
+//                            .foregroundColor(.red)
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

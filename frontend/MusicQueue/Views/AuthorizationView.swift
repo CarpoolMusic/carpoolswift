@@ -46,47 +46,48 @@ struct AuthorizationView: View {
         }
     }
     
-    // MARK: - View Model
+}
+
+// MARK: - View Model
+
+class AuthorizationViewModel: ObservableObject {
     
-    class AuthorizationViewModel: ObservableObject {
-        
-        @Published var isAuthenticated = false
-        var musicServiceType: MusicServiceType?
-        
-        func handleAppleButtonPressed() {
-            setMusicTypeInUserDefaults(type: .apple)
-            let appleMusicService = AppleMusicService()
-            appleMusicService.authorize()
-            if appleMusicService.authorizationStatus == .authorized {
-                self.isAuthenticated = true
-                UserDefaults.standard.set("apple", forKey: "musicServiceType")
-                
-            } else {
-                // Handle auth failure
-            }
-        }
-        
-        func handleSpotifyButtonPressed() {
-            setMusicTypeInUserDefaults(type: .spotify)
-            let sessionManager = SpotifySessionManager()
-            let authenticationController = SpotifyAuthenticationController(sessionManager: sessionManager) { authenticated in
-                if (authenticated) {
-                    self.isAuthenticated = true
-                UserDefaults.standard.set("spotify", forKey: "musicServiceType")
-                } else {
-                    // Handle auth failure with message and new attempt
-                }
-            }
-            // called here and callback above will set authenticated to true when complete
-            authenticationController.authenticate()
+    @Published var isAuthenticated = false
+    var musicServiceType: MusicServiceType?
+    
+    func handleAppleButtonPressed() {
+        setMusicTypeInUserDefaults(type: .apple)
+        let appleMusicService = AppleMusicService()
+        appleMusicService.authorize()
+        if appleMusicService.authorizationStatus == .authorized {
+            self.isAuthenticated = true
+            UserDefaults.standard.set("apple", forKey: "musicServiceType")
             
+        } else {
+            // Handle auth failure
         }
-        
-        func setMusicTypeInUserDefaults(type: MusicServiceType) {
-            UserDefaults.standard.set(type.rawValue, forKey: "musicServiceType")
+    }
+    
+    func handleSpotifyButtonPressed() {
+        setMusicTypeInUserDefaults(type: .spotify)
+        let sessionManager = SpotifySessionManager()
+        let authenticationController = SpotifyAuthenticationController(sessionManager: sessionManager) { authenticated in
+            if (authenticated) {
+                self.isAuthenticated = true
+            UserDefaults.standard.set("spotify", forKey: "musicServiceType")
+            } else {
+                // Handle auth failure with message and new attempt
+            }
         }
+        // called here and callback above will set authenticated to true when complete
+        authenticationController.authenticate()
         
     }
+    
+    func setMusicTypeInUserDefaults(type: MusicServiceType) {
+        UserDefaults.standard.set(type.rawValue, forKey: "musicServiceType")
+    }
+    
 }
 // MARK: - Previews
 
