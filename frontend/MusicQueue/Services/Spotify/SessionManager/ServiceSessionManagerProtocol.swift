@@ -6,3 +6,8 @@
 //
 
 import Foundation
+protocol ServiceSessionManagerProtocol {
+    
+    func initiateSession(scope: SPTScope)
+    func notifyReturnFromAuth(url: URL)
+}

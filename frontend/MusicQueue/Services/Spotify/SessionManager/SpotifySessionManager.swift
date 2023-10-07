@@ -5,12 +5,12 @@
 //  Created by Nolan Biscaro on 2023-08-12.
 //
 
-class SpotifySessionManager: NSObject {
+class SpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
     
     let SpotifyClientID = "[your spotify client id here]"
     let SpotifyRedirectURL = URL(string: "spotify-ios-quick-start://spotify-login-callback")!
 
-    lazy var configuration = SPTConfiguration(
+    private lazy var configuration = SPTConfiguration(
       clientID: SpotifyClientID,
       redirectURL: SpotifyRedirectURL
     )
@@ -23,8 +23,7 @@ class SpotifySessionManager: NSObject {
             self.configuration.tokenRefreshURL = tokenRefreshURL
             self.configuration.playURI = ""
         }
-        let manager = SPTSessionManager(configuration: self.configuration, delegate: self)
-        return manager
+        return SPTSessionManager(configuration: self.configuration, delegate: self)
     }()
 
     func initiateSession(scope: SPTScope) {
@@ -35,6 +34,10 @@ class SpotifySessionManager: NSObject {
     /// Notify the session manager that the user has returned from auth modal
     /// This invokes the didInitiateSession session manager delegate function
     self.sessionManager.application(UIApplication.shared, open: url, options: [:])
+    }
+    
+    static func notifyReturnFromUrl(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        sessionManager.application(app, open: url, options: options)
     }
     
     

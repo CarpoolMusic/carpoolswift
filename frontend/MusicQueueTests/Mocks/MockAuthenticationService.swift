@@ -6,7 +6,4 @@
 //
 
 import Foundation
-
-class MockSpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
-    
-}
+@testable import MusicQueue

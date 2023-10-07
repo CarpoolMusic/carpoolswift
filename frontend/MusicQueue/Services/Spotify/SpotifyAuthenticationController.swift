@@ -16,13 +16,13 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
     
     private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     
-    let sessionManager: SpotifySessionManager
+    let sessionManager: ServiceSessionManagerProtocol
     
     var authorizationStatus: MusicServiceAuthStatus = .notDetermined
     
     var authenticated: ((Bool) -> Void)? // Closure to determine if the authentication callback was successful
     
-    init(sessionManager: SpotifySessionManager, authenticated: ((Bool) -> Void)? = nil) {
+    init(sessionManager: ServiceSessionManagerProtocol, authenticated: ((Bool) -> Void)? = nil) {
         self.sessionManager = sessionManager
         self.authenticated = authenticated
     }
@@ -35,14 +35,10 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
     
     func authenticate() {
         let requestedScopes: SPTScope = [.appRemoteControl]
-        initiateAuthenticationModal(requestedScopes: requestedScopes)
-    }
-    // MARK: - Private methods
-    
-    private func initiateAuthenticationModal(requestedScopes: SPTScope) {
         /// Initiate the spotify authentication modal by making call to the session manager
         sessionManager.initiateSession(scope: requestedScopes)
     }
+    // MARK: - Private methods
     
     /// This is called from the content view when the app is opened via URL
     private func handleAuthCallback(with url: URL) {

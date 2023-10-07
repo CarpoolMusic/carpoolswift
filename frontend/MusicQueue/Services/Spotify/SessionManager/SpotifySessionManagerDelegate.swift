@@ -5,11 +5,12 @@
 //  Created by Nolan Biscaro on 2023-07-14.
 //
 
-extension SpotifySessionManager: SPTSessionManagerDelegate {
+extension SpotifySessionManager: SPTSessionManagerDelegate, UIApplicationDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         /// create new session connection
 //        self.appRemote.connect(accessToken: session.accessToken)
+        // extrct the access token from the session and save it in the session manager
         
         /// Debugging
         print("here is where I would impl session connection", session)

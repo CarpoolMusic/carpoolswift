@@ -6,15 +6,28 @@
 //
 
 import XCTest
+@testable import MusicQueue
 
 final class AuthenticationTest: XCTestCase {
-
+    
+    var authController: SpotifyAuthenticationController!
+    var mockSession: MockSession!
+    var mockSessionManager: MockSpotifySessionManager!
+    
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        let coder: NSCoder = MockCoder()
+        mockSession = MockSession(coder: coder)
+        mockSessionManager = MockSpotifySessionManager(mockSPTSession: mockSession)
+        authController = SpotifyAuthenticationController(sessionManager: mockSessionManager)
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+    
+    func testAuthenticationSuccessful() throws {
+        authController.authenticate()
     }
 
     func testExample() throws {
