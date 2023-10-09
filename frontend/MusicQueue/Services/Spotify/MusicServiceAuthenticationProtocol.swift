@@ -27,5 +27,5 @@ protocol MusicServiceAuthenticationProtocol: AnyObject {
     var isAuthorized: Bool { get }
     
     /// authorizes the user with the underlying music service
-    func authenticate()
+    func authenticate(authenticated: @escaping ((Bool) -> (Void)))
 }

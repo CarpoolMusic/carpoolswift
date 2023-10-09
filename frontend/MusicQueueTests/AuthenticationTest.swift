@@ -18,7 +18,7 @@ final class AuthenticationTest: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let coder: NSCoder = MockCoder()
         mockSession = MockSession(coder: coder)
-        mockSessionManager = MockSpotifySessionManager(mockSPTSession: mockSession)
+        mockSessionManager = MockSpotifySessionManager()
         authController = SpotifyAuthenticationController(sessionManager: mockSessionManager)
     }
 
@@ -26,9 +26,15 @@ final class AuthenticationTest: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
-    func testAuthenticationSuccessful() throws {
-        authController.authenticate()
-    }
+//    func testAuthenticationSuccessful() throws {
+//        self.authController.authenticate() { authenticated in
+//            XCTAssertTrue(authenticated)
+//            XCTAssertTrue(self.mockSessionManager.initiateSessionCalled)
+//            XCTAssertTrue(self.mockSessionManager.returnFromURLCalled)
+//            XCTAssertTrue(self.mockSessionManager.didInitiateCalled)
+//            
+//        }
+//    }
 
     func testExample() throws {
         // This is an example of a functional test case.

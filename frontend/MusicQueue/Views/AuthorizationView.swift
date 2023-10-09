@@ -44,8 +44,10 @@ struct AuthorizationView: View {
                 ButtonImageTextView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
             }
         }
+        .onOpenURL { url in
+            authorizationViewModel.handleSpotifyReturnURL(url: url)
+        }
     }
-    
 }
 
 // MARK: - View Model
@@ -54,33 +56,35 @@ class AuthorizationViewModel: ObservableObject {
     
     @Published var isAuthenticated = false
     var musicServiceType: MusicServiceType?
+    var authenticated: ((Bool) -> (Void))?
+    
+    var sessionManager: SpotifySessionManager?
     
     func handleAppleButtonPressed() {
-        setMusicTypeInUserDefaults(type: .apple)
-        let appleMusicService = AppleMusicService()
-        appleMusicService.authorize()
-        if appleMusicService.authorizationStatus == .authorized {
-            self.isAuthenticated = true
-            UserDefaults.standard.set("apple", forKey: "musicServiceType")
-            
-        } else {
-            // Handle auth failure
-        }
+        let authController = AppleAuthenticationController()
+        print("Apple pressed")
+        self.authenticateWithController(controller: authController, service: .apple)
     }
     
     func handleSpotifyButtonPressed() {
-        setMusicTypeInUserDefaults(type: .spotify)
-        let sessionManager = SpotifySessionManager()
-        let authenticationController = SpotifyAuthenticationController(sessionManager: sessionManager) { authenticated in
-            if (authenticated) {
+        self.sessionManager = SpotifySessionManager()
+        let authController = SpotifyAuthenticationController(sessionManager: sessionManager!)
+        self.authenticateWithController(controller: authController, service: .spotify)
+    }
+    
+    func handleSpotifyReturnURL(url: URL) {
+        self.sessionManager?.returnFromURL(UIApplication.shared, open: url, options: [:])
+    }
+    
+    
+    func authenticateWithController(controller: MusicServiceAuthenticationProtocol, service: MusicServiceType) {
+        controller.authenticate() { authenticated in
+            if authenticated {
+                /// seperate this out into a user defaults class that manages persistent state
+                self.setMusicTypeInUserDefaults(type: service)
                 self.isAuthenticated = true
-            UserDefaults.standard.set("spotify", forKey: "musicServiceType")
-            } else {
-                // Handle auth failure with message and new attempt
             }
         }
-        // called here and callback above will set authenticated to true when complete
-        authenticationController.authenticate()
         
     }
     

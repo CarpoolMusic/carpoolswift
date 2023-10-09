@@ -8,9 +8,15 @@
 extension SpotifySessionManager: SPTSessionManagerDelegate, UIApplicationDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
-        /// create new session connection
-//        self.appRemote.connect(accessToken: session.accessToken)
-        // extrct the access token from the session and save it in the session manager
+        // STORE IN USER DEFAULTS IS TEMP AND FOR TESTING ONLY
+        // this will evenutally be a request to the backend to store the token
+        let accessToken: String = session.accessToken
+        let refreshToken: String = session.refreshToken
+        UserDefaults.standard.set(accessToken, forKey: "accessToken")
+        UserDefaults.standard.set(refreshToken, forKey: "accessToken")
+        
+        /// set the authentication closure to notify the caller of authentication status
+        self.authenticated?(true)
         
         /// Debugging
         print("here is where I would impl session connection", session)

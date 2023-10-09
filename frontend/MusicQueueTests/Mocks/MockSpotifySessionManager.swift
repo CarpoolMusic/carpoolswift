@@ -12,11 +12,8 @@ enum MockError: Error {
 }
 
 class MockSession: SPTSession {
-    let mockAccessToken: String?
+    let mockAccessToken: String? = ""
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }
 
 class MockCoder: NSCoder {
@@ -27,20 +24,24 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
     // Mock data
     var shouldSucceed: Bool = true
     
+    var initiateSessionCalled = false
+    var returnFromURLCalled = false
+    
     var didInitiateCalled = false
     var didFailWithCalled  = false
     var didRenewCalled = false
-    let mockSPTSession: SPTSession
     
     let mockSpotifyClientID = "Mock Id"
     let mockSpotifyRedirectURL = URL(string: "mock redirect url")
     
+    var authenticated: ((Bool) -> (Void))?
+    
+    let mockSPTSession: MockSession = MockSession(coder: MockCoder())!
+    
     /// Manually set ths in the delegate methods
     var mockAccessToken: String?
     
-    init(mockSPTSession: MockSession) {
-        let mockCoder = MockCoder()
-        self.mockSPTSession = mockSPTSession
+    override init() {
     }
     
     lazy var configuration = SPTConfiguration(
@@ -59,14 +60,18 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
     }()
     
     
-    func initiateSession(scope: SPTScope) {
-        let mockUrl: URL = URL(string: "mock url")!
+    func initiateSession(scope: SPTScope, authenticated: @escaping ((Bool) -> (Void))) {
+        self.authenticated = authenticated
         /// simulate the callback being triggered when the user returns
-        notifyReturnFromAuth(url: mockUrl)
+        let app = UIApplication()
+        let mockUrl: URL = URL(string: "mock url")!
+        let options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+        returnFromURL(UIApplication(), open: mockUrl, options: options)
     }
     
-    
-    func notifyReturnFromAuth(url: URL) {
+    func returnFromURL(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
+        returnFromURLCalled = true
+        
         if (shouldSucceed) {
             self.sessionManager(manager: mockSessionManager, didInitiate: mockSPTSession)
         }
@@ -74,20 +79,24 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
             self.sessionManager(manager: mockSessionManager, didFailWith: MockError.initiationError("Mock failed"))
         }
     }
+    
 }
 
 extension MockSpotifySessionManager: SPTSessionManagerDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         self.didInitiateCalled = true
+        self.authenticated?(true)
         self.mockAccessToken = session.accessToken
     }
     
     func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {
+        self.authenticated?(false)
         self.didFailWithCalled = true
     }
     
     func sessionManager(manager: SPTSessionManager, didRenew session: SPTSession) {
+        self.authenticated?(false)
         self.didRenewCalled = true
     }
     

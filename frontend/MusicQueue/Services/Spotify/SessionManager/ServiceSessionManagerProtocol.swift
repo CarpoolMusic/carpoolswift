@@ -8,6 +8,6 @@
 import Foundation
 protocol ServiceSessionManagerProtocol {
     
-    func initiateSession(scope: SPTScope)
-    func notifyReturnFromAuth(url: URL)
+    func initiateSession(scope: SPTScope, authenticated: @escaping ((Bool) -> (Void)))
+    func returnFromURL(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Void
 }

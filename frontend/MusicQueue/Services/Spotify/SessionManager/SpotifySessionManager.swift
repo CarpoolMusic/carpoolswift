@@ -6,9 +6,9 @@
 //
 
 class SpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
-    
-    let SpotifyClientID = "[your spotify client id here]"
-    let SpotifyRedirectURL = URL(string: "spotify-ios-quick-start://spotify-login-callback")!
+    let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
+    let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
+    var authenticated: ((Bool) -> Void)?
 
     private lazy var configuration = SPTConfiguration(
       clientID: SpotifyClientID,
@@ -26,19 +26,13 @@ class SpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
         return SPTSessionManager(configuration: self.configuration, delegate: self)
     }()
 
-    func initiateSession(scope: SPTScope) {
+    func initiateSession(scope: SPTScope, authenticated: @escaping (Bool) -> Void) {
+        /// callback that the delegate can set to notify the user
+        self.authenticated = authenticated
         self.sessionManager.initiateSession(with: scope)
     }
     
-    func notifyReturnFromAuth(url: URL) {
-    /// Notify the session manager that the user has returned from auth modal
-    /// This invokes the didInitiateSession session manager delegate function
-    self.sessionManager.application(UIApplication.shared, open: url, options: [:])
-    }
-    
-    static func notifyReturnFromUrl(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        sessionManager.application(app, open: url, options: options)
-    }
-    
-    
+    func returnFromURL(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Void {
+        self.sessionManager.application(app, open: url, options: options)
+    }    
 }

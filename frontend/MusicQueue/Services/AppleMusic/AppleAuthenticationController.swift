@@ -25,12 +25,13 @@ class AppleAuthenticationController: MusicServiceAuthenticationProtocol {
         }
     }
     
-    func authenticate() {
+    func authenticate(authenticated: @escaping ((Bool) -> (Void))) {
         // Implement Apple Music's authorization process here
         switch self.authorizationStatus {
         case .notDetermined:
             Task {
                 let status = await MusicAuthorization.request()
+                status == .authorized ? authenticated(true) : authenticated(false)
             }
         case .denied:
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {

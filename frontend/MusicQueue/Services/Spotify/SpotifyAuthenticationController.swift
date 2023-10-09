@@ -14,17 +14,17 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
     
     private let accessTokenKey = "SpotifyAccessToken"
     
-    private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
+    private let SpotifyRedirectURL = URL(string: "spotify-ios-quick-start://spotify-login-callback")!
     
     let sessionManager: ServiceSessionManagerProtocol
     
     var authorizationStatus: MusicServiceAuthStatus = .notDetermined
     
-    var authenticated: ((Bool) -> Void)? // Closure to determine if the authentication callback was successful
+    var authenticated: Bool = false
     
-    init(sessionManager: ServiceSessionManagerProtocol, authenticated: ((Bool) -> Void)? = nil) {
+    
+    init(sessionManager: ServiceSessionManagerProtocol) {
         self.sessionManager = sessionManager
-        self.authenticated = authenticated
     }
     
     // MARK: - Public protocol methods
@@ -33,51 +33,9 @@ class SpotifyAuthenticationController: MusicServiceAuthenticationProtocol {
         return self.authorizationStatus == .authorized
     }
     
-    func authenticate() {
+    func authenticate(authenticated: @escaping (Bool) -> Void) {
         let requestedScopes: SPTScope = [.appRemoteControl]
         /// Initiate the spotify authentication modal by making call to the session manager
-        sessionManager.initiateSession(scope: requestedScopes)
-    }
-    // MARK: - Private methods
-    
-    /// This is called from the content view when the app is opened via URL
-    private func handleAuthCallback(with url: URL) {
-        if UrlMatchesCaller(url: url) {
-            if let accessToken = extractAccessTokenFromUrl(url: url) {
-                /// save the access token for later use
-                self.saveAccessTokenToKeychain(accessToken)
-                self.authorizationStatus = .authorized
-                /// Notify the session manager that we are back from auth
-                sessionManager.notifyReturnFromAuth(url: url)
-                authenticated?(true)
-            } else {
-                authenticated?(false)
-            }
-        }
-    }
-    
-    /// Given that  session manager handles token swap it may make sense for it to store the tokens, especially because its more accesssible from didInitiateSession?
-    func extractAccessTokenFromUrl(url: URL) -> String? {
-        print(url)
-        return "temp"
-    }
-    
-    private func UrlMatchesCaller(url: URL) -> Bool {
-        let schemeMatch = url.scheme == SpotifyRedirectURL.scheme
-        let hostMatch = url.host == SpotifyRedirectURL.host
-        
-        return schemeMatch && hostMatch
-    }
-    
-    
-    // MARK: - Keychain methods
-    
-    private func saveAccessTokenToKeychain(_ token: String) {
-        keychain.set(token, forKey: accessTokenKey)
-    }
-    
-    private func retrieveAccessTokenFromKeychain() -> String? {
-        let token = keychain.get(accessTokenKey)
-        return token
+        sessionManager.initiateSession(scope: requestedScopes, authenticated: authenticated)
     }
 }
