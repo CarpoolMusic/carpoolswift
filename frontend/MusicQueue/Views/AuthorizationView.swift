@@ -26,26 +26,34 @@ struct AuthorizationView: View {
     
     /// A decleration of the UI that this view presents.
     var body: some View {
-        if (authorizationViewModel.isAuthenticated) {
-            DashboardView()
+        NavigationView {
+            if authorizationViewModel.isAuthenticated {
+                AnyView(DashboardView())
+            } else {
+                AnyView(authenticationContent())
+            }
         }
+    }
+    
+    private func authenticationContent() -> some View {
         ZStack {
             VStack {
                 Spacer()
-                
                 AppTitleView(title: "Carpool", subtitle: "Some slogan")
-                
                 Spacer()
-                
-                /// Apple music login button
-                ButtonImageTextView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
-                
-                /// Spotify login button
-                ButtonImageTextView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+                loginButtons()
             }
         }
         .onOpenURL { url in
             authorizationViewModel.handleSpotifyReturnURL(url: url)
+        }
+    }
+    
+    private func loginButtons() -> some View {
+        VStack {
+            ButtonImageTextView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+            
+            ButtonImageTextView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
         }
     }
 }
@@ -79,13 +87,14 @@ class AuthorizationViewModel: ObservableObject {
     
     func authenticateWithController(controller: MusicServiceAuthenticationProtocol, service: MusicServiceType) {
         controller.authenticate() { authenticated in
-            if authenticated {
-                /// seperate this out into a user defaults class that manages persistent state
-                self.setMusicTypeInUserDefaults(type: service)
-                self.isAuthenticated = true
+            DispatchQueue.main.async {
+                if authenticated {
+                    /// seperate this out into a user defaults class that manages persistent state
+                    self.setMusicTypeInUserDefaults(type: service)
+                    self.isAuthenticated = true
+                }
             }
         }
-        
     }
     
     func setMusicTypeInUserDefaults(type: MusicServiceType) {

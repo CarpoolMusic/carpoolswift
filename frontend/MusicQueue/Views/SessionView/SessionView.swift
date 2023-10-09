@@ -76,7 +76,7 @@ class SessionViewModel: ObservableObject {
 
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
-        let socketConnection = SocketConnectionHandler(url: URL(string: "")!)
+        let socketConnection = SocketConnectionHandler()
         let sessionManager = SessionManager(socketConnectionHandler: socketConnection)
         
         SessionView(sessionManager: sessionManager)

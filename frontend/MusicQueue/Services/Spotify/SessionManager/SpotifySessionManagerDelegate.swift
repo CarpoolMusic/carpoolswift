@@ -8,6 +8,7 @@
 extension SpotifySessionManager: SPTSessionManagerDelegate, UIApplicationDelegate {
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
+        print("success", session)
         // STORE IN USER DEFAULTS IS TEMP AND FOR TESTING ONLY
         // this will evenutally be a request to the backend to store the token
         let accessToken: String = session.accessToken
@@ -17,9 +18,6 @@ extension SpotifySessionManager: SPTSessionManagerDelegate, UIApplicationDelegat
         
         /// set the authentication closure to notify the caller of authentication status
         self.authenticated?(true)
-        
-        /// Debugging
-        print("here is where I would impl session connection", session)
     }
     
     func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {

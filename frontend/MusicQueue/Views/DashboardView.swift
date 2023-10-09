@@ -15,15 +15,11 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                TitleView(title: "Join a music session or create a new one.")
+                TitleView(title: "Carpool")
+                
+                Spacer()
                 
                 TextFieldView(displayText: "Enter a Session ID", inputText: $dashboardViewModel.sessionId)
-                TextField("Enter Session ID", text: $dashboardViewModel.sessionId)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                
 
                 ButtonTextView(action: dashboardViewModel.handleJoinSessionButtonPressed, buttonText: Text("Join Session"), buttonStyle: ButtonBackgroundStyle())
                     .disabled(!dashboardViewModel.connected)
@@ -56,10 +52,8 @@ class DashboardViewModel: ObservableObject {
     var sessionManager: SessionManager
     
     init() {
-        let url = URL(string: "http://localhost:8080")
-        
         // create connection and connect
-        self.socketConnectionHandler = SocketConnectionHandler(url: url!)
+        self.socketConnectionHandler = SocketConnectionHandler()
         socketConnectionHandler.connect()
         
         // new session to either create or join

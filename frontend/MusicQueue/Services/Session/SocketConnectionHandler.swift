@@ -18,7 +18,8 @@ class SocketConnectionHandler {
     private let manager: SocketManager
     private let socket: SocketIOClient
     
-    init(url: URL) {
+    init() {
+        let url = URL(string: "http://localhost:3000")!
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
         self.socket = self.manager.defaultSocket
         self.setupHandlers()
