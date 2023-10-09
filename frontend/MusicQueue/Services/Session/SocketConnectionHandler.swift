@@ -59,7 +59,7 @@ class SocketConnectionHandler {
         switch event {
         case "connected":
             self.connected = true
-        case "disconnected":
+        case "disconnect":
             self.connected = false
         default:
             eventPublisher.send((event, items))

@@ -7,4 +7,5 @@
 
 enum SocketError: Error {
     case invalidSocketURL
+    case notConnected
 }

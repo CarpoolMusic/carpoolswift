@@ -31,6 +31,8 @@
 		6071687D2AD1EB5000485AD4 /* MockSpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6071687C2AD1EB5000485AD4 /* MockSpotifySessionManager.swift */; };
 		6071687F2AD1EBFD00485AD4 /* ServiceSessionManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6071687E2AD1EBFD00485AD4 /* ServiceSessionManagerProtocol.swift */; };
 		607168812AD21B4300485AD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168802AD21B4300485AD4 /* AppDelegate.swift */; };
+		607168852AD3893400485AD4 /* TestSocketConnectionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168842AD3893400485AD4 /* TestSocketConnectionHandler.swift */; };
+		607168872AD3913000485AD4 /* TestSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168862AD3913000485AD4 /* TestSessionManager.swift */; };
 		607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04972AAAAD95004DB82F /* SocketEventSender.swift */; };
 		607B049A2AAAAFA2004DB82F /* SessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B04992AAAAFA2004DB82F /* SessionHandler.swift */; };
 		607B049C2AAAB731004DB82F /* SocketEventReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */; };
@@ -113,6 +115,8 @@
 		6071687C2AD1EB5000485AD4 /* MockSpotifySessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSpotifySessionManager.swift; sourceTree = "<group>"; };
 		6071687E2AD1EBFD00485AD4 /* ServiceSessionManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSessionManagerProtocol.swift; sourceTree = "<group>"; };
 		607168802AD21B4300485AD4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		607168842AD3893400485AD4 /* TestSocketConnectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSocketConnectionHandler.swift; sourceTree = "<group>"; };
+		607168862AD3913000485AD4 /* TestSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSessionManager.swift; sourceTree = "<group>"; };
 		607B04972AAAAD95004DB82F /* SocketEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventSender.swift; sourceTree = "<group>"; };
 		607B04992AAAAFA2004DB82F /* SessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHandler.swift; sourceTree = "<group>"; };
 		607B049B2AAAB731004DB82F /* SocketEventReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEventReceiver.swift; sourceTree = "<group>"; };
@@ -253,6 +257,24 @@
 			path = Mocks;
 			sourceTree = "<group>";
 		};
+		607168822AD3852D00485AD4 /* Unit Tests */ = {
+			isa = PBXGroup;
+			children = (
+				60BA77732A55E2A500A5516B /* MusicQueueTests.swift */,
+				607168772AD1E69200485AD4 /* AuthenticationTest.swift */,
+			);
+			path = "Unit Tests";
+			sourceTree = "<group>";
+		};
+		607168832AD3854900485AD4 /* Integration Tests */ = {
+			isa = PBXGroup;
+			children = (
+				607168842AD3893400485AD4 /* TestSocketConnectionHandler.swift */,
+				607168862AD3913000485AD4 /* TestSessionManager.swift */,
+			);
+			path = "Integration Tests";
+			sourceTree = "<group>";
+		};
 		60BA77562A55E2A400A5516B = {
 			isa = PBXGroup;
 			children = (
@@ -300,9 +322,9 @@
 		60BA77722A55E2A500A5516B /* MusicQueueTests */ = {
 			isa = PBXGroup;
 			children = (
+				607168832AD3854900485AD4 /* Integration Tests */,
+				607168822AD3852D00485AD4 /* Unit Tests */,
 				6071687B2AD1EB3A00485AD4 /* Mocks */,
-				60BA77732A55E2A500A5516B /* MusicQueueTests.swift */,
-				607168772AD1E69200485AD4 /* AuthenticationTest.swift */,
 			);
 			path = MusicQueueTests;
 			sourceTree = "<group>";
@@ -610,7 +632,9 @@
 			files = (
 				6071687D2AD1EB5000485AD4 /* MockSpotifySessionManager.swift in Sources */,
 				60BA77742A55E2A500A5516B /* MusicQueueTests.swift in Sources */,
+				607168872AD3913000485AD4 /* TestSessionManager.swift in Sources */,
 				607168782AD1E69200485AD4 /* AuthenticationTest.swift in Sources */,
+				607168852AD3893400485AD4 /* TestSocketConnectionHandler.swift in Sources */,
 				6071687A2AD1E92F00485AD4 /* MockAuthenticationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

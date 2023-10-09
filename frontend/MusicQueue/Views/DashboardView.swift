@@ -69,7 +69,11 @@ class DashboardViewModel: ObservableObject {
     }
     
     func handleCreateSessionButtonPressed() {
-        self.sessionManager.createSession()
+        do {
+            try self.sessionManager.createSession()
+            
+        } catch {
+        }
     }
     
     func attachConnectionSubscriber() {

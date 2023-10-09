@@ -22,19 +22,25 @@ class SocketEventSender {
     
     init(connection: SocketConnectionHandler) {
         self.connection = connection
+        connection.connect()
     }
     
-//    func connect() {
-//        self.socket.connect()
-//    }
-//
-//    func disconnect() {
-//        self.socket.disconnect()
-//    }
+    func checkConnection() throws {
+        if !connection.connected {
+            throw SocketError.notConnected
+        }
+    }
     
-    func createSession() {
-        let event = SocketSendEvent.createSession
-        connection.emit(event: event.rawValue, with: [:])
+    
+    func createSession() throws {
+        do {
+            try checkConnection()
+            let event = SocketSendEvent.createSession
+            connection.emit(event: event.rawValue, with: [:])
+        } catch SocketError.notConnected {
+            // rethrow 
+            throw SocketError.notConnected
+        }
     }
     
     func joinSession(sessionID: String) {

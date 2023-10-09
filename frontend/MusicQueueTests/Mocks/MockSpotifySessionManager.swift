@@ -16,9 +16,14 @@ class MockSession: SPTSession {
     
 }
 
-class MockCoder: NSCoder {
-    
-}
+//class MockCoder: NSCoder {
+//    override var allowsKeyedCoding: Bool { return true }
+//    override func decodeObject(of classes: [AnyClass]?, forKey key: String) -> Any? {
+//           // Implement your mock decoding logic here
+//           return nil
+//       }
+//
+//}
 
 class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
     // Mock data
@@ -36,7 +41,7 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
     
     var authenticated: ((Bool) -> (Void))?
     
-    let mockSPTSession: MockSession = MockSession(coder: MockCoder())!
+    let mockSPTSession: MockSession = MockSession(coder: NSCoder())!
     
     /// Manually set ths in the delegate methods
     var mockAccessToken: String?
@@ -66,7 +71,7 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
         let app = UIApplication()
         let mockUrl: URL = URL(string: "mock url")!
         let options: [UIApplication.OpenURLOptionsKey : Any] = [:]
-        returnFromURL(UIApplication(), open: mockUrl, options: options)
+        returnFromURL(app, open: mockUrl, options: options)
     }
     
     func returnFromURL(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {

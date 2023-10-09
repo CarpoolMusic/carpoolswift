@@ -1,6 +1,7 @@
 import Foundation
 import SocketIO
 import SwiftUI
+import Combine
 
 class SessionManager: ObservableObject {
     
@@ -14,6 +15,7 @@ class SessionManager: ObservableObject {
     // MARK: - Session data
     private var sessionId: String = "-1"
     private var queue: Array<GenericSong> = []
+    private var cancellables = Set<AnyCancellable>()
     
     //MARK: - Session data
     init(socketConnectionHandler: SocketConnectionHandler) {
@@ -21,10 +23,11 @@ class SessionManager: ObservableObject {
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
         
         // subscribe session to socket events
-        _ = socketConnectionHandler.eventPublisher
-            .sink { event, items in
-                self.handleEvent(event: event, items: items)
+        socketConnectionHandler.eventPublisher
+            .sink { [weak self] event, items in
+                self?.handleEvent(event: event, items: items)
             }
+            .store(in: &cancellables)
     }
     
     
@@ -50,8 +53,8 @@ class SessionManager: ObservableObject {
         }
     }
     
-    func createSession() {
-        self.socketEventSender.createSession()
+    func createSession() throws {
+        try self.socketEventSender.createSession()
     }
     
     func joinSession(sessionId: String) {

@@ -6,17 +6,27 @@
 //
 
 import XCTest
+import Combine
+
 @testable import MusicQueue
 
 final class TestSocketConnectionHandler: XCTestCase {
+    
+    var socketConnectionHandler: SocketConnectionHandler!
+    var cancellables = Set<AnyCancellable>()
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        let connectionHandler = SocketConnectionHandler()
+        socketConnectionHandler = SocketConnectionHandler()
+        // Assume that the initial state is unconnected
+        XCTAssertFalse(socketConnectionHandler.connected)
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+        socketConnectionHandler.disconnect()
+        
+        super.tearDown()
     }
     
     func testConnectionToServer() throws {
@@ -32,8 +42,38 @@ final class TestSocketConnectionHandler: XCTestCase {
         socketConnectionHandler.connect()
         
         wait(for: [expectation], timeout: 5)
-        }
-
+    }
+    
+    func testDisconnectionFromServer() throws {
+        let disconnectionExpectation = XCTestExpectation(description: "Socket should disconnect")
+        
+        // First, ensure connection
+        let connectionExpectation = XCTestExpectation(description: "Socket should connect")
+        
+        socketConnectionHandler.$connected
+            .filter { $0 == true }
+            .sink { _ in
+                connectionExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+        
+        socketConnectionHandler.connect()
+        
+        wait(for: [connectionExpectation], timeout: 5)
+        
+        // Now, test disconnection
+        socketConnectionHandler.$connected
+            .filter { $0 == false }
+            .sink { _ in
+                disconnectionExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+        
+        socketConnectionHandler.disconnect()
+        
+        wait(for: [disconnectionExpectation], timeout: 5)
+    }
+    
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
