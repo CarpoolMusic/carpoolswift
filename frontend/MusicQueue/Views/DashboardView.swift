@@ -33,7 +33,7 @@ struct DashboardView: View {
             }
         }
         .navigationDestination(
-            isPresented: $dashboardViewModel.sessionManager.isActive) {
+            isPresented: $dashboardViewModel.sessionManager.isConnected) {
                 SessionView(sessionManager: dashboardViewModel.sessionManager)
         }
     }
@@ -48,41 +48,30 @@ class DashboardViewModel: ObservableObject {
     
     private var cancellable: AnyCancellable? = nil
         
-    var socketConnectionHandler: SocketConnectionHandler
     var sessionManager: SessionManager
     
     init() {
         // create connection and connect
-        self.socketConnectionHandler = SocketConnectionHandler()
-        socketConnectionHandler.connect()
-        
         // new session to either create or join
-        self.sessionManager = SessionManager(socketConnectionHandler: socketConnectionHandler)
-        
-        
-        self.attachConnectionSubscriber()
-        
+        self.sessionManager = SessionManager()
     }
     
     func handleJoinSessionButtonPressed() {
-        self.sessionManager.joinSession(sessionId: sessionId)
+        do {
+            try self.sessionManager.joinSession(sessionId: sessionId)
+        } catch {
+            // Handle error
+        }
     }
     
     func handleCreateSessionButtonPressed() {
         do {
-            try self.sessionManager.createSession()
+            try self.sessionManager.createSession(hostName: "", sessionName: "")
             
         } catch {
+            // Handle error
         }
     }
-    
-    func attachConnectionSubscriber() {
-        cancellable = socketConnectionHandler.$connected
-            .sink { status in
-                self.connected = status
-            }
-    }
-    
 }
 
 struct DashboardView_Previews: PreviewProvider {

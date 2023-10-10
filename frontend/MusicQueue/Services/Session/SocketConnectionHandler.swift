@@ -33,7 +33,8 @@ class SocketConnectionHandler {
         socket.disconnect()
     }
     
-    func emit(event: String, with items: [String: Any] = [:]) {
+    func emit(event: String, with items: [SocketData] = []) {
+        // attach a correlationID to match request/response
         socket.emit(event, items)
     }
     

@@ -56,7 +56,7 @@ class SessionViewModel: ObservableObject {
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
-        self.sessionIsActive = sessionManager.isActive
+        self.sessionIsActive = sessionManager.isConnected
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
         self.mediaPlayer = MediaPlayer(with: (service == "apple" ? AppleMusicMediaPlayer() : SpotifyMediaPlayer()))
     }
@@ -77,7 +77,7 @@ class SessionViewModel: ObservableObject {
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
         let socketConnection = SocketConnectionHandler()
-        let sessionManager = SessionManager(socketConnectionHandler: socketConnection)
+        let sessionManager = SessionManager()
         
         SessionView(sessionManager: sessionManager)
     }

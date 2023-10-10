@@ -10,22 +10,25 @@ import XCTest
 
 final class TestSessionManager: XCTestCase {
     
-    var socketConnectionHandler: SocketConnectionHandler!
     var sessionManager: SessionManager!
+    let TEST_HOST_NAME: String = "testHost"
+    let TEST_SESSION_NAME: String = "testSession"
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        socketConnectionHandler = SocketConnectionHandler()
-        sessionManager = SessionManager(socketConnectionHandler: socketConnectionHandler)
+        sessionManager = SessionManager()
         
         // ensure that we start with no active sessions
-        XCTAssertFalse(sessionManager.isActive)
+        XCTAssertFalse(sessionManager.isConnected)
+        
+        // connect session manager to server
+        sessionManager.connect()
         
         // ensure that the connection handler is connected
         // NOTE: in the app all buttons will be disabled until connection is achieved
         // Waiting for expecations is used in testing only and simulates this
-        let connectionHandlerExpecation = expectation(description: "Connection handler should be created and connected")
-        let cancellable = socketConnectionHandler.$connected.sink { connected in
+        let connectionHandlerExpecation = expectation(description: "Session Manager should be connected and isConnceted should be true")
+        let cancellable = sessionManager.$isConnected.sink { connected in
             if connected {
                 connectionHandlerExpecation.fulfill()
             }
@@ -40,31 +43,54 @@ final class TestSessionManager: XCTestCase {
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        socketConnectionHandler.disconnect()
-        
         super.tearDown()
     }
     
-    func testCreateSession() throws {
-        let sessionCreatedExpectation = expectation(description: "Session should be created and is active should be true.")
+    func testCreateSessionSuccess() throws {
+        let sessionCreatedExpectation = expectation(description: "Session should be created and is active should be true. Session information should be returned")
         // Observe the 'isActive' property
-        let cancellable = sessionManager.$isActive.sink { isActive in
+        let cancellable = sessionManager.$isConnected.sink { isActive in
             if isActive {
                 sessionCreatedExpectation.fulfill()
             }
         }
         
         // Trigger the session creation on the client
-        try sessionManager.createSession()
+        try sessionManager.createSession(hostName: TEST_HOST_NAME, sessionName: TEST_SESSION_NAME)
             
         
         // Wait for the expecations to be fulfilled
         waitForExpectations(timeout: 5, handler: nil)
         
+        XCTAssertNotEqual("", sessionManager.hostId)
+        XCTAssertEqual(TEST_HOST_NAME, sessionManager.hostName)
+        XCTAssertEqual(TEST_SESSION_NAME, sessionManager.sessionName)
+        
+        
         // Clean up
         cancellable.cancel()
     }
-
+    
+    func testCreateSessionDisconnected() throws {
+        // Disconnect from the session to simulate a break in the connection
+        sessionManager.disconnect()
+        let connectionDisconnectedExpecation = expectation(description: "Session should be disconnected and connected variable set to false")
+        let cancellable = sessionManager.$isConnected.sink { connected in
+            if !connected {
+                connectionDisconnectedExpecation.fulfill()
+            }
+        }
+        
+        // Wait for the expecations to be fulfilled
+        waitForExpectations(timeout: 5, handler: nil)
+        
+        XCTAssertThrowsError(try sessionManager.createSession(hostName: TEST_HOST_NAME, sessionName: TEST_SESSION_NAME)) { error in
+            XCTAssertEqual(error as? SocketError, SocketError.notConnected)
+        }
+        
+        cancellable.cancel()
+    }
+    
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
