@@ -6,72 +6,68 @@
 //
 
 import SwiftUI
+import Combine
 
 struct SessionCreationView: View {
     
-//    // MARK: - View
-//
+    @ObservedObject var sessionManager: SessionManager
+    @ObservedObject var sessionCreationViewModel: SessionCreationViewModel
+    
+    init(sessionManager: SessionManager) {
+        self.sessionManager = sessionManager
+        self.sessionCreationViewModel = SessionCreationViewModel(sessionManager: sessionManager)
+    }
+    
+    // MARK: - View
+    
     var body: some View {
         VStack{}
-//        NavigationView {
-//            VStack {
-//                Spacer()
-//                TextField("Enter Session Name", text: $sessionName)
-//                    .padding()
-//                    .background(Color(.systemGray6))
-//                    .cornerRadius(10)
-//                    .padding(.horizontal)
-//
-//                Spacer()
-//
-//                Button(action: {
-//                    handleCreateSessionButtonPressed()
-//                }) {
-//                    Text("Create session")
-//                        .font(.headline)
-//                        .foregroundColor(.white)
-//                        .padding()
-//                        .frame(maxWidth: .infinity)
-//                        .background(Color.blue)
-//                        .cornerRadius(10)
-//                }
-//                .padding(.horizontal)
-////                .alert(isPresented: $showingAlert) {
-////                    Alert(title: Text("Missing Session ID"), message: Text("Please enter a sessioID to join a session."), dismissButton: .default(Text("OK")))
-////                }
-//                .onReceive($sessionManager.connected) { isConnected in
-//                    if self.isCreateSessionButtonPressed {
-//                        self.sessionManager.createSession()
-//                        self.isCreateSessionButtonPressed = false
-//                        self.presentationMode.wrappedValue.dismiss()
-//                    }
-//
-//                }
-//
-//            }
-//            .navigationTitle("Create a Session")
-//        }
+        NavigationView {
+            VStack {
+                Spacer()
+                TextFieldView(displayText: "Enter Session Name", inputText: $sessionCreationViewModel.sessionName)
+
+                Spacer()
+
+                ButtonTextView(action: sessionCreationViewModel.handleCreateSessionButtonPressed, buttonText: Text("Create Session"), buttonStyle: ButtonBackgroundStyle())
+                    .disabled(!sessionCreationViewModel.sessionManager.isConnected)
+                    .opacity(sessionCreationViewModel.sessionManager.isConnected ? 1 : 0.5)
+                    .alert(isPresented: $sessionCreationViewModel.isShowingAlert) {
+                        Alert(title: Text("Missing Session ID"), message: Text("Please enter a sessioID to join a session."), dismissButton: .default(Text("OK")))
+                    }
+            }
+            .navigationTitle("Create a Session")
+        }
     }
     
     
 }
-class sessionCreationViewModel {
+class SessionCreationViewModel: ObservableObject {
+    @State var isShowingAlert = false
+    @State var sessionName: String = ""
     
-    init(){}
+    @State private var isSessionPublic: Bool = true
+    @State private var showingAlert: Bool = false
+    @State private var isJoinSessionButtonPressed = false
     
-//    @ObservedObject var sessionManager: SessionManager
-//    @State private var sessionName: String = ""
-//    @State private var isSessionPublic: Bool = true
-//    @State private var showingAlert: Bool = false
-//    @State private var isCreateSessionButtonPressed = false
-//    @State private var isJoinSessionButtonPressed = false
-//
-//    // MARK: - Methods
-//
-//    func handleCreateSessionButtonPressed() {
-//        sessionManager.connect()
-//        self.isCreateSessionButtonPressed = true
-//    }
+    var sessionManager: SessionManager
+    private var cancellables: Set<AnyCancellable> = []
+    
+    init(sessionManager: SessionManager) {
+        self.sessionManager = sessionManager
+        self.sessionManager.connect()
+    }
+
+    // MARK: - Methods
+
+    func handleCreateSessionButtonPressed() {
+        do {
+            try self.sessionManager.createSession(hostName: "this host name", sessionName: sessionName)
+        } catch {
+            print("Error creating session")
+        }
+        
+    }
 }
 
 //MARK: - Previews

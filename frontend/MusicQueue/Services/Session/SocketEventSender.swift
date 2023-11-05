@@ -34,19 +34,29 @@ class SocketEventSender {
     }
     
     func createSession(hostName: String, sessionName: String) throws {
-        let sessionData: [String: Any] =
-            ["hostName": hostName,
-             "sessionName": sessionName,
-            ]
+        // Build the request
+        let createSessionRequest: CreateSessionRequest = CreateSessionRequest(hostID: hostName, sessionName: sessionName)
+            
         try checkConnection()
+        
+        // Send the event
         let event = SocketSendEvent.createSession
-        connection.emit(event: event.rawValue, with: [sessionData])
+        if let json = try? createSessionRequest.jsonData() {
+            connection.emit(event: event.rawValue, with: [json])
+        }
     }
     
-    func joinSession(sessionID: String) throws {
+    func joinSession(sessionID: String, hostName: String) throws {
+        // Build the request
+        let joinSessionRequest: JoinSessionRequest = JoinSessionRequest(sessionID: sessionID, userID: hostName)
+        
         try checkConnection()
+        
         let event = SocketSendEvent.joinSession
-//        connection.emit(event: event.rawValue, with: [sessionID: sessionID])
+        if let json = try? joinSessionRequest.jsonData() {
+            print("SENDING JOIN ", json)
+            connection.emit(event: event.rawValue, with: [json])
+        }
     }
     
     func leaveSession(sessionID: String) {

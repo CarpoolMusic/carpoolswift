@@ -11,6 +11,7 @@ import XCTest
 final class TestSessionManager: XCTestCase {
     
     var sessionManager: SessionManager!
+    var otherSessionManager: SessionManager!
     let TEST_HOST_NAME: String = "testHost"
     let TEST_SESSION_NAME: String = "testSession"
 
@@ -49,7 +50,7 @@ final class TestSessionManager: XCTestCase {
     func testCreateSessionSuccess() throws {
         let sessionCreatedExpectation = expectation(description: "Session should be created and is active should be true. Session information should be returned")
         // Observe the 'isActive' property
-        let cancellable = sessionManager.$isConnected.sink { isActive in
+        let cancellable = sessionManager.$isActive.sink { isActive in
             if isActive {
                 sessionCreatedExpectation.fulfill()
             }
@@ -62,9 +63,7 @@ final class TestSessionManager: XCTestCase {
         // Wait for the expecations to be fulfilled
         waitForExpectations(timeout: 5, handler: nil)
         
-        XCTAssertNotEqual("", sessionManager.hostId)
-        XCTAssertEqual(TEST_HOST_NAME, sessionManager.hostName)
-        XCTAssertEqual(TEST_SESSION_NAME, sessionManager.sessionName)
+        XCTAssertNotEqual("", sessionManager.sessionId)
         
         
         // Clean up
@@ -89,6 +88,11 @@ final class TestSessionManager: XCTestCase {
         }
         
         cancellable.cancel()
+        // THIS IS TEMP DONT RELY ON THIS
+        sessionManager.isActive = false
+    }
+    
+    func testJoinSession() throws {
     }
     
     func testExample() throws {

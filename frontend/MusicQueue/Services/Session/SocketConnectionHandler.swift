@@ -19,7 +19,7 @@ class SocketConnectionHandler {
     private let socket: SocketIOClient
     
     init() {
-        let url = URL(string: "http://localhost:3000")!
+        let url = URL(string: "http://192.168.1.160:3000")!
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
         self.socket = self.manager.defaultSocket
         self.setupHandlers()
@@ -48,6 +48,7 @@ class SocketConnectionHandler {
     
     private func setupHandlers() {
         self.socket.onAny { [weak self] event in
+            print("EVENT HANKLDER", event)
             self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
         }
     }

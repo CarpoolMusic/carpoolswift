@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct User: Decodable {
+struct AppleMusicUser: Decodable {
     
     let country: String
     let displayName: String

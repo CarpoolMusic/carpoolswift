@@ -129,9 +129,9 @@ class AppleMusicService: ObservableObject {
         // Implement Apple Music's fetchArtwork here
     }
     
-    func fetchUser() async throws -> User {
+    func fetchUser() async throws -> AppleMusicUser {
         // Fetch the Apple music user
-        return User(country: "", displayName: "", email: "")
+        return AppleMusicUser(country: "", displayName: "", email: "")
     }
     
     

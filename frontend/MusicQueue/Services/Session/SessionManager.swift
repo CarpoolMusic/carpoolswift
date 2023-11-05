@@ -7,6 +7,7 @@ class SessionManager: ObservableObject {
     
     // MARK: - State
     @Published var isConnected: Bool = false
+    @Published var isActive: Bool = false
     
     private var socketConnectionHandler: SocketConnectionHandler
     private var socketEventSender: SocketEventSender
@@ -17,6 +18,7 @@ class SessionManager: ObservableObject {
     private var _sessionId: String?
     private var _sessionName: String?
     private var _hostName: String?
+    private var _users: [String]?
     private var _queue: Array<GenericSong> = []
     
     private var cancellables = Set<AnyCancellable>()
@@ -32,6 +34,9 @@ class SessionManager: ObservableObject {
         get {
             return _sessionId ?? ""
         }
+        set {
+            _sessionId = newValue
+        }
     }
     
     var sessionName: String {
@@ -46,21 +51,29 @@ class SessionManager: ObservableObject {
         }
     }
     
+    var users: [String] {
+        get {
+            return _users ?? []
+        }
+        set{
+            _users = newValue
+        }
+    }
+    
     //MARK: - Session data
     init() {
         self.socketConnectionHandler = SocketConnectionHandler()
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
         // Subscribe to the connection changes
         socketConnectionHandler.$connected
-            .sink { connected in
-                self.isConnected = connected
+            .sink { [weak self] connected in
+                self?.isConnected = connected
             }
             .store(in: &cancellables)
         
         // subscribe session to socket events
         socketConnectionHandler.eventPublisher
             .sink { [weak self] event, items in
-                print("ITEMS", items)
                 self?.handleEvent(event: event, items: items)
             }
             .store(in: &cancellables)
@@ -72,24 +85,14 @@ class SessionManager: ObservableObject {
     
     // MARK: - Socket.IO messages
     func handleEvent(event: String, items: [Any]) {
+        print("EVENT ", event)
         switch event {
         case "sessionCreated":
-            self._isHost = true
-            print("SESSION DATA", items)
-            if let sessionData = items.first as? [String: [String: Any]] {
-                if let response = sessionData["sessionCreatedResponse"] {
-                    self._hostId = response["hostId"] as? String
-                    self._sessionId = response["sessionId"] as? String
-                    self._sessionName = response["sessionName"] as? String
-                } else {
-                    // Handle error
-                }
-            }
-            
+            handleCreateSessionResponse(items: items)
         case "sessionJoined":
-            // load data from items into session
-            print("join")
-            self.isConnected = true
+            handleJoinSessionResponse(items: items)
+        case "userJoined":
+            handleUserJoinedEvent(items: items)
         case "sessionLeft":
             self.isConnected = false
         case "songVoted":
@@ -113,8 +116,8 @@ class SessionManager: ObservableObject {
         try self.socketEventSender.createSession(hostName: hostName, sessionName: sessionName)
     }
     
-    func joinSession(sessionId: String) throws {
-        try self.socketEventSender.joinSession(sessionID: sessionId)
+    func joinSession(sessionId: String, hostName: String) throws {
+        try self.socketEventSender.joinSession(sessionID: sessionId, hostName: hostName)
     }
     
     func leaveSession() {
@@ -132,4 +135,49 @@ class SessionManager: ObservableObject {
     func getQueueItems() -> Array<GenericSong> {
         return self._queue
     }
+    
+    
+    //MARK: - Event Handling
+    
+    func handleCreateSessionResponse(items: [Any]) {
+        if let firstItem = items.first as? [String: Any] {
+            if let sessionId = firstItem["sessionId"] as? String {
+                self._sessionId = sessionId
+                self.isActive = true
+            } else if let errResponse = firstItem["error"] {
+                print("Handle err", errResponse)
+            } else {
+                print("Unknown response")
+            }
+        }
+    }
+    
+    func handleJoinSessionResponse(items: [Any]) {
+        print("SESSION JOINEDDJDJFDJF")
+        if let firstItem = items.first as? [String: Any] {
+            if let users = firstItem["users"] as? [String] {
+                self.users = users
+                self.isActive = true
+            } else if let errResponse = firstItem["error"] {
+                print("Handle err", errResponse)
+            } else {
+                print("Unkown response")
+            }
+        }
+    }
+    
+    // Recieved when a some other user joins this session
+    func handleUserJoinedEvent(items: [Any]) {
+        if let firstItem = items.first as? [String: Any] {
+            if let user = firstItem["user"] as? String {
+                self.users.append(user)
+            }
+        } else {
+            print("Unkown event in userJoined")
+        }
+    }
+
+   
+    
+    
 }
