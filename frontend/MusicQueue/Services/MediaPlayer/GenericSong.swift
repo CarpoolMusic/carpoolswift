@@ -6,7 +6,7 @@
 //
 
 protocol GenericSong {
-    var id: String { get }
+    var id: Int { get }
     var title: String { get }
     var artist: String { get }
     var album: String { get }

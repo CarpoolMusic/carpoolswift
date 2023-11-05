@@ -15,12 +15,11 @@ struct SessionView: View {
         NavigationStack {
             VStack {
                 HStack {
-                    TitleView(title: "Session View")
-                    Button(action: {
-                        sessionViewModel.handleSearchButtonPressed()
-                    }) {
-                        Image(systemName: "search")
-                    }
+                    TitleView(title: "TESTESTST")
+                    
+                    Spacer()
+                    
+                    ButtonImageView(action: sessionViewModel.handleSearchButtonPressed, buttonImage: Image(systemName: "magnifyingglass"))
                 }
                 
                 NowPlayingView(currentlyPlayingArt: nil)
@@ -33,12 +32,13 @@ struct SessionView: View {
                 
                 MenuBarView(sessionManager: sessionViewModel.sessionManager, sessionViewModel: sessionViewModel)
             }
-        }
-        .navigationDestination(isPresented: $sessionViewModel.isQueueOpen) {
-            QueueView(sessionManager: sessionViewModel.sessionManager)
-        }
-        .navigationDestination(isPresented: $sessionViewModel.isSearching) {
-            SongSearchView()
+            .sheet(isPresented: $sessionViewModel.isQueueOpen) {
+                QueueView(sessionManager: sessionViewModel.sessionManager)
+            }
+            .sheet(isPresented: $sessionViewModel.isSearching) {
+                SongSearchView()
+            }
+            
         }
     }
 }

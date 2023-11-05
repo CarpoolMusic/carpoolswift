@@ -77,7 +77,7 @@ class AppleMusicService: ObservableObject {
     /// The action to perform when the user taps the Play/Pause button.
     func startPlayback(song: GenericSong) async {
         do {
-            let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(rawValue: song.id))
+            let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(rawValue: String(song.id)))
             let songs = try await songRequest.response()
             guard let song = songs.items.first else {
                 throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])

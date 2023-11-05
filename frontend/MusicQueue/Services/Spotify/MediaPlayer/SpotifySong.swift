@@ -8,7 +8,7 @@ import Foundation
 
 struct SpotifySong: GenericSong {
 //    var id: String = UUID().uuidString
-    var id: String = "0"
+    var id: Int = 0
     var votes: Int = 0
     
     private let track: SPTAppRemoteTrack
@@ -56,7 +56,7 @@ struct SpotifySong: GenericSong {
         }
         
         let encodableSong = EncodableGenericSong(
-            id: self.id,
+            id: String(self.id),
             votes: self.votes,
             title: self.title,
             artist: self.artist,
