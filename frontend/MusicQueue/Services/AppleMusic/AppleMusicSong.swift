@@ -7,19 +7,16 @@
 import SwiftUI
 import MusicKit
 
-struct AppleMusicSong: GenericSong {
-    
+struct AppleMusicSong {
     private let song: Song
 
     init(_ song: Song) {
         self.song = song
     }
     
-    var id: Int = 0
+    var id: MusicItemID = MusicItemID("0")
+    
     var votes: Int = 0
-    //    var id: Int {
-//        return song.id.rawValue
-//    }
     
     var title: String {
         return song.title
@@ -49,7 +46,7 @@ struct AppleMusicSong: GenericSong {
         let encoder = JSONEncoder()
         
         let encodableSong = EncodableGenericSong(
-            id: String(self.id),
+            id: self.id.rawValue,
             votes: self.votes,
             title: self.title,
             artist: self.artist,

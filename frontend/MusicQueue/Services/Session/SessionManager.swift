@@ -2,6 +2,7 @@ import Foundation
 import SocketIO
 import SwiftUI
 import Combine
+import MusicKit
 
 class SessionManager: ObservableObject {
     
@@ -19,7 +20,7 @@ class SessionManager: ObservableObject {
     private var _sessionName: String?
     private var _hostName: String?
     private var _users: [String]?
-    private var _queue: Array<GenericSong> = []
+    private var _queue: Array<AnyMusicItem> = []
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -97,7 +98,7 @@ class SessionManager: ObservableObject {
             self.isConnected = false
         case "songVoted":
             print("Song voted")
-            voteSong(songId: items[0] as! Int, vote: items[1] as! Int)
+            voteSong(songId: MusicItemID(items[0] as! String), vote: items[1] as! Int)
             
         default:
             print("Unhandled event: \(event)")
@@ -124,7 +125,7 @@ class SessionManager: ObservableObject {
         self.socketEventSender.leaveSession(sessionID: self.sessionId)
     }
     
-    func voteSong(songId: Int, vote: Int) {
+    func voteSong(songId: MusicItemID, vote: Int) {
         
     }
     
@@ -132,7 +133,27 @@ class SessionManager: ObservableObject {
         return self._isHost
     }
     
-    func getQueueItems() -> Array<GenericSong> {
+    func enqueue(song: AnyMusicItem) {
+        self._queue.append(song)
+    }
+    
+    func dequeue() -> AnyMusicItem? {
+        if self._queue.isEmpty {
+            return nil
+        } else {
+            return _queue.removeFirst()
+        }
+    }
+    
+    var isEmpty: Bool {
+        return _queue.isEmpty
+    }
+    
+    var front: AnyMusicItem? {
+        return _queue.first
+    }
+    
+    func getQueueItems() -> Array<AnyMusicItem> {
         return self._queue
     }
     

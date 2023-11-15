@@ -12,7 +12,6 @@ struct ContentView: View {
     @ObservedObject var contentViewModel = ContentViewModel()
     
     var body: some View {
-        // For testing purposes we will assume authenticated
         DashboardView()
         //        if contentViewModel.isAuthenticated {
 //            DashboardView()

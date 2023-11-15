@@ -13,7 +13,7 @@ class Session {
     let hostId: String
     @Published var participants: [User] = []
     /// The song queue for this session
-    @Published var queue: [GenericSong] = []
+    @Published var queue: [any GenericSong] = []
 //    {
 //        didSet {
 //            queue.sort {

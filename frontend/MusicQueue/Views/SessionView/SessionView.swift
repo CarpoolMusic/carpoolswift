@@ -36,7 +36,7 @@ struct SessionView: View {
                 QueueView(sessionManager: sessionViewModel.sessionManager)
             }
             .sheet(isPresented: $sessionViewModel.isSearching) {
-                SongSearchView()
+                SongSearchView(sessionManager: sessionViewModel.sessionManager)
             }
             
         }

@@ -4,11 +4,12 @@
 //
 //  Created by Nolan Biscaro on 2023-09-17.
 //
-import Foundation
+import MusicKit
 
-struct SpotifySong: GenericSong {
-//    var id: String = UUID().uuidString
-    var id: Int = 0
+struct SpotifySong {
+    
+    var id: MusicItemID = MusicItemID("0")
+    
     var votes: Int = 0
     
     private let track: SPTAppRemoteTrack
@@ -56,7 +57,7 @@ struct SpotifySong: GenericSong {
         }
         
         let encodableSong = EncodableGenericSong(
-            id: String(self.id),
+            id: self.id.rawValue,
             votes: self.votes,
             title: self.title,
             artist: self.artist,

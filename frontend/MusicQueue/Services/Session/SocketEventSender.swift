@@ -64,7 +64,7 @@ class SocketEventSender {
 //        connection.emit(event: event.rawValue, with: [sessionID: sessionID])
     }
     
-    func addSong(sessionId: String, song: GenericSong) {
+    func addSong(sessionId: String, song: any GenericSong) {
         let event = SocketSendEvent.addSong
 //        connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songData": song.toJSONData()!] as [String : Any])
     }

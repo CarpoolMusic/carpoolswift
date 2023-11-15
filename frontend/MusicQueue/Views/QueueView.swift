@@ -7,7 +7,19 @@
 
 import SwiftUI
 
+struct MusicCellView: View {
+    var song: AnyMusicItem
+    var queueViewModel: QueueViewModel
+    
+    var body: some View {
+        VStack {
+            QueueMusicItemCell(song: song, sessionManager: queueViewModel.sessionManager)
+        }
+    }
+}
+
 struct QueueView: View {
+    
     
     @ObservedObject var queueViewModel: QueueViewModel
     
@@ -16,32 +28,21 @@ struct QueueView: View {
     }
     
     var body: some View {
-        VStack {
-            if (queueViewModel.sessionManager.getQueueItems().isEmpty) {
-                Image(systemName: "magnifyingglass")
-                    .scaledToFill()
-                    .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
-                Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
-            }
-            List {
-                ForEach(queueViewModel.sessionManager.getQueueItems(), id: \.id) { song in
-                    MusicItemCell(artworkURL: song.artworkURL, title: song.title, artist: song.artist)
-                    HStack {
-                        Button(action: {
-                            queueViewModel.sessionManager.voteSong(songId: song.id, vote: 1)
-                        }) {
-                            Image(systemName: "hand.thumbsup")
-                                .foregroundColor(.blue)
-                        }
-                        Button(action: {
-                            queueViewModel.sessionManager.voteSong(songId: song.id, vote: -1)
-                        }) {
-                            Image(systemName: "hand.thumbsdown")
-                                .foregroundColor(.red)
-                        }
+        NavigationStack {
+            VStack {
+                if (queueViewModel.sessionManager.getQueueItems().isEmpty) {
+                    Image(systemName: "magnifyingglass")
+                        .scaledToFill()
+                        .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
+                    Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
+                }
+                List {
+                    ForEach(queueViewModel.sessionManager.getQueueItems(), id: \.id) { song in
+                        MusicCellView(song: song, queueViewModel: queueViewModel)
                     }
                 }
             }
+            .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
         }
     }
 }
@@ -49,9 +50,17 @@ struct QueueView: View {
 class QueueViewModel: ObservableObject {
     
     var sessionManager: SessionManager
+    var searchTerm = ""
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
     }
     
+}
+
+struct QueueViewModel_Previews: PreviewProvider {
+    static var previews: some View {
+        let sessionManager = SessionManager()
+        QueueView(sessionManager: sessionManager)
+    }
 }

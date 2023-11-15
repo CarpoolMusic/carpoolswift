@@ -1,0 +1,39 @@
+{
+    "CreateSessionRequest": {
+        "hostId": "string",
+        "sessionName": "string"
+    },
+    "CreateSessionResponse": {
+        "sessionId": "string"
+    },
+    "JoinSessionRequest": {
+        "sessionId": "string",
+        "userId": "string"
+    },
+    "JoinSessionResponse": {
+        "users": [
+            {
+                "socketId": "string",
+                "userId": "string"
+            }
+        ]
+    },
+    "ErrorResponse": {
+        "type": "string",
+        "message": "string",
+        "stack_trace": "string"
+    },
+    "Request": {
+        "oneOf": [
+            { "$ref": "#/definitions/CreateSessionRequest" }
+        ]
+    },
+    "Response": {
+        "status": { "type": "string" },
+        "oneOf": [
+            { "$ref": "#/definitions/CreateSessionResponse" },
+            { "$ref": "#/definitions/ErrorResponse" }
+        ]
+    }
+
+}
