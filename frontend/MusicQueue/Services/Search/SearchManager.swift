@@ -11,6 +11,10 @@ protocol SearchManagerProtocol {
     
     // The search method that takes a query and a completion handler.
     func searchSongs(query: String, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void)
+    
+    // Takes song information and finds the corresponding song object for service
+    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void)
+    
 }
 
 class SearchManager: SearchManagerProtocol {
@@ -27,4 +31,8 @@ class SearchManager: SearchManagerProtocol {
     func searchSongs(query: String, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
         self._base.searchSongs(query: query, completion: completion)
     }
+    
+    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
+        self._base.resolveSong(song: song, completion: completion)
+    }    
 }

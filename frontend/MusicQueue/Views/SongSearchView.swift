@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
-import MusicKit
-import MusicKit
+import Combine
 
 struct SongSearchView: View {
     
     @ObservedObject var songSearchViewModel: SongSearchViewModel
+    
     init(sessionManager: SessionManager) {
         self.songSearchViewModel = SongSearchViewModel(sessionManager: sessionManager)
     }
@@ -47,13 +47,13 @@ struct SongSearchView: View {
 class SongSearchViewModel: ObservableObject {
     @Published var query: String = "" {
         didSet {
-            self.searchManager.searchSongs(query: query) { [weak self] result in
+            self.sessionManager.searchSongs(query: query) { [weak self] result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let songs):
                         self?.songs = songs
                     case .failure(let error):
-                        print(error.localizedDescription)
+                        print("Error searching songs \(error)")
                         self?.songs = []
                     }
                 }
@@ -66,22 +66,32 @@ class SongSearchViewModel: ObservableObject {
     
     let musicServiceType: String = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
     let sessionManager: SessionManager
-    let searchManager: SearchManager
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init(sessionManager: SessionManager) {
-//        searchManager = ((musicServiceType == "apple") ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager()))
-        searchManager = SearchManager(AppleMusicSearchManager())
         self.sessionManager = sessionManager
+        
+        // Observe changes in session manager queue
+        sessionManager.$songAdded
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.songAdded = true
+            }
+            .store(in: &cancellables)
     }
     
     func songInQueue(_ song: AnyMusicItem) -> Bool {
-        sessionManager.getQueueItems().contains(where: { $0.id == song.id })
+        sessionManager.getQueuedSongs().contains(where: { $0.id == song.id })
     }
     
     func addSongToQueue(_ song: AnyMusicItem) {
-        if !songInQueue(song) {
-            sessionManager.enqueue(song: song)
-            songAdded = true
+        do {
+            if !songInQueue(song) {
+                try sessionManager.addSong(song: song)
+            }
+        } catch {
+            print("Error adding song")
         }
     }
 }

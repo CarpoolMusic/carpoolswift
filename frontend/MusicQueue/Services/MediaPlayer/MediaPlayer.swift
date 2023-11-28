@@ -4,7 +4,6 @@
 //
 //  Created by Nolan Biscaro on 2023-09-16.
 //
-import MusicKit
 
 enum PlayerState {
     case playing
@@ -14,13 +13,13 @@ enum PlayerState {
 
 protocol MediaPlayerProtocol {
     func play() async throws -> Void
-    func playSong(song: Song) async throws -> Void
+    func playSong(song: AnyMusicItem) async throws -> Void
     func pause() async throws -> Void
     func resume() async throws -> Void
     func togglePlayPause() async throws -> Void
     func skipToNext() async throws -> Void
     func skipToPrevious() async throws -> Void
-    func enqueueSong(song: Song) async throws -> Void
+    func enqueueSong(song: AnyMusicItem) async throws -> Void
     func getPlayerState() -> PlayerState
     func isPlaying() -> Bool
 }
@@ -51,7 +50,7 @@ class MediaPlayer: NSObject, MediaPlayerProtocol {
         }
     }
     
-    func playSong(song: Song) async throws {
+    func playSong(song: AnyMusicItem) async throws {
         try await mediaPlayer.playSong(song: song)
     }
 
@@ -67,7 +66,7 @@ class MediaPlayer: NSObject, MediaPlayerProtocol {
         try await mediaPlayer.skipToPrevious()
     }
     
-    func enqueueSong(song: Song) async throws {
+    func enqueueSong(song: AnyMusicItem) async throws {
         try await mediaPlayer.enqueueSong(song: song)
     }
     

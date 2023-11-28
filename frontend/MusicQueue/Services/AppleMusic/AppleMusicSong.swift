@@ -8,9 +8,9 @@ import SwiftUI
 import MusicKit
 
 struct AppleMusicSong {
-    private let song: Song
+    private let song: MusicKit.Song
 
-    init(_ song: Song) {
+    init(_ song: MusicKit.Song) {
         self.song = song
     }
     

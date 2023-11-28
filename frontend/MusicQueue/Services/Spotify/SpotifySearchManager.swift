@@ -6,6 +6,10 @@
 //
 
 class SpotifySearchManager: SearchManagerProtocol {
+    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
+        
+    }
+    
     
     func searchSongs(query: String, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
         

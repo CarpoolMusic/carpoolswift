@@ -12,9 +12,7 @@ struct MusicCellView: View {
     var queueViewModel: QueueViewModel
     
     var body: some View {
-        VStack {
-            QueueMusicItemCell(song: song, sessionManager: queueViewModel.sessionManager)
-        }
+        QueueMusicItemCell(song: song, sessionManager: queueViewModel.sessionManager)
     }
 }
 
@@ -28,22 +26,18 @@ struct QueueView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                if (queueViewModel.sessionManager.getQueueItems().isEmpty) {
-                    Image(systemName: "magnifyingglass")
-                        .scaledToFill()
-                        .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
-                    Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
-                }
-                List {
-                    ForEach(queueViewModel.sessionManager.getQueueItems(), id: \.id) { song in
-                        MusicCellView(song: song, queueViewModel: queueViewModel)
-                    }
-                }
+            if (queueViewModel.sessionManager.getQueuedSongs().isEmpty) {
+                Image(systemName: "magnifyingglass")
+                    .scaledToFill()
+                    .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
+                Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
             }
-            .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
+        List {
+            ForEach(queueViewModel.sessionManager.getQueuedSongs(), id: \.id) { song in
+                MusicCellView(song: song, queueViewModel: queueViewModel)
+            }
         }
+        .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
     }
 }
 

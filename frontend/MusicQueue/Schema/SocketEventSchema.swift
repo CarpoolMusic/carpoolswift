@@ -11,18 +11,24 @@ struct SocketEventSchema: Codable {
     let createSessionResponse: CreateSessionResponse
     let joinSessionRequest: JoinSessionRequest
     let joinSessionResponse: JoinSessionResponse
+    let songObj: Song
+    let addSongRequest: AddSongRequest
+    let songAddedEvent: SongAddedEvent
+    let voteSongRequest: VoteSongRequest
+    let voteSongEvent: VoteSongEvent
     let errorResponse: ErrorResponse
-    let request: Request
-    let response: Response
 
     enum CodingKeys: String, CodingKey {
         case createSessionRequest = "CreateSessionRequest"
         case createSessionResponse = "CreateSessionResponse"
         case joinSessionRequest = "JoinSessionRequest"
         case joinSessionResponse = "JoinSessionResponse"
+        case songObj = "SongObj"
+        case addSongRequest = "AddSongRequest"
+        case songAddedEvent = "SongAddedEvent"
+        case voteSongRequest = "VoteSongRequest"
+        case voteSongEvent = "VoteSongEvent"
         case errorResponse = "ErrorResponse"
-        case request = "Request"
-        case response = "Response"
     }
 }
 
@@ -49,18 +55,124 @@ extension SocketEventSchema {
         createSessionResponse: CreateSessionResponse? = nil,
         joinSessionRequest: JoinSessionRequest? = nil,
         joinSessionResponse: JoinSessionResponse? = nil,
-        errorResponse: ErrorResponse? = nil,
-        request: Request? = nil,
-        response: Response? = nil
+        songObj: Song? = nil,
+        addSongRequest: AddSongRequest? = nil,
+        songAddedEvent: SongAddedEvent? = nil,
+        voteSongRequest: VoteSongRequest? = nil,
+        voteSongEvent: VoteSongEvent? = nil,
+        errorResponse: ErrorResponse? = nil
     ) -> SocketEventSchema {
         return SocketEventSchema(
             createSessionRequest: createSessionRequest ?? self.createSessionRequest,
             createSessionResponse: createSessionResponse ?? self.createSessionResponse,
             joinSessionRequest: joinSessionRequest ?? self.joinSessionRequest,
             joinSessionResponse: joinSessionResponse ?? self.joinSessionResponse,
-            errorResponse: errorResponse ?? self.errorResponse,
-            request: request ?? self.request,
-            response: response ?? self.response
+            songObj: songObj ?? self.songObj,
+            addSongRequest: addSongRequest ?? self.addSongRequest,
+            songAddedEvent: songAddedEvent ?? self.songAddedEvent,
+            voteSongRequest: voteSongRequest ?? self.voteSongRequest,
+            voteSongEvent: voteSongEvent ?? self.voteSongEvent,
+            errorResponse: errorResponse ?? self.errorResponse
+        )
+    }
+
+    func jsonData() throws -> Data {
+        return try newJSONEncoder().encode(self)
+    }
+
+    func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
+        return String(data: try self.jsonData(), encoding: encoding)
+    }
+}
+
+// MARK: - AddSongRequest
+struct AddSongRequest: Codable {
+    let sessionID: String
+    let song: Song
+
+    enum CodingKeys: String, CodingKey {
+        case sessionID = "sessionId"
+        case song
+    }
+}
+
+// MARK: AddSongRequest convenience initializers and mutators
+
+extension AddSongRequest {
+    init(data: Data) throws {
+        self = try newJSONDecoder().decode(AddSongRequest.self, from: data)
+    }
+
+    init(_ json: String, using encoding: String.Encoding = .utf8) throws {
+        guard let data = json.data(using: encoding) else {
+            throw NSError(domain: "JSONDecoding", code: 0, userInfo: nil)
+        }
+        try self.init(data: data)
+    }
+
+    init(fromURL url: URL) throws {
+        try self.init(data: try Data(contentsOf: url))
+    }
+
+    func with(
+        sessionID: String? = nil,
+        song: Song? = nil
+    ) -> AddSongRequest {
+        return AddSongRequest(
+            sessionID: sessionID ?? self.sessionID,
+            song: song ?? self.song
+        )
+    }
+
+    func jsonData() throws -> Data {
+        return try newJSONEncoder().encode(self)
+    }
+
+    func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
+        return String(data: try self.jsonData(), encoding: encoding)
+    }
+}
+
+// MARK: - Song
+struct Song: Codable {
+    let service, id, title, artist: String
+    let album: String
+    let votes: Int
+}
+
+// MARK: Song convenience initializers and mutators
+
+extension Song {
+    init(data: Data) throws {
+        self = try newJSONDecoder().decode(Song.self, from: data)
+    }
+
+    init(_ json: String, using encoding: String.Encoding = .utf8) throws {
+        guard let data = json.data(using: encoding) else {
+            throw NSError(domain: "JSONDecoding", code: 0, userInfo: nil)
+        }
+        try self.init(data: data)
+    }
+
+    init(fromURL url: URL) throws {
+        try self.init(data: try Data(contentsOf: url))
+    }
+
+    func with(
+        service: String? = nil,
+        id: String? = nil,
+        title: String? = nil,
+        artist: String? = nil,
+        album: String? = nil,
+        votes: Int? = nil
+    ) -> Song {
+        return Song(
+            service: service ?? self.service,
+            id: id ?? self.id,
+            title: title ?? self.title,
+            artist: artist ?? self.artist,
+            album: album ?? self.album,
+            votes: votes ?? self.votes
         )
     }
 
@@ -347,16 +459,16 @@ extension User {
     }
 }
 
-// MARK: - Request
-struct Request: Codable {
-    let oneOf: [OneOf]
+// MARK: - SongAddedEvent
+struct SongAddedEvent: Codable {
+    let song: Song
 }
 
-// MARK: Request convenience initializers and mutators
+// MARK: SongAddedEvent convenience initializers and mutators
 
-extension Request {
+extension SongAddedEvent {
     init(data: Data) throws {
-        self = try newJSONDecoder().decode(Request.self, from: data)
+        self = try newJSONDecoder().decode(SongAddedEvent.self, from: data)
     }
 
     init(_ json: String, using encoding: String.Encoding = .utf8) throws {
@@ -371,10 +483,10 @@ extension Request {
     }
 
     func with(
-        oneOf: [OneOf]? = nil
-    ) -> Request {
-        return Request(
-            oneOf: oneOf ?? self.oneOf
+        song: Song? = nil
+    ) -> SongAddedEvent {
+        return SongAddedEvent(
+            song: song ?? self.song
         )
     }
 
@@ -387,20 +499,22 @@ extension Request {
     }
 }
 
-// MARK: - OneOf
-struct OneOf: Codable {
-    let ref: String
+// MARK: - VoteSongEvent
+struct VoteSongEvent: Codable {
+    let songID: String
+    let vote: Int
 
     enum CodingKeys: String, CodingKey {
-        case ref = "$ref"
+        case songID = "songId"
+        case vote
     }
 }
 
-// MARK: OneOf convenience initializers and mutators
+// MARK: VoteSongEvent convenience initializers and mutators
 
-extension OneOf {
+extension VoteSongEvent {
     init(data: Data) throws {
-        self = try newJSONDecoder().decode(OneOf.self, from: data)
+        self = try newJSONDecoder().decode(VoteSongEvent.self, from: data)
     }
 
     init(_ json: String, using encoding: String.Encoding = .utf8) throws {
@@ -415,10 +529,12 @@ extension OneOf {
     }
 
     func with(
-        ref: String? = nil
-    ) -> OneOf {
-        return OneOf(
-            ref: ref ?? self.ref
+        songID: String? = nil,
+        vote: Int? = nil
+    ) -> VoteSongEvent {
+        return VoteSongEvent(
+            songID: songID ?? self.songID,
+            vote: vote ?? self.vote
         )
     }
 
@@ -431,17 +547,23 @@ extension OneOf {
     }
 }
 
-// MARK: - Response
-struct Response: Codable {
-    let status: Status
-    let oneOf: [OneOf]
+// MARK: - VoteSongRequest
+struct VoteSongRequest: Codable {
+    let sessionID, songID: String
+    let vote: Int
+
+    enum CodingKeys: String, CodingKey {
+        case sessionID = "sessionId"
+        case songID = "songId"
+        case vote
+    }
 }
 
-// MARK: Response convenience initializers and mutators
+// MARK: VoteSongRequest convenience initializers and mutators
 
-extension Response {
+extension VoteSongRequest {
     init(data: Data) throws {
-        self = try newJSONDecoder().decode(Response.self, from: data)
+        self = try newJSONDecoder().decode(VoteSongRequest.self, from: data)
     }
 
     init(_ json: String, using encoding: String.Encoding = .utf8) throws {
@@ -456,52 +578,14 @@ extension Response {
     }
 
     func with(
-        status: Status? = nil,
-        oneOf: [OneOf]? = nil
-    ) -> Response {
-        return Response(
-            status: status ?? self.status,
-            oneOf: oneOf ?? self.oneOf
-        )
-    }
-
-    func jsonData() throws -> Data {
-        return try newJSONEncoder().encode(self)
-    }
-
-    func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
-        return String(data: try self.jsonData(), encoding: encoding)
-    }
-}
-
-// MARK: - Status
-struct Status: Codable {
-    let type: String
-}
-
-// MARK: Status convenience initializers and mutators
-
-extension Status {
-    init(data: Data) throws {
-        self = try newJSONDecoder().decode(Status.self, from: data)
-    }
-
-    init(_ json: String, using encoding: String.Encoding = .utf8) throws {
-        guard let data = json.data(using: encoding) else {
-            throw NSError(domain: "JSONDecoding", code: 0, userInfo: nil)
-        }
-        try self.init(data: data)
-    }
-
-    init(fromURL url: URL) throws {
-        try self.init(data: try Data(contentsOf: url))
-    }
-
-    func with(
-        type: String? = nil
-    ) -> Status {
-        return Status(
-            type: type ?? self.type
+        sessionID: String? = nil,
+        songID: String? = nil,
+        vote: Int? = nil
+    ) -> VoteSongRequest {
+        return VoteSongRequest(
+            sessionID: sessionID ?? self.sessionID,
+            songID: songID ?? self.songID,
+            vote: vote ?? self.vote
         )
     }
 

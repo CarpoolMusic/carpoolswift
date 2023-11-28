@@ -20,6 +20,12 @@ protocol GenericSong: MusicItem, Identifiable {
 }
 
 struct AnyMusicItem: GenericSong {
+    func toJSONData() -> Data? {
+        // nothing
+        return nil
+    }
+    
+    var service: String
     var id: MusicItemID
     var title: String
     var artist: String
@@ -30,10 +36,11 @@ struct AnyMusicItem: GenericSong {
     var artwork: Artwork?
     var votes: Int
     
-    private var _base: any MusicItem
+    private var _base: (any MusicItem)?
     
-    init(_ base: Song) {
+    init(_ base: MusicKit.Song) {
         self._base = base
+        self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
         self.title = base.title
         self.artist = base.artistName
@@ -44,8 +51,18 @@ struct AnyMusicItem: GenericSong {
         self.votes = 0
     }
     
+    init(id: String, title: String, artist: String, album: String, votes: Int = 0) {
+        self.id = MusicItemID(id)
+        self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.votes = votes
+    }
+        
     init(_ base: any GenericSong) {
         self._base = base
+        self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
         self.title = base.title
         self.artist = base.artist
@@ -55,10 +72,9 @@ struct AnyMusicItem: GenericSong {
         self.artworkURL = base.artworkURL
         self.votes = base.votes
     }
-    
-    func toJSONData() -> Data? {
-        // impl
-        return nil
+
+    func getBase() -> (any MusicItem)? {
+        return self._base
     }
 }
 

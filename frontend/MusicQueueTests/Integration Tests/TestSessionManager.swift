@@ -92,8 +92,10 @@ final class TestSessionManager: XCTestCase {
         sessionManager.isActive = false
     }
     
-    func testJoinSession() throws {
+    func testAddSong() throws {
+        
     }
+    
     
     func testExample() throws {
         // This is an example of a functional test case.

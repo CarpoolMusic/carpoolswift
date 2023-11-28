@@ -48,7 +48,6 @@ class SocketConnectionHandler {
     
     private func setupHandlers() {
         self.socket.onAny { [weak self] event in
-            print("EVENT HANKLDER", event)
             self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
         }
     }

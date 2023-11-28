@@ -41,9 +41,9 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
         self.appRemote.playerAPI?.resume()
     }
     
-    func playSong(song: Song) async throws {
-        let trackUri = song.id.rawValue
-        self.appRemote.playerAPI?.play(trackUri, callback: defaultCallback)
+    func playSong(song: AnyMusicItem) async throws {
+//        let trackUri = song.id
+//        self.appRemote.playerAPI?.play(trackUri.rawValue, callback: defaultCallback)
     }
     
     func pause() {
@@ -72,9 +72,9 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
         self.appRemote.playerAPI?.skip(toPrevious: defaultCallback)
     }
     
-    func enqueueSong(song: Song) async throws {
-        let trackUri = song.id.rawValue
-        self.appRemote.playerAPI?.enqueueTrackUri(trackUri)
+    func enqueueSong(song: AnyMusicItem) async throws {
+//        let trackUri = song.id
+//        self.appRemote.playerAPI?.enqueueTrackUri(trackUri.rawValue)
     }
     
     func getPlayerState() -> PlayerState {

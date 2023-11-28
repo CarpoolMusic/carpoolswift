@@ -28,15 +28,15 @@ struct BaseMusicItemCell: View {
                 if let artwork = self.artwork {
                     // Show apple music artwork
                     ArtworkImage(artwork, width: 50)
-                        .cornerRadius(6)
+//                        .cornerRadius(6)
                 } else if let artworkURL = self.artworkURL {
                     // Get Spotify artwork image from URL
                     AsyncImage(url: artworkURL)
-                        .cornerRadius(6)
+//                        .cornerRadius(6)
                 } else {
                     Image(systemName: "music.note.list")
                         .frame(width: 50, height: 50)
-                        .cornerRadius(6)
+//                        .cornerRadius(6)
                 }
                 Spacer()
             }
@@ -93,36 +93,40 @@ struct QueueMusicItemCell: View {
     var body: some View {
         VStack {
             BaseMusicItemCell(song: song)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
 
             HStack {
                 Button(action: {
-                    if !thumbsUpPressed {
-                        sessionManager.voteSong(songId: song.id, vote: 1)
-                    } else {
-                        sessionManager.voteSong(songId: song.id, vote: -1)
+                    do {
+                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: 1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: -1)
+                        thumbsUpPressed.toggle()
+                        thumbsDownPressed = false
+                    } catch {
+                        print("Error downvoting on song")
                     }
-                    thumbsUpPressed.toggle()
-                    thumbsDownPressed = !thumbsUpPressed
                 }) {
                     Image(systemName: thumbsUpPressed ? "hand.thumbsup.fill" : "hand.thumbsup")
                         .foregroundColor(.blue)
                 }
+                .buttonStyle(PlainButtonStyle())
                 .animation(.easeInOut, value: thumbsUpPressed)
                 
                 Spacer()
                 
                 Button(action: {
-                    if !thumbsDownPressed {
-                        sessionManager.voteSong(songId: song.id, vote: -1)
-                    } else {
-                        sessionManager.voteSong(songId: song.id, vote: 1)
+                    do {
+                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: -1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: 1)
+                        thumbsDownPressed.toggle()
+                        thumbsUpPressed = false
+                    } catch {
+                        print("Error upvoting song")
                     }
-                    thumbsDownPressed.toggle()
-                    thumbsUpPressed = !thumbsDownPressed
                 }) {
                     Image(systemName: thumbsDownPressed ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                         .foregroundColor(.red)
                 }
+                .buttonStyle(PlainButtonStyle())
                 .animation(.easeInOut, value: thumbsDownPressed)
             }
         }

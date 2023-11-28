@@ -23,10 +23,15 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         }
     }
     
-    func playSong(song: Song) async throws {
-        try await self.queue.insert(song, position: .afterCurrentEntry)
-        try await self.player.skipToNextEntry()
-        try await self.play()
+    func playSong(song: AnyMusicItem) async throws {
+        if let song: MusicKit.Song = song.getBase() as? MusicKit.Song {
+            try await self.queue.insert(song, position: .afterCurrentEntry)
+            try await self.player.skipToNextEntry()
+            try await self.play()
+        } else {
+            // Handle error
+            print("Error getting base for song")
+        }
     }
     
     func resume() async throws {
@@ -49,8 +54,12 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         try await self.player.skipToPreviousEntry()
     }
     
-    func enqueueSong(song: Song) async throws {
-        try await self.queue.insert(song, position: .tail)
+    func enqueueSong(song: AnyMusicItem) async throws {
+        if let song: MusicKit.Song = song.getBase() as? MusicKit.Song {
+            try await self.queue.insert(song, position: .tail)
+        } else {
+            print("Error downcasting musicItem to Song")
+        }
     }
     
     func getPlayerState() -> PlayerState {
