@@ -99,7 +99,7 @@ struct QueueMusicItemCell: View {
             HStack {
                 Button(action: {
                     do {
-                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: 1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: -1)
+                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: -1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: 1)
                         thumbsUpPressed.toggle()
                         thumbsDownPressed = false
                     } catch {
@@ -116,7 +116,7 @@ struct QueueMusicItemCell: View {
                 
                 Button(action: {
                     do {
-                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: -1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: 1)
+                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: 1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: -1)
                         thumbsDownPressed.toggle()
                         thumbsUpPressed = false
                     } catch {
