@@ -4,9 +4,19 @@
 //
 //  Created by Nolan Biscaro on 2023-09-15.
 //
+import SwiftUI
 import MusicKit
 
 class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
+    
+    func currentSongArtworkUrl() -> URL? {
+        return nil
+    }
+    
+    func setQueue(queue: Queue) {
+        print("nothing")
+    }
+    
     let appRemoteManager: SpotifyAppRemoteManager
     let appRemote: SPTAppRemote
     var isPaused: Bool = true
@@ -85,6 +95,10 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
 //            return PlayerState.playing
 //        }
         return PlayerState.undetermined
+    }
+    
+    func queueIsEmpty() -> Bool {
+        return false
     }
     
     func isPlaying() -> Bool {

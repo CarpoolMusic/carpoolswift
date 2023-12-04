@@ -6,7 +6,7 @@
 //
 import MusicKit
 
-protocol GenericSong: MusicItem, Identifiable {
+protocol GenericSong: MusicItem, Identifiable, Equatable {
     var id: MusicItemID { get }
     var title: String { get }
     var artist: String { get }
@@ -19,7 +19,16 @@ protocol GenericSong: MusicItem, Identifiable {
     func toJSONData() -> Data?
 }
 
+enum baseSong {
+    case appleSong(MusicKit.Song)
+    case spotifySong(SpotifySong)
+}
+
 struct AnyMusicItem: GenericSong {
+    static func == (lhs: AnyMusicItem, rhs: AnyMusicItem) -> Bool {
+        return lhs.title == rhs.title
+    }
+    
     func toJSONData() -> Data? {
         // nothing
         return nil
@@ -36,10 +45,10 @@ struct AnyMusicItem: GenericSong {
     var artwork: Artwork?
     var votes: Int
     
-    private var _base: (any MusicItem)?
+    private var _base: baseSong
     
     init(_ base: MusicKit.Song) {
-        self._base = base
+        self._base = .appleSong(base)
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
         self.title = base.title
@@ -51,17 +60,8 @@ struct AnyMusicItem: GenericSong {
         self.votes = 0
     }
     
-    init(id: String, title: String, artist: String, album: String, votes: Int = 0) {
-        self.id = MusicItemID(id)
-        self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
-        self.title = title
-        self.artist = artist
-        self.album = album
-        self.votes = votes
-    }
-        
-    init(_ base: any GenericSong) {
-        self._base = base
+    init(_ base: SpotifySong) {
+        self._base = .spotifySong(base)
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
         self.title = base.title
@@ -72,8 +72,8 @@ struct AnyMusicItem: GenericSong {
         self.artworkURL = base.artworkURL
         self.votes = base.votes
     }
-
-    func getBase() -> (any MusicItem)? {
+    
+    func getBase() -> baseSong {
         return self._base
     }
 }

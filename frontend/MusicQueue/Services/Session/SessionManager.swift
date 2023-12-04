@@ -12,6 +12,7 @@ class SessionManager: ObservableObject {
     
     // Set each time a song is added to the queue
     @Published var songAdded: Bool = false
+    @Published var queueUpdated: Bool = false
     
     private var searchManager: SearchManager
     private var socketConnectionHandler: SocketConnectionHandler
@@ -27,6 +28,43 @@ class SessionManager: ObservableObject {
     private var _users: [String]?
     
     private var cancellables = Set<AnyCancellable>()
+    
+    //MARK: - Session data
+    init() {
+        print("Session Manager init")
+        self.socketConnectionHandler = SocketConnectionHandler()
+        self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
+//        self.searchManager = (UserDefaults.standard.string(forKey: "musicServiceType") == "apple") ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
+        self.searchManager = SearchManager(AppleMusicSearchManager())
+        
+        // Subscribe to the connection changes
+        socketConnectionHandler.$connected
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] connected in
+                self?.isConnected = connected
+            }
+            .store(in: &cancellables)
+        
+        // subscribe session to socket events
+        socketConnectionHandler.eventPublisher
+            .sink { [weak self] event, items in
+                self?.handleEvent(event: event, items: items)
+            }
+            .store(in: &cancellables)
+        
+        // subscribe to changes i
+        _queue.$updated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.queueUpdated.toggle()
+            }
+            .store(in: &cancellables)
+    }
+    
+    deinit {
+        socketConnectionHandler.disconnect()
+    }
+    
     
     // Accessors
     var hostId: String {
@@ -65,31 +103,12 @@ class SessionManager: ObservableObject {
         }
     }
     
-    //MARK: - Session data
-    init() {
-        self.socketConnectionHandler = SocketConnectionHandler()
-        self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
-        self.searchManager = ((UserDefaults.standard.string(forKey: "musicServiceType")) != nil) ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
-        
-        // Subscribe to the connection changes
-        socketConnectionHandler.$connected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] connected in
-                self?.isConnected = connected
-            }
-            .store(in: &cancellables)
-        
-        // subscribe session to socket events
-        socketConnectionHandler.eventPublisher
-            .sink { [weak self] event, items in
-                self?.handleEvent(event: event, items: items)
-            }
-            .store(in: &cancellables)
+    var queue: Queue {
+        get {
+            return _queue
+        }
     }
     
-    deinit {
-        socketConnectionHandler.disconnect()
-    }
     // MARK: - Socket.IO messages
     func handleEvent(event: String, items: [Any]) {
         print("EVENT ", event)
@@ -206,6 +225,7 @@ class SessionManager: ObservableObject {
                 print("Cannot parse song")
                 return
             }
+            
             // Resolve the song with music service
             searchManager.resolveSong(song: song) { result in
                 DispatchQueue.main.async {

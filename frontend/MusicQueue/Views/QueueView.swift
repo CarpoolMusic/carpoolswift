@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MusicCellView: View {
     var song: AnyMusicItem
@@ -26,25 +27,28 @@ struct QueueView: View {
     }
     
     var body: some View {
-            if (queueViewModel.sessionManager.getQueuedSongs().isEmpty) {
-                Image(systemName: "magnifyingglass")
-                    .scaledToFill()
-                    .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
-                Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
-            }
+        if (queueViewModel.sessionManager.getQueuedSongs().isEmpty) {
+            Image(systemName: "magnifyingglass")
+                .scaledToFill()
+                .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
+            Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
+        }
         List {
             ForEach(queueViewModel.sessionManager.getQueuedSongs(), id: \.id) { song in
                 MusicCellView(song: song, queueViewModel: queueViewModel)
             }
         }
+        .animation(.default, value: queueViewModel.sessionManager.queueUpdated)
         .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
     }
 }
 
 class QueueViewModel: ObservableObject {
     
-    var sessionManager: SessionManager
+    @Published var sessionManager: SessionManager
     var searchTerm = ""
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager

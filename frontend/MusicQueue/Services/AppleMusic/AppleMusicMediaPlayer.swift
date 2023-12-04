@@ -4,34 +4,38 @@
 //
 //  Created by Nolan Biscaro on 2023-09-16.
 //
+import Foundation
 import MusicKit
 
 class AppleMusicMediaPlayer: MediaPlayerProtocol {
-    private let player: SystemMusicPlayer
-    private let queue: MusicPlayer.Queue
-
-    init() {
-        self.player = SystemMusicPlayer.shared
-        self.queue = MusicPlayer.Queue()
+    private let _player: ApplicationMusicPlayer
+    private var _userQueue: Queue
+    
+    private var isPlaybackQueueSet = false
+    
+    init(queue: Queue) {
+        self._player = ApplicationMusicPlayer.shared
+        self._userQueue = queue
     }
 
     // MARK: - Playback controls
     func play() async throws {
-        try await prepareToPlay()
-        if self.player.isPreparedToPlay {
-            try await player.play()
+        print("PLAY() song pressed")
+        
+        if (self._player.queue.currentEntry == nil) {
+            try await loadNextSong()
         }
+        self.preparePlayer()
+        try await _player.play()
     }
     
-    func playSong(song: AnyMusicItem) async throws {
-        if let song: MusicKit.Song = song.getBase() as? MusicKit.Song {
-            try await self.queue.insert(song, position: .afterCurrentEntry)
-            try await self.player.skipToNextEntry()
-            try await self.play()
-        } else {
-            // Handle error
-            print("Error getting base for song")
+    func currentSongArtworkUrl() async throws -> URL? {
+        print("LOADING SONG IMAGE")
+        if (self._player.queue.currentEntry == nil) {
+            try await loadNextSong()
         }
+        
+        return self._player.queue.currentEntry?.artwork?.url(width: 40, height: 40)
     }
     
     func resume() async throws {
@@ -39,31 +43,29 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     func pause() async throws {
-        self.player.pause()
+        self._player.pause()
     }
     
     func togglePlayPause() async throws {
+        print("Toggle play pause")
         try await self.isPlaying() ? self.pause() : self.play()
     }
 
     func skipToNext() async throws {
-        try await self.player.skipToNextEntry()
+        // add next entry to player queue from user queue
+        try await self.loadNextSong()
+        try await self._player.skipToNextEntry()
+        try await self.play()
     }
 
     func skipToPrevious() async throws {
-        try await self.player.skipToPreviousEntry()
-    }
-    
-    func enqueueSong(song: AnyMusicItem) async throws {
-        if let song: MusicKit.Song = song.getBase() as? MusicKit.Song {
-            try await self.queue.insert(song, position: .tail)
-        } else {
-            print("Error downcasting musicItem to Song")
-        }
+        print("entires", _player.queue.entries)
+        try await _player.skipToPreviousEntry()
+        try await self.play()
     }
     
     func getPlayerState() -> PlayerState {
-        switch player.state.playbackStatus {
+        switch _player.state.playbackStatus {
         case .playing:
             return PlayerState.playing
         case .paused:
@@ -74,11 +76,39 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     func isPlaying() -> Bool {
-        return self.player.state.playbackStatus == .playing
+        return self._player.state.playbackStatus == .playing
     }
-
-    /// Prepares the current queue for playback, interrupting any active (nonmixable) audio sessions.
-    private func prepareToPlay() async throws {
-        return try await self.player.prepareToPlay()
+    
+    func loadNextSong() async throws -> Void {
+        // add song to play if queue is empty
+        if let nextSong = _userQueue.dequeue(), let song = convertSongToBase(anyMusicItem: nextSong) {
+            if (!self.isPlaybackQueueSet) {
+                self._player.queue = [song]
+                self.isPlaybackQueueSet = true
+            } else {
+                try await self._player.queue.insert(song, position: .tail)
+                print("entires", self._player.queue.entries)
+            }
+        } else {
+            print("Error getting song at front of queue.")
+        }
+    }
+    
+    func preparePlayer() -> Void {
+        Task {
+            try await _player.prepareToPlay()
+        }
+    }
+    
+    private func convertSongToBase(anyMusicItem: AnyMusicItem) -> MusicKit.Song? {
+        switch anyMusicItem.getBase() {
+        case .appleSong(let song):
+            return song
+        default:
+            print("error")
+        }
+        
+        print("failed to convert song to mussickit.song")
+        return nil
     }    
 }

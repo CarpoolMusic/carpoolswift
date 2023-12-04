@@ -5,6 +5,9 @@
 //  Created by Nolan Biscaro on 2023-09-16.
 //
 
+import SwiftUI
+import MusicKit
+
 enum PlayerState {
     case playing
     case paused
@@ -13,73 +16,85 @@ enum PlayerState {
 
 protocol MediaPlayerProtocol {
     func play() async throws -> Void
-    func playSong(song: AnyMusicItem) async throws -> Void
     func pause() async throws -> Void
     func resume() async throws -> Void
     func togglePlayPause() async throws -> Void
     func skipToNext() async throws -> Void
     func skipToPrevious() async throws -> Void
-    func enqueueSong(song: AnyMusicItem) async throws -> Void
     func getPlayerState() -> PlayerState
+    func currentSongArtworkUrl() async throws -> URL?
     func isPlaying() -> Bool
 }
 
-class MediaPlayer: NSObject, MediaPlayerProtocol {
-    /// Generic media player interface
-    private let mediaPlayer: MediaPlayerProtocol
+class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     
-    init(with mediaPlayer: MediaPlayerProtocol) {
-        self.mediaPlayer = mediaPlayer
+    @Published var newCurrentSong: Bool = false
+    
+    /// Generic media player interface
+    private let _base: MediaPlayerProtocol
+    
+    required init(queue: Queue) {
+//        self._base = UserDefaults.standard.string(forKey: "musicServiceType") == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer()
+        print("init media player base to apple")
+        self._base = AppleMusicMediaPlayer(queue: queue)
     }
     
     //MARK: - Music Controls
     
     func play() async throws {
-        try await mediaPlayer.play()
+        print("PLAY")
+        try await _base.play()
     }
     
     func pause() async throws {
-        try await mediaPlayer.pause()
+        print("PAUSE")
+        try await _base.pause()
     }
     
     func togglePlayPause() async throws {
-        if mediaPlayer.getPlayerState() == .paused {
-            try await mediaPlayer.play()
+        print("TOGGLE PLAY PAUSE")
+        if _base.getPlayerState() != .playing {
+            try await self.play()
         } else {
-            try await mediaPlayer.pause()
+            try await self.pause()
         }
     }
     
-    func playSong(song: AnyMusicItem) async throws {
-        try await mediaPlayer.playSong(song: song)
-    }
-
-    func resume() async throws {
-        try await mediaPlayer.resume()
-    }
+    func resume() async throws { try await _base.resume() }
     
     func skipToNext() async throws {
-        try await mediaPlayer.skipToNext()
+        print("SKIP TO NEXT")
+        try await _base.skipToNext()
+        DispatchQueue.main.async {
+            self.newCurrentSong.toggle()
+            print("SET NEW CURRENT SON")
+        }
     }
     
     func skipToPrevious() async throws {
-        try await mediaPlayer.skipToPrevious()
-    }
-    
-    func enqueueSong(song: AnyMusicItem) async throws {
-        try await mediaPlayer.enqueueSong(song: song)
+        print("SKIP TO PREV")
+        try await _base.skipToPrevious()
+        DispatchQueue.main.async {
+            print("SET NEW CURRENT SON")
+            self.newCurrentSong.toggle()
+        }
     }
     
     func getPlayerState() -> PlayerState {
-        return mediaPlayer.getPlayerState()
+        return _base.getPlayerState()
     }
     
     func isPlaying() -> Bool {
-        return self.mediaPlayer.isPlaying()
+        return self._base.isPlaying()
+    }
+    
+    func currentSongArtworkUrl() async throws -> URL? {
+        print("mediaPlayer.currentSongArtworkURl")
+        return try await self._base.currentSongArtworkUrl()
     }
     
     /// Used in cases where async is not aloud and we need to call one of the media player methods (ex. in button action)
-    func performMediaPlayerAction(_ action: @escaping () async throws -> Void) {
+    func performAsyncAction(_ action: @escaping () async throws -> Void) {
         Task {
             do {
                 try await action()
@@ -89,4 +104,8 @@ class MediaPlayer: NSObject, MediaPlayerProtocol {
             }
         }
     }
+    
+//    func setQueue(queue: Queue) {
+//        self.mediaPlayer.setQueue(queue: queue)
+//    }
 }

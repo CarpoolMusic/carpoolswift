@@ -1,5 +1,6 @@
 
 import SwiftUI
+import Combine
 
 struct SessionView: View {
     
@@ -22,7 +23,7 @@ struct SessionView: View {
                     ButtonImageView(action: sessionViewModel.handleSearchButtonPressed, buttonImage: Image(systemName: "magnifyingglass"))
                 }
                 
-                NowPlayingView(currentlyPlayingArt: nil)
+                NowPlayingView(mediaPlayer: sessionViewModel.mediaPlayer)
                 
                 Spacer()
                 
@@ -45,7 +46,7 @@ struct SessionView: View {
 
 class SessionViewModel: ObservableObject {
     
-    @State private var isPlaying = false
+    @Published private var isPlaying = false
     
     @Published var sessionManager: SessionManager
     @Published var mediaPlayer: MediaPlayer
@@ -54,11 +55,23 @@ class SessionViewModel: ObservableObject {
     @Published var isSearching = false
     @Published var sessionIsActive: Bool
     
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
         self.sessionIsActive = sessionManager.isConnected
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
-        self.mediaPlayer = MediaPlayer(with: (service == "apple" ? AppleMusicMediaPlayer() : SpotifyMediaPlayer()))
+        self.mediaPlayer = MediaPlayer(queue: sessionManager.queue)
+        
+        // subscribe to changes in queue
+//        sessionManager.$queueUpdated
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] _ in
+//                // Update queue in media player
+//                self?.mediaPlayer.setQueue(queue: self?.sessionManager.queue ?? Queue())
+//            }
+//            .store(in: &cancellables)
     }
     
     func handleSearchButtonPressed() {
