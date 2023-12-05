@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MusicKit
+import Combine
 
 enum PlayerState {
     case playing
@@ -15,6 +16,7 @@ enum PlayerState {
 }
 
 protocol MediaPlayerProtocol {
+    var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> { get }
     func play() async throws -> Void
     func pause() async throws -> Void
     func resume() async throws -> Void
@@ -22,13 +24,15 @@ protocol MediaPlayerProtocol {
     func skipToNext() async throws -> Void
     func skipToPrevious() async throws -> Void
     func getPlayerState() -> PlayerState
-    func currentSongArtworkUrl() async throws -> URL?
+    func currentSongArtworkUrl(width: Int, height: Int) async throws -> URL?
     func isPlaying() -> Bool
 }
 
-class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
+class MediaPlayer: NSObject, ObservableObject {
     
-    @Published var newCurrentSong: Bool = false
+    @Published var currentEntry: AnyMusicItem?
+    private var currentEntrySubscription: AnyCancellable?
+    
     
     /// Generic media player interface
     private let _base: MediaPlayerProtocol
@@ -37,13 +41,29 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
 //        self._base = UserDefaults.standard.string(forKey: "musicServiceType") == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer()
         print("init media player base to apple")
         self._base = AppleMusicMediaPlayer(queue: queue)
+        
+        super.init()
+        
+        setupCurrentEntrySub()
+    }
+    
+    private func setupCurrentEntrySub() {
+        currentEntrySubscription = _base.currentEntryPublisher
+            .sink { [weak self] song in
+                print("SETTING CURRENT ENTRY")
+                self?.currentEntry = song
+            }
     }
     
     //MARK: - Music Controls
     
     func play() async throws {
         print("PLAY")
-        try await _base.play()
+        do {
+            try await _base.play()
+        } catch {
+            print("Failed to skip to next with error \(error)")
+        }
     }
     
     func pause() async throws {
@@ -64,19 +84,19 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     
     func skipToNext() async throws {
         print("SKIP TO NEXT")
-        try await _base.skipToNext()
-        DispatchQueue.main.async {
-            self.newCurrentSong.toggle()
-            print("SET NEW CURRENT SON")
+        do {
+            try await _base.skipToNext()
+        } catch {
+            print ("Failed to skip to next with error \(error)")
         }
     }
     
     func skipToPrevious() async throws {
         print("SKIP TO PREV")
-        try await _base.skipToPrevious()
-        DispatchQueue.main.async {
-            print("SET NEW CURRENT SON")
-            self.newCurrentSong.toggle()
+        do {
+            try await _base.skipToPrevious()
+        } catch {
+            print("Failed to skip prev with error \(error)")
         }
     }
     
@@ -88,9 +108,9 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
         return self._base.isPlaying()
     }
     
-    func currentSongArtworkUrl() async throws -> URL? {
+    func currentSongArtworkUrl(width: Int, height: Int) async throws -> URL? {
         print("mediaPlayer.currentSongArtworkURl")
-        return try await self._base.currentSongArtworkUrl()
+        return try await self._base.currentSongArtworkUrl(width: width * 2, height: height * 2)
     }
     
     /// Used in cases where async is not aloud and we need to call one of the media player methods (ex. in button action)

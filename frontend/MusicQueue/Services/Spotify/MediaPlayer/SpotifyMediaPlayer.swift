@@ -6,10 +6,15 @@
 //
 import SwiftUI
 import MusicKit
+import Combine
 
 class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
     
-    func currentSongArtworkUrl() -> URL? {
+    
+    var currentEntryPublisher = PassthroughSubject<AnyMusicItem, Never>()
+    
+    
+    func currentSongArtworkUrl(width: Int, height: Int) -> URL? {
         return nil
     }
     
@@ -98,6 +103,10 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
     }
     
     func queueIsEmpty() -> Bool {
+        return false
+    }
+    
+    func currentSongLoaded() -> Bool {
         return false
     }
     

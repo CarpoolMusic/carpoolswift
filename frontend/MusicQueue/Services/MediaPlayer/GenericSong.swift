@@ -22,6 +22,7 @@ protocol GenericSong: MusicItem, Identifiable, Equatable {
 enum baseSong {
     case appleSong(MusicKit.Song)
     case spotifySong(SpotifySong)
+    case queueEntry(ApplicationMusicPlayer.Queue.Entry)
 }
 
 struct AnyMusicItem: GenericSong {
