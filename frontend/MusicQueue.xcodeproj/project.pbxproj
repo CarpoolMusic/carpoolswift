@@ -42,6 +42,9 @@
 		60998EC12B52F18A0022CDB9 /* SpotifySearchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EBE2B52F18A0022CDB9 /* SpotifySearchManager.swift */; };
 		60998EC22B52F18A0022CDB9 /* SpotifyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EBF2B52F18A0022CDB9 /* SpotifyAPIClient.swift */; };
 		60998EC32B52F18A0022CDB9 /* SpotifyNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EC02B52F18A0022CDB9 /* SpotifyNotificationManager.swift */; };
+		60998EC52B52F6970022CDB9 /* SearchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EC42B52F6970022CDB9 /* SearchManager.swift */; };
+		60998EC72B52F84A0022CDB9 /* BaseMusicItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EC62B52F84A0022CDB9 /* BaseMusicItemCell.swift */; };
+		60998EC92B52F8B20022CDB9 /* SocketEventSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60998EC82B52F8B20022CDB9 /* SocketEventSchema.swift */; };
 		609D8FC42AA95B7F005C237E /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609D8FC32AA95B7F005C237E /* Buttons.swift */; };
 		609D8FC62AA95E47005C237E /* Titles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609D8FC52AA95E47005C237E /* Titles.swift */; };
 		60A4ED9C2A86A44800FADC40 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A4ED9B2A86A44800FADC40 /* UserPreferences.swift */; };
@@ -130,6 +133,9 @@
 		60998EBE2B52F18A0022CDB9 /* SpotifySearchManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SpotifySearchManager.swift; path = MusicQueue/Services/Spotify/SpotifySearchManager.swift; sourceTree = "<group>"; };
 		60998EBF2B52F18A0022CDB9 /* SpotifyAPIClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SpotifyAPIClient.swift; path = MusicQueue/Services/Spotify/SpotifyAPIClient.swift; sourceTree = "<group>"; };
 		60998EC02B52F18A0022CDB9 /* SpotifyNotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SpotifyNotificationManager.swift; path = MusicQueue/Services/Spotify/SpotifyNotificationManager.swift; sourceTree = "<group>"; };
+		60998EC42B52F6970022CDB9 /* SearchManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SearchManager.swift; path = MusicQueue/Services/Search/SearchManager.swift; sourceTree = SOURCE_ROOT; };
+		60998EC62B52F84A0022CDB9 /* BaseMusicItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BaseMusicItemCell.swift; path = MusicQueue/Models/BaseMusicItemCell.swift; sourceTree = SOURCE_ROOT; };
+		60998EC82B52F8B20022CDB9 /* SocketEventSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketEventSchema.swift; path = MusicQueue/Schema/SocketEventSchema.swift; sourceTree = "<group>"; };
 		609D8FC32AA95B7F005C237E /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		609D8FC52AA95E47005C237E /* Titles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Titles.swift; sourceTree = "<group>"; };
 		60A4ED9B2A86A44800FADC40 /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
@@ -287,6 +293,7 @@
 			isa = PBXGroup;
 			children = (
 				60998EBF2B52F18A0022CDB9 /* SpotifyAPIClient.swift */,
+				60998EC82B52F8B20022CDB9 /* SocketEventSchema.swift */,
 				60998EC02B52F18A0022CDB9 /* SpotifyNotificationManager.swift */,
 				60998EBE2B52F18A0022CDB9 /* SpotifySearchManager.swift */,
 				60BA77612A55E2A400A5516B /* MusicQueue */,
@@ -358,6 +365,7 @@
 				60BA778F2A55F2A800A5516B /* SessionCreationView.swift */,
 				60BA77A72A5E588A00A5516B /* TestView.swift */,
 				60BA77A92A5E61A900A5516B /* QueueView.swift */,
+				60998EC62B52F84A0022CDB9 /* BaseMusicItemCell.swift */,
 				60BA77AB2A5E65A600A5516B /* ChatView.swift */,
 				60BA77EE2A65A43400A5516B /* SongSearchView.swift */,
 				60BA77D12A632F4500A5516B /* DashboardView.swift */,
@@ -429,6 +437,7 @@
 			isa = PBXGroup;
 			children = (
 				60BA77962A55F8FB00A5516B /* SessionManager.swift */,
+				60998EC42B52F6970022CDB9 /* SearchManager.swift */,
 				60998EBC2B52F0CB0022CDB9 /* Queue.swift */,
 				60BA77D82A6445ED00A5516B /* SocketServiceProtocol.swift */,
 				60BA77DA2A64463B00A5516B /* SocketConnectionHandler.swift */,
@@ -588,17 +597,20 @@
 				60576CBE2AB63302005D6E15 /* NowPlayingView.swift in Sources */,
 				607168672AB7BA6700485AD4 /* GenericSong.swift in Sources */,
 				60BA77972A55F8FB00A5516B /* SessionManager.swift in Sources */,
+				60998EC92B52F8B20022CDB9 /* SocketEventSchema.swift in Sources */,
 				60998EC12B52F18A0022CDB9 /* SpotifySearchManager.swift in Sources */,
 				6071687F2AD1EBFD00485AD4 /* ServiceSessionManagerProtocol.swift in Sources */,
 				607B049C2AAAB731004DB82F /* SocketEventReceiver.swift in Sources */,
 				607B049A2AAAAFA2004DB82F /* SessionHandler.swift in Sources */,
 				60551F2A2A87E505002AA8F9 /* SpotifyAuthenticationController.swift in Sources */,
 				60BA77DB2A64463B00A5516B /* SocketConnectionHandler.swift in Sources */,
+				60998EC72B52F84A0022CDB9 /* BaseMusicItemCell.swift in Sources */,
 				60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */,
 				60998EBB2B523F340022CDB9 /* SpotifySong.swift in Sources */,
 				60BA77902A55F2A800A5516B /* SessionCreationView.swift in Sources */,
 				60BA77AC2A5E65A600A5516B /* ChatView.swift in Sources */,
 				60BA77CD2A6300C600A5516B /* User.swift in Sources */,
+				60998EC52B52F6970022CDB9 /* SearchManager.swift in Sources */,
 				60BA77DD2A64498300A5516B /* SessionManagerProtocol.swift in Sources */,
 				60576CB62AB61962005D6E15 /* SpotifyMediaPlayerDelegate.swift in Sources */,
 				607168812AD21B4300485AD4 /* AppDelegate.swift in Sources */,
