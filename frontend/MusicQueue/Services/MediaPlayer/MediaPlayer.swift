@@ -20,12 +20,9 @@ protocol MediaPlayerProtocol {
     func play() async throws -> Void
     func pause() async throws -> Void
     func resume() async throws -> Void
-    func togglePlayPause() async throws -> Void
     func skipToNext() async throws -> Void
     func skipToPrevious() async throws -> Void
     func getPlayerState() -> PlayerState
-    func currentSongArtworkUrl(width: Int, height: Int) async throws -> URL?
-    func isPlaying() -> Bool
 }
 
 class MediaPlayer: NSObject, ObservableObject {
@@ -39,8 +36,8 @@ class MediaPlayer: NSObject, ObservableObject {
     
     required init(queue: Queue) {
 //        self._base = UserDefaults.standard.string(forKey: "musicServiceType") == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer()
-        print("init media player base to apple")
-        self._base = AppleMusicMediaPlayer(queue: queue)
+        print("init media player base to spotify")
+        self._base = SpotifyMediaPlayer(queue: queue)
         
         super.init()
         
@@ -73,11 +70,7 @@ class MediaPlayer: NSObject, ObservableObject {
     
     func togglePlayPause() async throws {
         print("TOGGLE PLAY PAUSE")
-        if _base.getPlayerState() != .playing {
-            try await self.play()
-        } else {
-            try await self.pause()
-        }
+        self.isPlaying() ? try await self.pause() : try await self.play()
     }
     
     func resume() async throws { try await _base.resume() }
@@ -105,12 +98,7 @@ class MediaPlayer: NSObject, ObservableObject {
     }
     
     func isPlaying() -> Bool {
-        return self._base.isPlaying()
-    }
-    
-    func currentSongArtworkUrl(width: Int, height: Int) async throws -> URL? {
-        print("mediaPlayer.currentSongArtworkURl")
-        return try await self._base.currentSongArtworkUrl(width: width * 2, height: height * 2)
+        return _base.getPlayerState() == .playing
     }
     
     /// Used in cases where async is not aloud and we need to call one of the media player methods (ex. in button action)

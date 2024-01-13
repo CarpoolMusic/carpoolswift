@@ -135,8 +135,8 @@ extension AddSongRequest {
 
 // MARK: - Song
 struct Song: Codable {
-    let service, id, title, artist: String
-    let album: String
+    let service, id, uri, title: String
+    let artist, album: String
     let votes: Int
 }
 
@@ -161,6 +161,7 @@ extension Song {
     func with(
         service: String? = nil,
         id: String? = nil,
+        uri: String? = nil,
         title: String? = nil,
         artist: String? = nil,
         album: String? = nil,
@@ -169,6 +170,7 @@ extension Song {
         return Song(
             service: service ?? self.service,
             id: id ?? self.id,
+            uri: uri ?? self.uri,
             title: title ?? self.title,
             artist: artist ?? self.artist,
             album: album ?? self.album,

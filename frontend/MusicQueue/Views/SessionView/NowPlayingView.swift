@@ -60,21 +60,21 @@ class NowPlayingViewModel: ObservableObject {
         mediaPlayer.$currentEntry
             .sink { [weak self] entry in
                 if let _entry = entry {
-                    self?.resolveArtwork(currentEntry: _entry)
+                    self?._resolveArtwork(currentEntry: _entry)
                 }
             }
             .store(in: &cancellables)
     }
     
-    func resolveArtwork(currentEntry: AnyMusicItem) {
+    private func _resolveArtwork(currentEntry: AnyMusicItem) {
         Task {
             if let artwork = currentEntry.artwork {
                 self.artwork = artwork
                 self.loadedImage = nil
                 print("load from artwork")
             }
-            if let artworkUrl = try await mediaPlayer.currentSongArtworkUrl(width: Int(screenWidth * 0.85), height: Int(screenHeight * 0.3)) {
-                loadImage(from: artworkUrl)
+            if let artworkUrl = currentEntry.artworkURL {
+                _loadImage(from: artworkUrl)
                 print("Resolved artwork done", artworkUrl)
             } else {
                 print("Error resolving artwork from URL")
@@ -82,7 +82,7 @@ class NowPlayingViewModel: ObservableObject {
         }
     }
     
-    func loadImage(from url: URL) {
+    private func _loadImage(from url: URL) {
         print("Trying to load image")
         
         URLSession.shared.dataTask(with: url) { data, response, error in

@@ -71,10 +71,10 @@ class MockSpotifySessionManager: NSObject, ServiceSessionManagerProtocol {
         let app = UIApplication()
         let mockUrl: URL = URL(string: "mock url")!
         let options: [UIApplication.OpenURLOptionsKey : Any] = [:]
-        returnFromURL(app, open: mockUrl, options: options)
+        application(app, open: mockUrl, options: options)
     }
     
-    func returnFromURL(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
         returnFromURLCalled = true
         
         if (shouldSucceed) {

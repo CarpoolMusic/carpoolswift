@@ -7,10 +7,6 @@
 
 import MusicKit
 
-enum SearchError: Error {
-    case songNotFound
-}
-
 class AppleMusicSearchManager: SearchManagerProtocol {
     
     var _query: String = ""
@@ -40,7 +36,7 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         
     }
     
-    func searchSongById(id: MusicItemID, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
+    private func searchSongById(id: MusicItemID, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
         Task {
             do {
                 let searchRequest = MusicCatalogResourceRequest<MusicKit.Song>(matching: \.id, equalTo: id)
@@ -79,7 +75,7 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         }
     }
     
-    func searchSongs(query: String, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
+    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
         self._query = query
         Task {
             if self._query.isEmpty {
@@ -89,7 +85,7 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 do {
                     // Issue a catalog search request for songs matching the search term.
                     var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
-                    searchRequest.limit = 10
+                    searchRequest.limit = limit
                     searchRequest.includeTopResults = true
                     let searchResponse = try await searchRequest.response()
                     

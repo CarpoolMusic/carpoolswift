@@ -58,12 +58,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         }
     }
     
-    func currentSongArtworkUrl(width: Int, height: Int) async throws -> URL? {
-        print("currentSongArtworkUrl")
-        print("CURRENT SONG ", self._player.queue.currentEntry as Any)
-        return self._player.queue.currentEntry?.artwork?.url(width: width, height: height)
-    }
-    
     func resume() async throws {
         try await self.play()
     }
@@ -120,7 +114,7 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         return self._player.state.playbackStatus == .playing
     }
     
-    private func addSongToQueue(song: MusicKit.Song) async throws -> Void {
+    private func enqueue(song: MusicKit.Song) async throws -> Void {
         if (isPlaybackQueueSet) {
             do {
                 try await _player.queue.insert(song, position: .tail)
@@ -138,18 +132,12 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     
     func loadNextSong() async throws -> Void {
         // add song to play if queue is empty
-        if let front = _userQueue.front, let song = convertSongToBase(anyMusicItem: _userQueue.dequeue()!) {
+        if let song = convertSongToBase(anyMusicItem: _userQueue.dequeue()!) {
             // Add the next song to the queue
-            try await addSongToQueue(song: song)
-            print("SETTING CURRENT ENTRY TO \(song)")
-            print("song at front", front)
-            print("song", song)
+            try await enqueue(song: song)
         } else {
             print("Error getting song at front of queue.")
-            return
         }
-        print("currentSong: ", _player.queue.currentEntry as Any)
-        print("entries", _player.queue.entries)
     }
     
     func currentSongTitle() -> String {

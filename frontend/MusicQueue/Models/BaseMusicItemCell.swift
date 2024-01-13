@@ -28,15 +28,32 @@ struct BaseMusicItemCell: View {
                 if let artwork = self.artwork {
                     // Show apple music artwork
                     ArtworkImage(artwork, width: 50)
-//                        .cornerRadius(6)
+                        .cornerRadius(6)
                 } else if let artworkURL = self.artworkURL {
                     // Get Spotify artwork image from URL
-                    AsyncImage(url: artworkURL)
-//                        .cornerRadius(6)
+                    AsyncImage(url: artworkURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                        case .failure(_):
+                            Image(systemName: "music.note.list")
+                        default:
+                            ProgressView()
+                                .frame(width: 50, height: 50)
+                        }
+                        
+                    }
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 50, height: 50)
+                        .clipped()
+                        .cornerRadius(6)
                 } else {
                     Image(systemName: "music.note.list")
                         .frame(width: 50, height: 50)
-//                        .cornerRadius(6)
+                        .cornerRadius(6)
                 }
                 Spacer()
             }
@@ -99,7 +116,7 @@ struct QueueMusicItemCell: View {
             HStack {
                 Button(action: {
                     do {
-                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: -1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: 1)
+                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id, vote: -1) : try sessionManager.voteSong(songId: song.id, vote: 1)
                         thumbsUpPressed.toggle()
                         thumbsDownPressed = false
                     } catch {
@@ -116,7 +133,7 @@ struct QueueMusicItemCell: View {
                 
                 Button(action: {
                     do {
-                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id.rawValue, vote: 1) : try sessionManager.voteSong(songId: song.id.rawValue, vote: -1)
+                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id, vote: 1) : try sessionManager.voteSong(songId: song.id, vote: -1)
                         thumbsDownPressed.toggle()
                         thumbsUpPressed = false
                     } catch {

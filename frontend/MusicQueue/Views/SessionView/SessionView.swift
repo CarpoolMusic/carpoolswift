@@ -59,17 +59,18 @@ class SessionViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init(sessionManager: SessionManager) {
+        print("init sessionView view model")
         self.sessionManager = sessionManager
         self.sessionIsActive = sessionManager.isConnected
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
-        self.mediaPlayer = MediaPlayer(queue: sessionManager.queue)
+        self.mediaPlayer = MediaPlayer(queue: sessionManager._queue)
         
         // subscribe to changes in queue
 //        sessionManager.$queueUpdated
 //            .receive(on: DispatchQueue.main)
 //            .sink { [weak self] _ in
 //                // Update queue in media player
-//                self?.mediaPlayer.setQueue(queue: self?.sessionManager.queue ?? Queue())
+//                self?.mediaPlayer.setQueue(queue: self?.sessionManager._queue ?? Queue())
 //            }
 //            .store(in: &cancellables)
     }
@@ -85,13 +86,4 @@ class SessionViewModel: ObservableObject {
     }
     
     // MARK: - Playback
-}
-
-struct SessionView_Previews: PreviewProvider {
-    static var previews: some View {
-        let socketConnection = SocketConnectionHandler()
-        let sessionManager = SessionManager()
-        
-        SessionView(sessionManager: sessionManager)
-    }
 }

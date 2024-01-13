@@ -22,6 +22,7 @@
     "SongObj": {
         "service": "string",
         "id": "string",
+	"uri": "string",
         "title": "string",
         "artist": "string",
         "album": "string",
@@ -32,6 +33,7 @@
         "song": {
             "service": "string",
             "id": "string",
+	    "uri":"string",
             "title": "string",
             "artist": "string",
             "album": "string",
@@ -42,6 +44,7 @@
         "song": {
             "service": "string",
             "id": "string",
+	    "uri":"string",
             "title": "string",
             "artist": "string",
             "album": "string",

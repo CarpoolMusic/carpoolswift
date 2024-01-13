@@ -45,7 +45,7 @@ struct AuthorizationView: View {
             }
         }
         .onOpenURL { url in
-            authorizationViewModel.handleSpotifyReturnURL(url: url)
+            authorizationViewModel.sessionManager?.application(UIApplication.shared, open: url)
         }
     }
     
@@ -64,38 +64,43 @@ class AuthorizationViewModel: ObservableObject {
     
     @Published var isAuthenticated = false
     var musicServiceType: MusicServiceType?
-    var authenticated: ((Bool) -> (Void))?
     
     var sessionManager: SpotifySessionManager?
     
     func handleAppleButtonPressed() {
+        setMusicTypeInUserDefaults(type: .apple)
+        
         let authController = AppleAuthenticationController()
-        print("Apple pressed")
-        self.authenticateWithController(controller: authController, service: .apple)
+        authController.authenticate(authenticated: { result in
+            // Handle result
+        })
     }
     
     func handleSpotifyButtonPressed() {
+        setMusicTypeInUserDefaults(type: .spotify)
+        
         self.sessionManager = SpotifySessionManager()
-        let authController = SpotifyAuthenticationController(sessionManager: sessionManager!)
-        self.authenticateWithController(controller: authController, service: .spotify)
+        sessionManager?.initiateSession(authenticated: { authenticated in
+            self.isAuthenticated = authenticated
+        })
     }
     
-    func handleSpotifyReturnURL(url: URL) {
-        self.sessionManager?.returnFromURL(UIApplication.shared, open: url, options: [:])
-    }
+//    func handleSpotifyReturnURL(url: URL) {
+//        self.sessionManager?.application(UIApplication.shared, open: url, options: [:])
+//    }
     
     
-    func authenticateWithController(controller: MusicServiceAuthenticationProtocol, service: MusicServiceType) {
-        controller.authenticate() { authenticated in
-            DispatchQueue.main.async {
-                if authenticated {
-                    /// seperate this out into a user defaults class that manages persistent state
-                    self.setMusicTypeInUserDefaults(type: service)
-                    self.isAuthenticated = true
-                }
-            }
-        }
-    }
+//    func authenticateWithController(controller: MusicServiceAuthenticationProtocol, service: MusicServiceType) {
+//        controller.authenticate() { authenticated in
+//            DispatchQueue.main.async {
+//                if authenticated {
+//                    /// seperate this out into a user defaults class that manages persistent state
+//                    self.setMusicTypeInUserDefaults(type: service)
+//                    self.isAuthenticated = true
+//                }
+//            }
+//        }
+//    }
     
     func setMusicTypeInUserDefaults(type: MusicServiceType) {
         UserDefaults.standard.set(type.rawValue, forKey: "musicServiceType")

@@ -8,110 +8,147 @@ import SwiftUI
 import MusicKit
 import Combine
 
-class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol {
+class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerStateDelegate {
+    private let _userQueue: Queue
+    private let appRemoteManager: SpotifyAppRemoteManager
     
+    private var isPlaybackQueueSet: Bool = false
+    private var playerState: SPTAppRemotePlayerState?
+    private var _playerQueue: SpotifySongQueue<String>
     
-    var currentEntryPublisher = PassthroughSubject<AnyMusicItem, Never>()
+    var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
     
-    
-    func currentSongArtworkUrl(width: Int, height: Int) -> URL? {
-        return nil
-    }
-    
-    func setQueue(queue: Queue) {
-        print("nothing")
-    }
-    
-    let appRemoteManager: SpotifyAppRemoteManager
-    let appRemote: SPTAppRemote
-    var isPaused: Bool = true
-    
-    override init() {
+    init(queue: Queue) {
+        self._userQueue = queue
+        self._playerQueue = SpotifySongQueue()
         self.appRemoteManager = SpotifyAppRemoteManager()
-        self.appRemote = appRemoteManager.appRemote
-        /// subsribe to changes from the player state
-        self.appRemote.playerAPI?.subscribe()
-    }
-    
-    
-    /// result and error returned from the player
-    /// on success result will carry desrired value from call
-    /// on error resilt will be nil and error set
-    var defaultCallback: SPTAppRemoteCallback {
-        get {
-            return {result, error in
-                if let error = error {
-                    print("There has been an error")
-                }
-                else {
-                    print("This is the result from the callback \(String(describing: result))")
-                }
-            }
-        }
     }
     
     // MARK: - Player methods
     
-    func play() {
-        self.appRemote.playerAPI?.resume()
-    }
-    
-    func playSong(song: AnyMusicItem) async throws {
-//        let trackUri = song.id
-//        self.appRemote.playerAPI?.play(trackUri.rawValue, callback: defaultCallback)
+    func play() async throws {
+        print("play")
+        
+        if (!isPlaybackQueueSet) {
+            try await loadNextSong()
+            if let currentSong = _playerQueue.current {
+                print("connecing with song", currentSong)
+                appRemoteManager.connect(with: currentSong)
+                isPlaybackQueueSet = true
+            } else {
+                print("No song in queue to play")
+            }
+        } else {
+            self.resume()
+        }
+        
     }
     
     func pause() {
-        self.appRemote.playerAPI?.pause()
+        print("pause")
+        self.appRemoteManager.appRemote.playerAPI?.pause()
     }
     
     func resume() {
-        self.appRemote.playerAPI?.resume()
+        print("resume")
+        self.appRemoteManager.appRemote.playerAPI?.resume()
     }
     
-    func togglePlayPause() async throws {
-        self.appRemote.playerAPI?.getPlayerState({playerState, error in
-            if let error = error {
-                print("There has been an error \(error)")
-            } else if let playerState = playerState as? SPTAppRemotePlayerState {
-                playerState.isPaused ? self.play() : self.pause()
-            }
-        })
-    }
-    
-    func skipToNext() {
-        self.appRemote.playerAPI?.skip(toNext: defaultCallback)
+    func skipToNext() async throws {
+        print("skipToNext")
+        try await loadNextSong()
+        if let nextSongUri = _playerQueue.next() {
+            appRemoteManager.appRemote.playerAPI?.play(nextSongUri)
+        } else if let currentSong = _playerQueue.current {
+            print("Unable to get next song. Restarting current.")
+            self.appRemoteManager.appRemote.playerAPI?.play(currentSong)
+        } else {
+            print("No previous or current song to play")
+        }
     }
     
     func skipToPrevious() {
-        self.appRemote.playerAPI?.skip(toPrevious: defaultCallback)
-    }
-    
-    func enqueueSong(song: AnyMusicItem) async throws {
-//        let trackUri = song.id
-//        self.appRemote.playerAPI?.enqueueTrackUri(trackUri.rawValue)
+        print("skipToPrevious")
+        if let previousSong = _playerQueue.previous() {
+            self.appRemoteManager.appRemote.playerAPI?.play(previousSong)
+        } else if let currentSong = _playerQueue.current {
+            print("No previous song. Restarting current")
+            self.appRemoteManager.appRemote.playerAPI?.play(currentSong)
+        } else {
+            print("No previous or current song to play.")
+        }
     }
     
     func getPlayerState() -> PlayerState {
-//        if self.playerState.isPaused {
-//            return PlayerState.paused
-//        }
-//        else {
-//            return PlayerState.playing
-//        }
-        return PlayerState.undetermined
+        guard let playerState = self.appRemoteManager.playerState else {
+            return .undetermined
+        }
+        print("Player state \(playerState)")
+        if (playerState.isPaused) {
+            return .paused
+        } else {
+            return .playing
+        }
     }
     
-    func queueIsEmpty() -> Bool {
-        return false
+    func loadNextSong() async throws -> Void {
+        print("load next song")
+        if let nextSong = _userQueue.dequeue() {
+            // Add next song uri to the player queue
+            self._playerQueue.append(newElement: nextSong.uri)
+        } else {
+            print("Error getting song at front of queue")
+        }
     }
     
-    func currentSongLoaded() -> Bool {
-        return false
+    func handlePlayerCallback<T>(result: T?, error: Error?) {
+        if let result = result {
+            print("good \(result)")
+        } else {
+            print("Error in callback from media player \(String(describing: error?.localizedDescription))")
+        }
     }
     
-    func isPlaying() -> Bool {
-//        return !self.playerState.isPaused
-        return false
+    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
+        print("Player state has changed")
+    }
+}
+
+struct SpotifySongQueue<T> {
+    private var array: [T]
+    private var currentIndex: Int
+
+    init() {
+        self.array = []
+        self.currentIndex = array.startIndex
+        print("STSRT IDX \(array.startIndex)")
+    }
+
+    var current: T? {
+        return array.indices.contains(currentIndex) ? array[currentIndex] : nil
+    }
+    
+    mutating func next() -> T? {
+        guard !array.isEmpty, currentIndex < array.index(before: array.endIndex) else {
+            return nil
+        }
+        currentIndex = array.index(after: currentIndex)
+        return array[currentIndex]
+    }
+
+    mutating func previous() -> T? {
+        guard !array.isEmpty, currentIndex > array.startIndex else {
+            return nil
+        }
+        currentIndex = array.index(before: currentIndex)
+        return array[currentIndex]
+    }
+
+    mutating func reset() {
+        currentIndex = array.startIndex
+    }
+    
+    mutating func append(newElement: T) {
+        array.append(newElement)
     }
 }

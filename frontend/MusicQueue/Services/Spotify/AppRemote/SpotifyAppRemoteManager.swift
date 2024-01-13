@@ -4,13 +4,16 @@
 //
 //  Created by Nolan Biscaro on 2023-08-12.
 //
-class SpotifyAppRemoteManager: NSObject {
-    
+
+class SpotifyAppRemoteManager: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelegate {
     private let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     
-    // Determines whether or not appRemote is connected
-    @Published var connectionStatus : ConnectionStatus = .undetermined
+    // MARK: - App Remote
+    
+    private var connected: Bool = false
+    var playerState: SPTAppRemotePlayerState?
+    
     
     lazy var configuration = SPTConfiguration(
         clientID: SpotifyClientID,
@@ -19,38 +22,55 @@ class SpotifyAppRemoteManager: NSObject {
     
     lazy var appRemote: SPTAppRemote = {
         let appRemote = SPTAppRemote(configuration: configuration, logLevel: .debug)
+//        appRemote.connectionParameters.accessToken = TokenVault.getTokenFromKeychain()
         appRemote.delegate = self
         return appRemote
     }()
     
-    func connect(accessToken: String) {
-        setAccessToken(accessToken: accessToken)
-        // wake up the spotify app before trying to connect
-        self.appRemote.authorizeAndPlayURI("")
-        // connection handled in delegate
-        self.appRemote.connect()
+    // MARK: - App Remote methods
+    
+    func connect(with songUri: String) {
+        print("connecting with song \(songUri)")
+        if (!self.connected) {
+            DispatchQueue.main.async {
+                self.appRemote.authorizeAndPlayURI(songUri)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                self.appRemote.connectionParameters.accessToken = TokenVault.getTokenFromKeychain()
+                self.appRemote.connect()
+            }
+        }
     }
     
-    func getAccessToken() -> String {
-        return self.appRemote.connectionParameters.accessToken ?? ""
+    // MARK: - Delegate methods
+    
+    func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
+        print("APP REMOTE Connection established")
+        self.connected = true
+        self.appRemote.playerAPI?.delegate = self
+        self.appRemote.playerAPI?.subscribe(toPlayerState: { (success, error) in
+            if let error = error {
+                print("Error subscribing to player state:", error.localizedDescription)
+            }
+        })
     }
     
-    private func setAccessToken(accessToken: String) {
-        self.appRemote.connectionParameters.accessToken = accessToken
+    func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
+        print("Connection attempt failed with error \(String(describing: error))")
+        self.connected = false
+    }
+    
+    func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
+        print("Session disconnected")
+        self.connected = false
     }
     
     
-//    func extractAccessTokenFromURL(url: URL) throws -> String {
-//        let parameters = self.appRemote.authorizationParameters(from: url);
-//
-//        if let access_token = parameters?[SPTAppRemoteAccessTokenKey] {
-//                appRemote.connectionParameters.accessToken = access_token
-//                return access_token
-//        } else {
-//            let error_description = parameters?[SPTAppRemoteErrorDescriptionKey] ?? "No error description"
-//            throw AppRemoteManagerError.missingAccessToken(error_description)
-//        }
-//    }
+    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
+        print("PLAYER STATE CHANGED")
+        self.playerState = playerState
+    }
     
 }
 

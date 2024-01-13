@@ -39,25 +39,12 @@ class Queue: ObservableObject {
         return self._queue
     }
     
-    func upvote(songId: String) {
-        if let index = _queue.firstIndex(where: { $0.id.rawValue == songId }) {
-            _queue[index].votes += 1
-            // Check if a resort is required
-            if index > 0 && _queue[index].votes > _queue[index - 1].votes {
-                self.sortQueue()
-            }
+    func find(id: String) -> AnyMusicItem? {
+        if let index = _queue.firstIndex(where: { $0.id == id }) {
+            return _queue[index]
         }
+        return nil
     }
-    
-    func donwvote(songId: String) {
-        if let index = _queue.firstIndex(where: { $0.id.rawValue == songId }) {
-            _queue[index].votes -= 1
-            if index < _queue.count - 1 && _queue[index].votes < _queue[index + 1].votes {
-                sortQueue()
-            }
-        }
-    }
-    
     
     private func sortQueue() {
         _queue.sort { (song1, song2) -> Bool in

@@ -6,12 +6,19 @@
 //
 
 class SpotifySearchManager: SearchManagerProtocol {
-    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        
+   
+    let _spotifyAPIClient: SpotifyAPIClient
+    
+    init() {
+        self._spotifyAPIClient = SpotifyAPIClient()
     }
     
+    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
+        _spotifyAPIClient.searchSongs(query: query, limit: limit, completion: completion)
+    }
     
-    func searchSongs(query: String, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        
+    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
+        let song = SpotifySong(song: song)
+        completion(.success(AnyMusicItem(song)))
     }
 }

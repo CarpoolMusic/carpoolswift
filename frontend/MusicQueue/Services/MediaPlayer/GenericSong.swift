@@ -6,13 +6,13 @@
 //
 import MusicKit
 
-protocol GenericSong: MusicItem, Identifiable, Equatable {
-    var id: MusicItemID { get }
+protocol GenericSong: Identifiable, Equatable {
+    var id: String { get }
     var title: String { get }
     var artist: String { get }
     var album: String? { get }
     var duration: TimeInterval? { get }
-    var uri: URL? { get }
+    var uri: String { get }
     var artworkURL: URL? { get }
     var artwork: Artwork? { get set }
     var votes: Int { get }
@@ -26,6 +26,7 @@ enum baseSong {
 }
 
 struct AnyMusicItem: GenericSong {
+    
     static func == (lhs: AnyMusicItem, rhs: AnyMusicItem) -> Bool {
         return lhs.title == rhs.title
     }
@@ -36,14 +37,15 @@ struct AnyMusicItem: GenericSong {
     }
     
     var service: String
-    var id: MusicItemID
+    var id: String
+    var uri: String
     var title: String
     var artist: String
     var album: String?
     var duration: TimeInterval?
-    var uri: URL?
     var artworkURL: URL?
     var artwork: Artwork?
+    var artworkImage: UIImage?
     var votes: Int
     
     private var _base: baseSong
@@ -51,13 +53,12 @@ struct AnyMusicItem: GenericSong {
     init(_ base: MusicKit.Song) {
         self._base = .appleSong(base)
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
-        self.id = base.id
+        self.id = base.id.rawValue
         self.title = base.title
         self.artist = base.artistName
         self.album = base.albumTitle
         self.duration = base.duration
-        self.uri = base.url
-        self.artwork = base.artwork
+        self.uri = base.url?.absoluteString ?? ""
         self.votes = 0
     }
     
@@ -65,17 +66,25 @@ struct AnyMusicItem: GenericSong {
         self._base = .spotifySong(base)
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
-        self.title = base.title
-        self.artist = base.artist
-        self.album = base.album
-        self.duration = base.duration
+        self.title = base.name
+        self.artist = base.artists.first ?? ""
+        self.album = base.albumName
+        self.duration = TimeInterval(base.duration)
         self.uri = base.uri
-        self.artworkURL = base.artworkURL
-        self.votes = base.votes
+        self.artworkURL = URL(string: base.image)
+        self.votes = 0
     }
     
     func getBase() -> baseSong {
         return self._base
+    }
+    
+    mutating func upvote() {
+        self.votes += 1
+    }
+    
+    mutating func downvote() {
+        self.votes -= 1
     }
 }
 

@@ -45,9 +45,10 @@ struct SongSearchView: View {
 // MARK: - View Model
 
 class SongSearchViewModel: ObservableObject {
+    var searchManager: SearchManager = SearchManager(SpotifySearchManager())
     @Published var query: String = "" {
         didSet {
-            self.sessionManager.searchSongs(query: query) { [weak self] result in
+            self.searchManager.searchSongs(query: query, limit: 20) { [weak self] result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let songs):

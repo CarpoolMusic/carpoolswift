@@ -26,10 +26,12 @@ class SocketConnectionHandler {
     }
     
     func connect() {
+        print("sending socket connect")
         socket.connect()
     }
     
     func disconnect() {
+        print("sending socket disconnect")
         socket.disconnect()
     }
     
