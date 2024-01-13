@@ -4,6 +4,7 @@
 //
 //  Created by Nolan Biscaro on 2023-09-17.
 //
+import Foundation
 import MusicKit
 
 protocol GenericSong: Identifiable, Equatable {
