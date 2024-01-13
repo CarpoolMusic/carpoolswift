@@ -71,18 +71,18 @@ struct SpotifySong {
     let name: String
     let uri: String
     let duration: Int
-    let image: String
     let artists: [String]
     let albumName: String
+    let artworkURL: String
     
     init(song: Song) {
         self.id = song.id
         self.name = song.title
         self.uri = song.uri
         self.duration = 0
-        self.image = ""
         self.artists = [""]
         self.albumName = ""
+        self.artworkURL = song.artworkURL
     }
 
     init?(dictionary: [String: Any]) {
@@ -107,22 +107,22 @@ struct SpotifySong {
             print("Missing album or album name")
             return nil
         }
-        guard let imageArray = album["images"] as? [[String: Any]],
-            let firstImageJson = imageArray.first,
-            let imageUrl = firstImageJson["url"] as? String else {
-                return nil
-        }
         guard let artistsArray = dictionary["artists"] as? [[String: Any]] else {
             print("Missing artists")
             return nil
+        }
+        guard let imageArray = album["images"] as? [[String: Any]],
+            let firstImageJson = imageArray.first,
+            let artworkURL = firstImageJson["url"] as? String else {
+                return nil
         }
         
         self.id = id
         self.name = name
         self.uri = uri
         self.duration = duration
-        self.image = imageUrl
         self.albumName = albumName
         self.artists = artistsArray.compactMap { $0["name"] as? String }
+        self.artworkURL = artworkURL
     }
 }

@@ -240,8 +240,9 @@ class SessionManager: ObservableObject {
             let title = song["title"] as? String ?? ""
             let album = song["album"] as? String ?? ""
             let artist = song["artist"] as? String ?? ""
+            let artworkURL = song["artworkUrl"] as? String ?? ""
             let votes = song["votes"] as? Int ?? -1
-            return Song(service: service, id: id, uri: uri, title: title, artist: album, album: artist, votes: votes)
+            return Song(service: service, id: id, uri: uri, title: title, artist: album, album: artist, artworkURL: artworkURL, votes: votes)
         }
         
         return nil
