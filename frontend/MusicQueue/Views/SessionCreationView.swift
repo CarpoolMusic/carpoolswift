@@ -14,6 +14,7 @@ struct SessionCreationView: View {
     @ObservedObject var sessionCreationViewModel: SessionCreationViewModel
     
     init(sessionManager: SessionManager) {
+        print("init session creation view")
         self.sessionManager = sessionManager
         self.sessionCreationViewModel = SessionCreationViewModel(sessionManager: sessionManager)
     }
@@ -54,8 +55,8 @@ class SessionCreationViewModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     init(sessionManager: SessionManager) {
+        print("session manager init called")
         self.sessionManager = sessionManager
-        self.sessionManager.connect()
     }
 
     // MARK: - Methods

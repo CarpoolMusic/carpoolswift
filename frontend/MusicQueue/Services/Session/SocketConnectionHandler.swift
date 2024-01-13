@@ -26,10 +26,12 @@ class SocketConnectionHandler {
     }
     
     func connect() {
+        print("sending socket connect")
         socket.connect()
     }
     
     func disconnect() {
+        print("sending socket disconnect")
         socket.disconnect()
     }
     
@@ -48,7 +50,6 @@ class SocketConnectionHandler {
     
     private func setupHandlers() {
         self.socket.onAny { [weak self] event in
-            print("EVENT HANKLDER", event)
             self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
         }
     }

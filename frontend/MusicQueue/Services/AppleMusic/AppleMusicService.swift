@@ -75,9 +75,9 @@ class AppleMusicService: ObservableObject {
     }
     
     /// The action to perform when the user taps the Play/Pause button.
-    func startPlayback(song: GenericSong) async {
+    func startPlayback(song: any GenericSong) async {
         do {
-            let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(rawValue: String(song.id)))
+            let songRequest = MusicCatalogResourceRequest<MusicKit.Song>(matching: \.id, equalTo: MusicItemID(rawValue: String(describing: song.id)))
             let songs = try await songRequest.response()
             guard let song = songs.items.first else {
                 throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
@@ -138,7 +138,7 @@ class AppleMusicService: ObservableObject {
     // MARK: - Search results requesting
     
     /// The albums the app loads using MusicKit that match the current search term.
-    @Published var songs: MusicItemCollection<Song> = []
+    @Published var songs: MusicItemCollection<MusicKit.Song> = []
     
     /// A reference to the storage object for recent albums the user previously viewed in the app.
     //    @StateObject private var recentAlbumsStorage = RecentAlbumsStorage.shared
@@ -158,7 +158,7 @@ class AppleMusicService: ObservableObject {
                 do {
                     print("SErarchign")
                     // Issue a catalog search request for albums matching the search term.
-                    var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [Song.self])
+                    var searchRequest = MusicCatalogSearchRequest(term: searchTerm, types: [MusicKit.Song.self])
                     searchRequest.limit = 5
                     let searchResponse = try await searchRequest.response()
                     

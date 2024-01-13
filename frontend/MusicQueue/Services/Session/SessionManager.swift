@@ -2,6 +2,11 @@ import Foundation
 import SocketIO
 import SwiftUI
 import Combine
+import MusicKit
+
+enum SessionManagerError: Error {
+    case InvalidSessionId
+}
 
 class SessionManager: ObservableObject {
     
@@ -9,9 +14,16 @@ class SessionManager: ObservableObject {
     @Published var isConnected: Bool = false
     @Published var isActive: Bool = false
     
+    // Set each time a song is added to the queue
+    @Published var songAdded: Bool = false
+    @Published var queueUpdated: Bool = false
+    
+//    private var searchManager: SearchManager
     private var socketConnectionHandler: SocketConnectionHandler
     private var socketEventSender: SocketEventSender
+    var searchManager: SearchManager
     private var _isHost: Bool = false
+    var _queue: Queue = Queue()
     
     // MARK: - Session data
     private var _hostId: String?
@@ -19,53 +31,20 @@ class SessionManager: ObservableObject {
     private var _sessionName: String?
     private var _hostName: String?
     private var _users: [String]?
-    private var _queue: Array<GenericSong> = []
     
     private var cancellables = Set<AnyCancellable>()
     
-    // Accessors
-    var hostId: String {
-        get {
-            return _hostId ?? ""
-        }
-    }
-    
-    var sessionId: String {
-        get {
-            return _sessionId ?? ""
-        }
-        set {
-            _sessionId = newValue
-        }
-    }
-    
-    var sessionName: String {
-        get {
-            return _sessionName ?? ""
-        }
-    }
-    
-    var hostName: String {
-        get {
-            return _hostName ?? ""
-        }
-    }
-    
-    var users: [String] {
-        get {
-            return _users ?? []
-        }
-        set{
-            _users = newValue
-        }
-    }
-    
     //MARK: - Session data
     init() {
+//        print("Session Manager init")
         self.socketConnectionHandler = SocketConnectionHandler()
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
+//        self.searchManager = (UserDefaults.standard.string(forKey: "musicServiceType") == "apple") ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
+        self.searchManager = SearchManager(SpotifySearchManager())
+        
         // Subscribe to the connection changes
         socketConnectionHandler.$connected
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] connected in
                 self?.isConnected = connected
             }
@@ -77,38 +56,30 @@ class SessionManager: ObservableObject {
                 self?.handleEvent(event: event, items: items)
             }
             .store(in: &cancellables)
+        
+        // subscribe to changes in queue
+//        _queue.$updated
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] _ in
+//                self?.queueUpdated.toggle()
+//            }
+//            .store(in: &cancellables)
     }
     
     deinit {
         socketConnectionHandler.disconnect()
     }
+   
     
-    // MARK: - Socket.IO messages
-    func handleEvent(event: String, items: [Any]) {
-        print("EVENT ", event)
-        switch event {
-        case "sessionCreated":
-            handleCreateSessionResponse(items: items)
-        case "sessionJoined":
-            handleJoinSessionResponse(items: items)
-        case "userJoined":
-            handleUserJoinedEvent(items: items)
-        case "sessionLeft":
-            self.isConnected = false
-        case "songVoted":
-            print("Song voted")
-            voteSong(songId: items[0] as! Int, vote: items[1] as! Int)
-            
-        default:
-            print("Unhandled event: \(event)")
-        }
-    }
+    // MARK: - Event Sender
     
     func connect() {
+        print("session manager connect")
         self.socketConnectionHandler.connect()
     }
     
     func disconnect() {
+        print("session manager disconnect")
         self.socketConnectionHandler.disconnect()
     }
     
@@ -117,27 +88,69 @@ class SessionManager: ObservableObject {
     }
     
     func joinSession(sessionId: String, hostName: String) throws {
-        try self.socketEventSender.joinSession(sessionID: sessionId, hostName: hostName)
+        try self.socketEventSender.joinSession(sessionId: sessionId, hostName: hostName)
     }
     
-    func leaveSession() {
-        self.socketEventSender.leaveSession(sessionID: self.sessionId)
+    func leaveSession() throws {
+        guard let sessionId = self._sessionId else {
+            throw SessionManagerError.InvalidSessionId
+            // throw error
+        }
+        self.socketEventSender.leaveSession(sessionId: sessionId)
     }
     
-    func voteSong(songId: Int, vote: Int) {
+    func addSong(song: AnyMusicItem) throws {
+        guard let sessionId = self._sessionId else {
+            throw SessionManagerError.InvalidSessionId
+        }
+        try self.socketEventSender.addSong(sessionId: sessionId, song: song)
+    }
+    
+    func voteSong(songId: String, vote: Int) throws {
+        guard let sessionId = self._sessionId else {
+            throw SessionManagerError.InvalidSessionId
+        }
+        try self.socketEventSender.voteSong(sessionId: sessionId, songId: songId, vote: vote)
         
+    }
+    
+    func getQueuedSongs() -> Array<AnyMusicItem> {
+        return _queue.getQueueItems()
     }
     
     func isHost() -> Bool {
         return self._isHost
     }
     
-    func getQueueItems() -> Array<GenericSong> {
-        return self._queue
+    //MARK: - Event Handling
+    
+    func handleEvent(event: String, items: [Any]) {
+        print("EVENT ", event)
+        switch event {
+        case "sessionCreated":
+            print("Session created")
+            handleCreateSessionResponse(items: items)
+        case "sessionJoined":
+            print("Session joined")
+            handleJoinSessionResponse(items: items)
+        case "songAdded":
+            print("Song Added")
+            handleSongAddedEvent(items: items)
+        case "songVoted":
+            print("Song voted")
+            handleSongVotedEvent(items: items)
+//        case "userJoined":
+//            handleUserJoinedEvent(items: items)
+//        case "sessionLeft":
+//            self.isConnected = false
+            
+        default:
+            print("Unhandled event: \(event)")
+        }
     }
     
+    // MARK: - Event Handler helper functions
     
-    //MARK: - Event Handling
     
     func handleCreateSessionResponse(items: [Any]) {
         if let firstItem = items.first as? [String: Any] {
@@ -153,10 +166,9 @@ class SessionManager: ObservableObject {
     }
     
     func handleJoinSessionResponse(items: [Any]) {
-        print("SESSION JOINEDDJDJFDJF")
         if let firstItem = items.first as? [String: Any] {
             if let users = firstItem["users"] as? [String] {
-                self.users = users
+                self._users = users
                 self.isActive = true
             } else if let errResponse = firstItem["error"] {
                 print("Handle err", errResponse)
@@ -170,12 +182,71 @@ class SessionManager: ObservableObject {
     func handleUserJoinedEvent(items: [Any]) {
         if let firstItem = items.first as? [String: Any] {
             if let user = firstItem["user"] as? String {
-                self.users.append(user)
+                self._users?.append(user)
             }
         } else {
             print("Unkown event in userJoined")
         }
     }
+    
+    // Recieved when a user in the session adds a song (including sender)
+    func handleSongAddedEvent(items: [Any]) {
+        
+        if let songItems = items.first as? [String: Any] {
+            guard let song: Song = buildMusicItem(songItems: songItems) else {
+                print("Cannot parse song")
+                return
+            }
+            
+            // Resolve the song with music service
+            searchManager.resolveSong(song: song) { result in
+                print("resovied song")
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let song):
+                        print("Success on adding song to queue", song)
+                        self._queue.enqueue(song: song)
+                        self.songAdded = true
+                    case .failure(let error):
+                        // Handle error
+                        print("Error resolving song \(error)")
+                    }
+                }
+            }
+        } else {
+            // handle error
+            print("Error in response from songAddedEvent")
+        }
+    }
+    
+    func handleSongVotedEvent(items: [Any]) {
+        
+        if let voteItems = items.first as? [String : Any] {
+            if let songId = voteItems["songId"] as? String, let vote = voteItems["vote"] as? Int {
+                if var votedSong = self._queue.find(id: songId) {
+                    (vote == -1) ? votedSong.downvote() : votedSong.upvote()
+                }
+            }
+        }
+    }
+  
+    // MARK: - Helper method
+    
+    private func buildMusicItem(songItems: [String: Any]) -> Song? {
+        if let song = songItems["song"] as? [String: Any] {
+            let service = song["service"] as? String ?? ""
+            let id = song["id"] as? String ?? ""
+            let uri = song["uri"] as? String ?? ""
+            let title = song["title"] as? String ?? ""
+            let album = song["album"] as? String ?? ""
+            let artist = song["artist"] as? String ?? ""
+            let votes = song["votes"] as? Int ?? -1
+            return Song(service: service, id: id, uri: uri, title: title, artist: album, album: artist, votes: votes)
+        }
+        
+        return nil
+    }
+    
 
    
     

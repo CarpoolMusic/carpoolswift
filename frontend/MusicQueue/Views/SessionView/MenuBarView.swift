@@ -40,7 +40,11 @@ struct MenuBarView: View {
     }
     /// The action to perform when the user taps the Leave Session button.
     private func handleLeaveSessionButtonSelected() {
-        self.sessionManager.leaveSession()
+        do {
+            try self.sessionManager.leaveSession()
+        } catch {
+            print("error leaving session")
+        }
     }
     
     private func handleQueueButtonPressed() {

@@ -4,29 +4,58 @@
 //
 //  Created by Nolan Biscaro on 2023-09-16.
 //
+import Foundation
 import MusicKit
+import Combine
 
 class AppleMusicMediaPlayer: MediaPlayerProtocol {
-    private let player: SystemMusicPlayer
-    private let queue: MusicPlayer.Queue
 
-    init() {
-        self.player = SystemMusicPlayer.shared
-        self.queue = MusicPlayer.Queue()
-    }
-
-    // MARK: - Playback controls
-    func play() async throws {
-        try await prepareToPlay()
-        if self.player.isPreparedToPlay {
-            try await player.play()
-        }
+    private let _player: ApplicationMusicPlayer
+    private var _userQueue: Queue
+    private var isPlaybackQueueSet: Bool = false
+    private var queueUpdate: AnyCancellable?
+    
+    var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
+    
+    
+    
+    init(queue: Queue) {
+        _player = ApplicationMusicPlayer.shared
+        _player.queue = ApplicationMusicPlayer.Queue()
+        _player.queue.entries = []
+        self._userQueue = queue
+        setupQueueUpdateSubscription()
     }
     
-    func playSong(song: Song) async throws {
-        try await self.queue.insert(song, position: .afterCurrentEntry)
-        try await self.player.skipToNextEntry()
-        try await self.play()
+    private func setupQueueUpdateSubscription() {
+        queueUpdate = _player.queue.objectWillChange
+            .sink { [weak self] _ in
+                if let currentEntry = self?._player.queue.currentEntry {
+                    if case .song(let song) = currentEntry.item {
+                        self?.currentEntryPublisher.send(AnyMusicItem(song))
+                    }
+                }
+            }
+        
+    }
+    
+    // MARK: - Playback controls
+    func play() async throws {
+        print("play")
+        
+        if (!isPlaybackQueueSet) {
+            print("first play")
+            try await loadNextSong()
+            isPlaybackQueueSet = true
+        }
+        
+        do {
+            try await _player.play()
+            print("Sucess on _player.play")
+            print("CURRENT SONG PLAYING", _player.queue.currentEntry as Any)
+        } catch {
+            print("Failed to prepare play with error: \(error)")
+        }
     }
     
     func resume() async throws {
@@ -34,27 +63,44 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     func pause() async throws {
-        self.player.pause()
+        self._player.pause()
     }
     
     func togglePlayPause() async throws {
+        print("Toggle play pause")
         try await self.isPlaying() ? self.pause() : self.play()
     }
 
     func skipToNext() async throws {
-        try await self.player.skipToNextEntry()
+        print("skip to next")
+        
+        // Add next entry to player queue from user queue
+        try await self.loadNextSong()
+        do {
+            try await _player.skipToNextEntry()
+            print("success on skipToNextEntry")
+            print("CURRENT SONG PLAYING", _player.queue.currentEntry as Any)
+        } catch {
+            print("Failed to skipToNextEntry with error \(error)")
+        }
+        print("loaded next song")
+//        try await self.play()
     }
 
     func skipToPrevious() async throws {
-        try await self.player.skipToPreviousEntry()
-    }
-    
-    func enqueueSong(song: Song) async throws {
-        try await self.queue.insert(song, position: .tail)
+        print("skip to previous")
+        do {
+            try await _player.skipToPreviousEntry()
+            print("PREVIOUS", _player.queue.entries.first as Any)
+            print("success on skipToPreviousEntry")
+        } catch {
+            print("Failed to skipToNextEntry with error \(error)")
+        }
+//        try await self.play()
     }
     
     func getPlayerState() -> PlayerState {
-        switch player.state.playbackStatus {
+        switch _player.state.playbackStatus {
         case .playing:
             return PlayerState.playing
         case .paused:
@@ -65,11 +111,48 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     func isPlaying() -> Bool {
-        return self.player.state.playbackStatus == .playing
+        return self._player.state.playbackStatus == .playing
     }
-
-    /// Prepares the current queue for playback, interrupting any active (nonmixable) audio sessions.
-    private func prepareToPlay() async throws {
-        return try await self.player.prepareToPlay()
+    
+    private func enqueue(song: MusicKit.Song) async throws -> Void {
+        if (isPlaybackQueueSet) {
+            do {
+                try await _player.queue.insert(song, position: .tail)
+                print("sucessfully added song to tail")
+            } catch {
+                print("Failed to insert into queue with error \(error)")
+            }
+        } else {
+            let entry = MusicPlayer.Queue.Entry(song)
+            _player.queue = ApplicationMusicPlayer.Queue([entry])
+            print("entires in add", _player.queue.entries)
+            isPlaybackQueueSet = true
+        }
+    }
+    
+    func loadNextSong() async throws -> Void {
+        // add song to play if queue is empty
+        if let song = convertSongToBase(anyMusicItem: _userQueue.dequeue()!) {
+            // Add the next song to the queue
+            try await enqueue(song: song)
+        } else {
+            print("Error getting song at front of queue.")
+        }
+    }
+    
+    func currentSongTitle() -> String {
+        return _player.queue.currentEntry?.title ?? "Untitled"
+    }
+    
+    private func convertSongToBase(anyMusicItem: AnyMusicItem) -> MusicKit.Song? {
+        switch anyMusicItem.getBase() {
+        case .appleSong(let song):
+            return song
+        default:
+            print("error")
+        }
+        
+        print("failed to convert song to mussickit.song")
+        return nil
     }    
 }

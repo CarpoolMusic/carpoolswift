@@ -31,7 +31,7 @@ struct ChatView: View {
 
             HStack {
                 TextField("Type a message...", text: $newMessage)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 
                 Button(action: {

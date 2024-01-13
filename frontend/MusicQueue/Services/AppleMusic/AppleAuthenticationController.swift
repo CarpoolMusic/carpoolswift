@@ -27,6 +27,7 @@ class AppleAuthenticationController: MusicServiceAuthenticationProtocol {
     
     func authenticate(authenticated: @escaping ((Bool) -> (Void))) {
         // Implement Apple Music's authorization process here
+        print("AUTH", self.authorizationStatus)
         switch self.authorizationStatus {
         case .notDetermined:
             Task {
