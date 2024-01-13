@@ -136,8 +136,14 @@ extension AddSongRequest {
 // MARK: - Song
 struct Song: Codable {
     let service, id, uri, title: String
-    let artist, album: String
+    let artist, album, artworkURL: String
     let votes: Int
+
+    enum CodingKeys: String, CodingKey {
+        case service, id, uri, title, artist, album
+        case artworkURL = "artworkUrl"
+        case votes
+    }
 }
 
 // MARK: Song convenience initializers and mutators
@@ -165,6 +171,7 @@ extension Song {
         title: String? = nil,
         artist: String? = nil,
         album: String? = nil,
+        artworkURL: String? = nil,
         votes: Int? = nil
     ) -> Song {
         return Song(
@@ -174,6 +181,7 @@ extension Song {
             title: title ?? self.title,
             artist: artist ?? self.artist,
             album: album ?? self.album,
+            artworkURL: artworkURL ?? self.artworkURL,
             votes: votes ?? self.votes
         )
     }

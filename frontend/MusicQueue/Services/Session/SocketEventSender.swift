@@ -60,7 +60,7 @@ class SocketEventSender {
     
     func addSong(sessionId: String, song: AnyMusicItem) throws {
         // Build the request
-        let song = Song(service: song.service, id: song.id, uri: song.uri, title: song.title, artist: song.artist, album: song.album ?? "", votes: song.votes)
+        let song = Song(service: song.service, id: song.id, uri: song.uri, title: song.title, artist: song.artist, album: song.album ?? "", artworkURL: song.artworkURL ?? "", votes: song.votes)
         let addSongRequest: AddSongRequest = AddSongRequest(sessionID: sessionId, song: song)
         print("IN SESSION ", sessionId)
         

@@ -14,7 +14,7 @@ protocol GenericSong: Identifiable, Equatable {
     var album: String? { get }
     var duration: TimeInterval? { get }
     var uri: String { get }
-    var artworkURL: URL? { get }
+    var artworkURL: String? { get }
     var artwork: Artwork? { get set }
     var votes: Int { get }
     func toJSONData() -> Data?
@@ -44,7 +44,7 @@ struct AnyMusicItem: GenericSong {
     var artist: String
     var album: String?
     var duration: TimeInterval?
-    var artworkURL: URL?
+    var artworkURL: String?
     var artwork: Artwork?
     var artworkImage: UIImage?
     var votes: Int
@@ -72,7 +72,7 @@ struct AnyMusicItem: GenericSong {
         self.album = base.albumName
         self.duration = TimeInterval(base.duration)
         self.uri = base.uri
-        self.artworkURL = URL(string: base.image)
+        self.artworkURL = base.artworkURL
         self.votes = 0
     }
     

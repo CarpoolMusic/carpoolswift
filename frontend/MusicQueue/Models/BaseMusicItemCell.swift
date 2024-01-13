@@ -8,7 +8,7 @@ struct BaseMusicItemCell: View {
     // MARK: - Properties
     
     private let artwork: Artwork?
-    private let artworkURL: URL?
+    private let artworkURL: String?
     private let title: String
     private let artist: String
     
@@ -29,7 +29,7 @@ struct BaseMusicItemCell: View {
                     // Show apple music artwork
                     ArtworkImage(artwork, width: 50)
                         .cornerRadius(6)
-                } else if let artworkURL = self.artworkURL {
+                } else if let urlString = self.artworkURL, let artworkURL = URL(string: urlString) {
                     // Get Spotify artwork image from URL
                     AsyncImage(url: artworkURL) { phase in
                         switch phase {

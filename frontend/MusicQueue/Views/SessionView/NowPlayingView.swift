@@ -67,15 +67,16 @@ class NowPlayingViewModel: ObservableObject {
     }
     
     private func _resolveArtwork(currentEntry: AnyMusicItem) {
+        print("resolving artwork \(currentEntry)")
         Task {
             if let artwork = currentEntry.artwork {
                 self.artwork = artwork
                 self.loadedImage = nil
                 print("load from artwork")
             }
-            if let artworkUrl = currentEntry.artworkURL {
-                _loadImage(from: artworkUrl)
-                print("Resolved artwork done", artworkUrl)
+            if let urlString = currentEntry.artworkURL, let artworkURL = URL(string: urlString) {
+                _loadImage(from: artworkURL)
+                print("Resolved artwork done", artworkURL)
             } else {
                 print("Error resolving artwork from URL")
             }

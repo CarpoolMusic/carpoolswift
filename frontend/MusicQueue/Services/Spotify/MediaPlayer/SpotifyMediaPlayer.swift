@@ -14,7 +14,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     
     private var isPlaybackQueueSet: Bool = false
     private var playerState: SPTAppRemotePlayerState?
-    private var _playerQueue: SpotifySongQueue<String>
+    private var _playerQueue: SpotifySongQueue<AnyMusicItem>
     
     var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
     
@@ -33,7 +33,8 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
             try await loadNextSong()
             if let currentSong = _playerQueue.current {
                 print("connecing with song", currentSong)
-                appRemoteManager.connect(with: currentSong)
+                appRemoteManager.connect(with: currentSong.uri)
+                self.currentEntryPublisher.send(currentSong)
                 isPlaybackQueueSet = true
             } else {
                 print("No song in queue to play")
@@ -57,11 +58,12 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     func skipToNext() async throws {
         print("skipToNext")
         try await loadNextSong()
-        if let nextSongUri = _playerQueue.next() {
-            appRemoteManager.appRemote.playerAPI?.play(nextSongUri)
+        if let nextSong = _playerQueue.next() {
+            appRemoteManager.appRemote.playerAPI?.play(nextSong.uri )
+            self.currentEntryPublisher.send(nextSong)
         } else if let currentSong = _playerQueue.current {
             print("Unable to get next song. Restarting current.")
-            self.appRemoteManager.appRemote.playerAPI?.play(currentSong)
+            self.appRemoteManager.appRemote.playerAPI?.play(currentSong.uri )
         } else {
             print("No previous or current song to play")
         }
@@ -70,10 +72,11 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     func skipToPrevious() {
         print("skipToPrevious")
         if let previousSong = _playerQueue.previous() {
-            self.appRemoteManager.appRemote.playerAPI?.play(previousSong)
+            self.appRemoteManager.appRemote.playerAPI?.play(previousSong.uri)
+            self.currentEntryPublisher.send(previousSong)
         } else if let currentSong = _playerQueue.current {
             print("No previous song. Restarting current")
-            self.appRemoteManager.appRemote.playerAPI?.play(currentSong)
+            self.appRemoteManager.appRemote.playerAPI?.play(currentSong.uri)
         } else {
             print("No previous or current song to play.")
         }
@@ -95,7 +98,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
         print("load next song")
         if let nextSong = _userQueue.dequeue() {
             // Add next song uri to the player queue
-            self._playerQueue.append(newElement: nextSong.uri)
+            self._playerQueue.append(newElement: nextSong)
         } else {
             print("Error getting song at front of queue")
         }
