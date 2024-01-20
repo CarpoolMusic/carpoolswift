@@ -13,8 +13,6 @@ class SocketConnectionHandler {
    
     @Published var connected: Bool = false
     
-    weak var delegate: SocketEventReceiver?
-    
     private let manager: SocketManager
     private let socket: SocketIOClient
     

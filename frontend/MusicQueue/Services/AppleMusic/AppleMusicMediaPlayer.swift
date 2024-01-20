@@ -40,63 +40,40 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     // MARK: - Playback controls
-    func play() async throws {
-        print("play")
-        
+    func play() {
         if (!isPlaybackQueueSet) {
-            print("first play")
-            try await loadNextSong()
+            self.loadNextSong()
             isPlaybackQueueSet = true
         }
         
-        do {
-            try await _player.play()
-            print("Sucess on _player.play")
-            print("CURRENT SONG PLAYING", _player.queue.currentEntry as Any)
-        } catch {
-            print("Failed to prepare play with error: \(error)")
+        performAsyncAction {
+            try await self._player.play()
         }
     }
     
-    func resume() async throws {
-        try await self.play()
+    func resume() {
+        self.play()
     }
     
-    func pause() async throws {
+    func pause() {
         self._player.pause()
     }
     
-    func togglePlayPause() async throws {
-        print("Toggle play pause")
-        try await self.isPlaying() ? self.pause() : self.play()
+    func togglePlayPause() {
+        self.isPlaying() ? self.pause() : self.play()
     }
 
-    func skipToNext() async throws {
-        print("skip to next")
-        
-        // Add next entry to player queue from user queue
-        try await self.loadNextSong()
-        do {
-            try await _player.skipToNextEntry()
-            print("success on skipToNextEntry")
-            print("CURRENT SONG PLAYING", _player.queue.currentEntry as Any)
-        } catch {
-            print("Failed to skipToNextEntry with error \(error)")
+    func skipToNext() {
+        self.loadNextSong()
+        performAsyncAction {
+            try await self._player.skipToNextEntry()
         }
-        print("loaded next song")
-//        try await self.play()
     }
 
-    func skipToPrevious() async throws {
-        print("skip to previous")
-        do {
-            try await _player.skipToPreviousEntry()
-            print("PREVIOUS", _player.queue.entries.first as Any)
-            print("success on skipToPreviousEntry")
-        } catch {
-            print("Failed to skipToNextEntry with error \(error)")
+    func skipToPrevious() {
+        performAsyncAction {
+            try await self._player.skipToPreviousEntry()
         }
-//        try await self.play()
     }
     
     func getPlayerState() -> PlayerState {
@@ -114,27 +91,21 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         return self._player.state.playbackStatus == .playing
     }
     
-    private func enqueue(song: MusicKit.Song) async throws -> Void {
+    private func enqueue(song: MusicKit.Song) -> Void {
         if (isPlaybackQueueSet) {
-            do {
-                try await _player.queue.insert(song, position: .tail)
-                print("sucessfully added song to tail")
-            } catch {
-                print("Failed to insert into queue with error \(error)")
+            performAsyncAction {
+                try await self._player.queue.insert(song, position: .tail)
             }
         } else {
             let entry = MusicPlayer.Queue.Entry(song)
             _player.queue = ApplicationMusicPlayer.Queue([entry])
-            print("entires in add", _player.queue.entries)
             isPlaybackQueueSet = true
         }
     }
     
-    func loadNextSong() async throws -> Void {
-        // add song to play if queue is empty
+    func loadNextSong() -> Void {
         if let song = convertSongToBase(anyMusicItem: _userQueue.dequeue()!) {
-            // Add the next song to the queue
-            try await enqueue(song: song)
+            enqueue(song: song)
         } else {
             print("Error getting song at front of queue.")
         }
@@ -151,8 +122,17 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         default:
             print("error")
         }
-        
-        print("failed to convert song to mussickit.song")
         return nil
     }    
+    
+    private func performAsyncAction(_ action: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await action()
+            } catch {
+                // Handle error
+                print("An error ocurred: \(error)")
+            }
+        }
+    }
 }

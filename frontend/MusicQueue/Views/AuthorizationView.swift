@@ -10,28 +10,21 @@ import MusicKit
 
 // MARK: - Authorization View
 
-/// `WelcomeView` is a view that appears when a user needs to choose and
-/// authenticate their underlying music source
-
 struct AuthorizationView: View {
     // MARK: - Properties
     
     /// Opens a URL using the appropriate system service.
     @Environment(\.openURL) private var openURL
-    
     @ObservedObject var authorizationViewModel = AuthorizationViewModel()
     
     
     // MARK: - View
     
-    /// A decleration of the UI that this view presents.
     var body: some View {
-        NavigationView {
-            if authorizationViewModel.isAuthenticated {
-                AnyView(DashboardView())
-            } else {
-                AnyView(authenticationContent())
-            }
+        if authorizationViewModel.isAuthenticated {
+            AnyView(DashboardView())
+        } else {
+            AnyView(authenticationContent())
         }
     }
     
@@ -63,49 +56,24 @@ struct AuthorizationView: View {
 class AuthorizationViewModel: ObservableObject {
     
     @Published var isAuthenticated = false
-    var musicServiceType: MusicServiceType?
-    
     var sessionManager: SpotifySessionManager?
     
     func handleAppleButtonPressed() {
-        setMusicTypeInUserDefaults(type: .apple)
+        UserPreferences.setUserMusicService(type: .apple)
         
-        let authController = AppleAuthenticationController()
-        authController.authenticate(authenticated: { result in
+        AppleAuthenticationController().authenticate(authenticated: { result in
             // Handle result
         })
     }
     
     func handleSpotifyButtonPressed() {
-        setMusicTypeInUserDefaults(type: .spotify)
+        UserPreferences.setUserMusicService(type: .spotify)
         
         self.sessionManager = SpotifySessionManager()
         sessionManager?.initiateSession(authenticated: { authenticated in
             self.isAuthenticated = authenticated
         })
     }
-    
-//    func handleSpotifyReturnURL(url: URL) {
-//        self.sessionManager?.application(UIApplication.shared, open: url, options: [:])
-//    }
-    
-    
-//    func authenticateWithController(controller: MusicServiceAuthenticationProtocol, service: MusicServiceType) {
-//        controller.authenticate() { authenticated in
-//            DispatchQueue.main.async {
-//                if authenticated {
-//                    /// seperate this out into a user defaults class that manages persistent state
-//                    self.setMusicTypeInUserDefaults(type: service)
-//                    self.isAuthenticated = true
-//                }
-//            }
-//        }
-//    }
-    
-    func setMusicTypeInUserDefaults(type: MusicServiceType) {
-        UserDefaults.standard.set(type.rawValue, forKey: "musicServiceType")
-    }
-    
 }
 // MARK: - Previews
 

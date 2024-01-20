@@ -9,15 +9,16 @@ import MusicKit
 
 protocol GenericSong: Identifiable, Equatable {
     var id: String { get }
+    var uri: String { get }
+    var service: String { get }
     var title: String { get }
     var artist: String { get }
-    var album: String? { get }
-    var duration: TimeInterval? { get }
-    var uri: String { get }
-    var artworkURL: String? { get }
-    var artwork: Artwork? { get set }
+    var album: String { get }
     var votes: Int { get }
-    func toJSONData() -> Data?
+    
+    // Types that are specific to Apple Music Song or Spotify song.
+    var artwork: Artwork? { get }
+    var artworkURL: String? { get }
 }
 
 enum baseSong {
@@ -28,50 +29,44 @@ enum baseSong {
 
 struct AnyMusicItem: GenericSong {
     
-    static func == (lhs: AnyMusicItem, rhs: AnyMusicItem) -> Bool {
-        return lhs.title == rhs.title
-    }
-    
-    func toJSONData() -> Data? {
-        // nothing
-        return nil
-    }
-    
-    var service: String
     var id: String
     var uri: String
+    var service: String
     var title: String
+    var album: String
     var artist: String
-    var album: String?
-    var duration: TimeInterval?
-    var artworkURL: String?
-    var artwork: Artwork?
-    var artworkImage: UIImage?
     var votes: Int
+    
+    var artwork: Artwork?
+    var artworkURL: String?
+    
     
     private var _base: baseSong
     
     init(_ base: MusicKit.Song) {
         self._base = .appleSong(base)
+        
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id.rawValue
+        self.uri = base.url?.absoluteString ?? ""
         self.title = base.title
         self.artist = base.artistName
-        self.album = base.albumTitle
-        self.duration = base.duration
-        self.uri = base.url?.absoluteString ?? ""
+        self.album = base.albumTitle ?? ""
+        self.artwork = base.artwork
+        self.artworkURL = nil
         self.votes = 0
     }
     
     init(_ base: SpotifySong) {
         self._base = .spotifySong(base)
+        
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
+        self.uri = base.uri
         self.title = base.name
         self.artist = base.artists.first ?? ""
         self.album = base.albumName
-        self.duration = TimeInterval(base.duration)
-        self.uri = base.uri
+        self.artwork = nil
         self.artworkURL = base.artworkURL
         self.votes = 0
     }
@@ -87,6 +82,11 @@ struct AnyMusicItem: GenericSong {
     mutating func downvote() {
         self.votes -= 1
     }
+    
+    static func == (lhs: AnyMusicItem, rhs: AnyMusicItem) -> Bool {
+        return lhs.title == rhs.title
+    }
+    
 }
 
 // Inner struct to convert only the properties we need

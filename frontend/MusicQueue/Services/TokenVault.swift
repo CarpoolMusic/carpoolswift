@@ -20,11 +20,9 @@ class TokenVault {
 
         let updateAttributes: [String: Any] = [kSecValueData as String: data]
 
-        // Try to update first
         let updateStatus = SecItemUpdate(query as CFDictionary, updateAttributes as CFDictionary)
          if updateStatus == errSecItemNotFound {
-        // Item not found, try to add it
-        let addStatus = SecItemAdd(query.merging(updateAttributes) { (_, new) in new } as CFDictionary, nil)
+            SecItemAdd(query.merging(updateAttributes) { (_, new) in new } as CFDictionary, nil)
         }
     }
     

@@ -12,7 +12,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     private let _userQueue: Queue
     private let appRemoteManager: SpotifyAppRemoteManager
     
-    private var isPlaybackQueueSet: Bool = false
+    private var playbackSet: Bool = false
     private var playerState: SPTAppRemotePlayerState?
     private var _playerQueue: SpotifySongQueue<AnyMusicItem>
     
@@ -26,23 +26,23 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     
     // MARK: - Player methods
     
-    func play() async throws {
+    func play() {
         print("play")
         
-        if (!isPlaybackQueueSet) {
-            try await loadNextSong()
-            if let currentSong = _playerQueue.current {
-                print("connecing with song", currentSong)
-                appRemoteManager.connect(with: currentSong.uri)
-                self.currentEntryPublisher.send(currentSong)
-                isPlaybackQueueSet = true
-            } else {
-                print("No song in queue to play")
-            }
-        } else {
+        if (playbackSet) {
             self.resume()
+            return
         }
         
+        loadNextSong()
+        if let currentSong = _playerQueue.current {
+            print("connecing with song", currentSong)
+            appRemoteManager.connect(with: currentSong.uri)
+            self.currentEntryPublisher.send(currentSong)
+            playbackSet = true
+        } else {
+            print("No song in queue to play")
+        }
     }
     
     func pause() {
@@ -55,15 +55,15 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
         self.appRemoteManager.appRemote.playerAPI?.resume()
     }
     
-    func skipToNext() async throws {
+    func skipToNext() {
         print("skipToNext")
-        try await loadNextSong()
+        loadNextSong()
         if let nextSong = _playerQueue.next() {
-            appRemoteManager.appRemote.playerAPI?.play(nextSong.uri )
+            self.appRemoteManager.appRemote.playerAPI?.play(nextSong.uri)
             self.currentEntryPublisher.send(nextSong)
         } else if let currentSong = _playerQueue.current {
             print("Unable to get next song. Restarting current.")
-            self.appRemoteManager.appRemote.playerAPI?.play(currentSong.uri )
+            self.appRemoteManager.appRemote.playerAPI?.play(currentSong.uri)
         } else {
             print("No previous or current song to play")
         }
@@ -94,64 +94,16 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
         }
     }
     
-    func loadNextSong() async throws -> Void {
+    func loadNextSong() -> Void {
         print("load next song")
         if let nextSong = _userQueue.dequeue() {
-            // Add next song uri to the player queue
             self._playerQueue.append(newElement: nextSong)
         } else {
             print("Error getting song at front of queue")
         }
     }
     
-    func handlePlayerCallback<T>(result: T?, error: Error?) {
-        if let result = result {
-            print("good \(result)")
-        } else {
-            print("Error in callback from media player \(String(describing: error?.localizedDescription))")
-        }
-    }
-    
     func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
         print("Player state has changed")
-    }
-}
-
-struct SpotifySongQueue<T> {
-    private var array: [T]
-    private var currentIndex: Int
-
-    init() {
-        self.array = []
-        self.currentIndex = array.startIndex
-        print("STSRT IDX \(array.startIndex)")
-    }
-
-    var current: T? {
-        return array.indices.contains(currentIndex) ? array[currentIndex] : nil
-    }
-    
-    mutating func next() -> T? {
-        guard !array.isEmpty, currentIndex < array.index(before: array.endIndex) else {
-            return nil
-        }
-        currentIndex = array.index(after: currentIndex)
-        return array[currentIndex]
-    }
-
-    mutating func previous() -> T? {
-        guard !array.isEmpty, currentIndex > array.startIndex else {
-            return nil
-        }
-        currentIndex = array.index(before: currentIndex)
-        return array[currentIndex]
-    }
-
-    mutating func reset() {
-        currentIndex = array.startIndex
-    }
-    
-    mutating func append(newElement: T) {
-        array.append(newElement)
     }
 }

@@ -70,9 +70,15 @@ struct BaseMusicItemCell: View {
 }
 
 struct SearchMusicItemCell: View {
-    let song: AnyMusicItem
+    var song: AnyMusicItem
     var songInQueue: Binding<Bool>
     var onAddToQueue: () -> Void
+    
+    init(song: AnyMusicItem, songInQueue: Binding<Bool>, onAddToQueue: @escaping () -> Void) {
+        self.song = song
+        self.songInQueue = songInQueue
+        self.onAddToQueue = onAddToQueue
+    }
     
     var body: some View {
         HStack {

@@ -64,15 +64,6 @@ class SessionViewModel: ObservableObject {
         self.sessionIsActive = sessionManager.isConnected
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
         self.mediaPlayer = MediaPlayer(queue: sessionManager._queue)
-        
-        // subscribe to changes in queue
-//        sessionManager.$queueUpdated
-//            .receive(on: DispatchQueue.main)
-//            .sink { [weak self] _ in
-//                // Update queue in media player
-//                self?.mediaPlayer.setQueue(queue: self?.sessionManager._queue ?? Queue())
-//            }
-//            .store(in: &cancellables)
     }
     
     func handleSearchButtonPressed() {
