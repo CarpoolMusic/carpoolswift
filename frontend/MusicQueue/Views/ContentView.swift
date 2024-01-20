@@ -22,7 +22,6 @@ struct ContentView: View {
 }
 
 class ContentViewModel: ObservableObject {
-    
     @Published var isAuthenticated = false
 }
 

@@ -34,12 +34,10 @@ class SocketEventSender {
     }
     
     func createSession(hostName: String, sessionName: String) throws {
-        // Build the request
         let createSessionRequest: CreateSessionRequest = CreateSessionRequest(hostID: hostName, sessionName: sessionName)
             
         try checkConnection()
         
-        // Send the event
         let event = SocketSendEvent.createSession
         if let json = try? createSessionRequest.jsonData() {
             connection.emit(event: event.rawValue, with: [json])
@@ -47,7 +45,6 @@ class SocketEventSender {
     }
     
     func joinSession(sessionId: String, hostName: String) throws {
-        // Build the request
         let joinSessionRequest: JoinSessionRequest = JoinSessionRequest(sessionID: sessionId, userID: hostName)
         
         try checkConnection()
@@ -59,10 +56,8 @@ class SocketEventSender {
     }
     
     func addSong(sessionId: String, song: AnyMusicItem) throws {
-        // Build the request
-        let song = Song(service: song.service, id: song.id, uri: song.uri, title: song.title, artist: song.artist, album: song.album ?? "", artworkURL: song.artworkURL ?? "", votes: song.votes)
+        let song = Song(service: song.service, id: song.id, uri: song.uri, title: song.title, artist: song.artist, album: song.album, artworkURL: song.artworkURL ?? "", votes: song.votes)
         let addSongRequest: AddSongRequest = AddSongRequest(sessionID: sessionId, song: song)
-        print("IN SESSION ", sessionId)
         
         try checkConnection()
         
@@ -72,12 +67,12 @@ class SocketEventSender {
         }
     }
     
-    func leaveSession(sessionId: String) {
+    func leaveSession(sessionId: String) throws {
         let event = SocketSendEvent.leaveSession
 //        connection.emit(event: event.rawValue, with: [sessionID: sessionID])
     }
     
-    func removeSong(sessionId: String, songID: String) {
+    func removeSong(sessionId: String, songID: String) throws {
         let event = SocketSendEvent.removeSong
 //        connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songID": songID])
     }

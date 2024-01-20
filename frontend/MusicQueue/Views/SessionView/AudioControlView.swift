@@ -21,21 +21,21 @@ struct AudioControlView: View {
     var body: some View {
         return HStack {
             Button(action: {
-                self.mediaPlayer.performAsyncAction(mediaPlayer.skipToPrevious)
+                self.mediaPlayer.skipToPrevious()
                 
             }) {
                 Image(systemName: "backward.fill")
             }
             .disabled(!isHost)
             Button(action: {
-                self.mediaPlayer.performAsyncAction(mediaPlayer.togglePlayPause)
+                self.mediaPlayer.togglePlayPause()
                 
             }) {
                 Image(systemName: mediaPlayer.isPlaying() ? "pause.fill" : "play.fill")
             }
             .disabled(!isHost)
             Button(action: {
-                self.mediaPlayer.performAsyncAction(self.mediaPlayer.skipToNext)
+                self.mediaPlayer.skipToNext()
                 
             }) {
                 Image(systemName: "forward.fill")

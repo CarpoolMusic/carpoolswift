@@ -46,6 +46,10 @@ struct SongSearchView: View {
 
 class SongSearchViewModel: ObservableObject {
     var searchManager: SearchManager = SearchManager(SpotifySearchManager())
+    
+    @Published var songs: [AnyMusicItem] = []
+    @Published var songAdded: Bool = false
+    
     @Published var query: String = "" {
         didSet {
             self.searchManager.searchSongs(query: query, limit: 20) { [weak self] result in
@@ -53,6 +57,8 @@ class SongSearchViewModel: ObservableObject {
                     switch result {
                     case .success(let songs):
                         self?.songs = songs
+                        print(songs)
+                        print("searched")
                     case .failure(let error):
                         print("Error searching songs \(error)")
                         self?.songs = []
@@ -61,9 +67,6 @@ class SongSearchViewModel: ObservableObject {
             }
         }
     }
-    
-    @Published var songs: [AnyMusicItem] = []
-    @Published var songAdded: Bool = false
     
     let musicServiceType: String = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
     let sessionManager: SessionManager
