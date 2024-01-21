@@ -21,6 +21,9 @@ extension SessionManager {
             case "songAdded":
                 print("Song Added")
                 handleSongAddedEvent(items: items)
+            case "songRemoved":
+                print("Song Removed")
+                handleSongRemovedEvent(items: items)
             case "songVoted":
                 print("Song voted")
                 handleSongVotedEvent(items: items)
@@ -63,7 +66,7 @@ extension SessionManager {
     func handleUserJoinedEvent(items: [Any]) {
         if let firstItem = items.first as? [String: Any] {
             if let user = firstItem["user"] as? String {
-                self._session.users?.append(user)
+                self._session.users.append(user)
             }
         } else {
             print("Unkown event in userJoined")
@@ -95,6 +98,19 @@ extension SessionManager {
         } else {
             print("Error in response from songAddedEvent")
         }
+    }
+    
+    func handleSongRemovedEvent(items: [Any]) {
+        print("handling song removed event")
+        print(items)
+        if let items = items.first as? [String : Any],
+           let songId = items["songId"] as? String {
+            self._queue.removeItem(id: songId)
+            print("song \(songId) removed")
+        } else {
+            print("Error unable to remove song")
+        }
+        
     }
     
     func handleSongVotedEvent(items: [Any]) {

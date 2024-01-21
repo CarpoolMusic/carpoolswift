@@ -6,9 +6,9 @@
 //
 
 struct Session {
-    var hostId: String?
-    var sessionId: String?
-    var sessionName: String?
-    var hostName: String?
-    var users: [String]?
+    var hostId: String = ""
+    var sessionId: String = ""
+    var sessionName: String = ""
+    var hostName: String = ""
+    var users: [String] = []
 }

@@ -46,6 +46,12 @@ class Queue: ObservableObject {
         return nil
     }
     
+    func removeItem(id: String) -> Void {
+        if let index = _queue.firstIndex(where: { $0.id == id }) {
+            _queue.remove(at: index)
+        }
+    }
+    
     private func sortQueue() {
         _queue.sort { (song1, song2) -> Bool in
             updated.toggle()

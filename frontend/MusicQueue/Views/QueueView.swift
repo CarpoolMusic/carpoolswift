@@ -32,14 +32,23 @@ struct QueueView: View {
                 .scaledToFill()
                 .frame(width: UIScreen.main.bounds.width / 2, height: UIScreen.main.bounds.height / 2)
             Text("Your song queue is currently empty. Click the ") + Text(Image(systemName: "magnifyingglass")) + Text(" to search for songs")
-        }
-        List {
-            ForEach(queueViewModel.sessionManager.getQueuedSongs(), id: \.id) { song in
-                MusicCellView(song: song, queueViewModel: queueViewModel)
+        } else {
+            List {
+                ForEach(queueViewModel.sessionManager.getQueuedSongs(), id: \.id) { song in
+                    MusicCellView(song: song, queueViewModel: queueViewModel)
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                queueViewModel.removeSong(songId: song.id)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                }
             }
+            .animation(.default, value: queueViewModel.sessionManager.queueUpdated)
+            .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
+            
         }
-        .animation(.default, value: queueViewModel.sessionManager.queueUpdated)
-        .searchable(text: $queueViewModel.searchTerm, prompt: "Songs")
     }
 }
 
@@ -52,6 +61,14 @@ class QueueViewModel: ObservableObject {
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
+    }
+    
+    func removeSong(songId: String) {
+        do {
+            try self.sessionManager.socketEventSender.removeSong(sessionId: self.sessionManager._session.sessionId, songID: songId)
+        } catch {
+            print("Error deleting song from queue")
+        }
     }
     
 }
