@@ -29,7 +29,7 @@ class SocketEventSender {
     
     func checkConnection() throws {
         guard connection.connected else {
-            throw SocketError.notConnected
+            throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
         }
     }
     
@@ -39,9 +39,8 @@ class SocketEventSender {
         try checkConnection()
         
         let event = SocketSendEvent.createSession
-        if let json = try? createSessionRequest.jsonData() {
-            connection.emit(event: event.rawValue, with: [json])
-        }
+        let json = try createSessionRequest.jsonData()
+        connection.emit(event: event.rawValue, with: [json])
     }
     
     func joinSession(sessionId: String, hostName: String) throws {
@@ -50,9 +49,8 @@ class SocketEventSender {
         try checkConnection()
         
         let event = SocketSendEvent.joinSession
-        if let json = try? joinSessionRequest.jsonData() {
-            connection.emit(event: event.rawValue, with: [json])
-        }
+        let json = try joinSessionRequest.jsonData()
+        connection.emit(event: event.rawValue, with: [json])
     }
     
     func addSong(sessionId: String, song: AnyMusicItem) throws {
@@ -62,26 +60,23 @@ class SocketEventSender {
         try checkConnection()
         
         let event = SocketSendEvent.addSong
-        if let json = try? addSongRequest.jsonData() {
-            connection.emit(event: event.rawValue, with: [json])
-        }
+        let json = try addSongRequest.jsonData()
+        connection.emit(event: event.rawValue, with: [json])
     }
     
     func leaveSession(sessionId: String) throws {
-        let event = SocketSendEvent.leaveSession
+//        let event = SocketSendEvent.leaveSession
 //        connection.emit(event: event.rawValue, with: [sessionID: sessionID])
     }
     
     func removeSong(sessionId: String, songID: String) throws {
-        print("sending remove song request")
         let removeSongRequest: RemoveSongRequest = RemoveSongRequest(sessionID: sessionId, songID: songID)
         
         try checkConnection()
         
         let event = SocketSendEvent.removeSong
-        if let json = try? removeSongRequest.jsonData() {
-            connection.emit(event: event.rawValue, with: [json])
-        }
+        let json = try removeSongRequest.jsonData()
+        connection.emit(event: event.rawValue, with: [json])
     }
     
     func voteSong(sessionId: String, songId: String, vote: Int) throws {
@@ -90,8 +85,7 @@ class SocketEventSender {
         try checkConnection()
         
         let event = SocketSendEvent.voteSong
-        if let json = try? voteSongRequest.jsonData() {
-            connection.emit(event: event.rawValue, with: [json])
-        }
+        let json = try voteSongRequest.jsonData()
+        connection.emit(event: event.rawValue, with: [json])
     }
 }

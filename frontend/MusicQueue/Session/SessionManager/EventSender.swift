@@ -10,12 +10,10 @@ import Foundation
 extension SessionManager {
     
     func connect() {
-        print("session manager connect")
         self.socketConnectionHandler.connect()
     }
     
     func disconnect() {
-        print("session manager disconnect")
         self.socketConnectionHandler.disconnect()
     }
     
