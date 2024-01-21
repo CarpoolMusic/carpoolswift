@@ -28,24 +28,14 @@ extension SessionManager {
     }
     
     func leaveSession() throws {
-        guard let sessionId = self._session.sessionId else {
-            throw SessionManagerError.InvalidSessionId
-            // throw error
-        }
-        try self.socketEventSender.leaveSession(sessionId: sessionId)
+        try self.socketEventSender.leaveSession(sessionId: self._session.sessionId)
     }
     
     func addSong(song: AnyMusicItem) throws {
-        guard let sessionId = self._session.sessionId else {
-            throw SessionManagerError.InvalidSessionId
-        }
-        try self.socketEventSender.addSong(sessionId: sessionId, song: song)
+        try self.socketEventSender.addSong(sessionId: self._session.sessionId, song: song)
     }
     
     func voteSong(songId: String, vote: Int) throws {
-        guard let sessionId = self._session.sessionId else {
-            throw SessionManagerError.InvalidSessionId
-        }
-        try self.socketEventSender.voteSong(sessionId: sessionId, songId: songId, vote: vote)
+        try self.socketEventSender.voteSong(sessionId: self._session.sessionId, songId: songId, vote: vote)
     }
 }

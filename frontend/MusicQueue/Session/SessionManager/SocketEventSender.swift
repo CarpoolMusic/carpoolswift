@@ -73,8 +73,15 @@ class SocketEventSender {
     }
     
     func removeSong(sessionId: String, songID: String) throws {
+        print("sending remove song request")
+        let removeSongRequest: RemoveSongRequest = RemoveSongRequest(sessionID: sessionId, songID: songID)
+        
+        try checkConnection()
+        
         let event = SocketSendEvent.removeSong
-//        connection.emit(event: event.rawValue, with: ["sessionId": sessionId, "songID": songID])
+        if let json = try? removeSongRequest.jsonData() {
+            connection.emit(event: event.rawValue, with: [json])
+        }
     }
     
     func voteSong(sessionId: String, songId: String, vote: Int) throws {
