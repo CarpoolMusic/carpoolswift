@@ -26,9 +26,9 @@ class AppleAuthenticationController: MusicServiceAuthenticationProtocol {
     }
     
     func authenticate(authenticated: @escaping ((Bool) -> (Void))) {
-        // Implement Apple Music's authorization process here
-        print("AUTH", self.authorizationStatus)
         switch self.authorizationStatus {
+        case .authorized:
+            authenticated(true)
         case .notDetermined:
             Task {
                 let status = await MusicAuthorization.request()
@@ -38,10 +38,8 @@ class AppleAuthenticationController: MusicServiceAuthenticationProtocol {
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(settingsURL)
             }
-        default:
-            fatalError("No button should be displayed for current authorization status: \(self.authorizationStatus).")
         }
     }
     
-    
+
 }

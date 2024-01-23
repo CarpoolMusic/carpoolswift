@@ -7,10 +7,6 @@
 
 import MusicKit
 
-enum SearchError: Error {
-    case songNotFound
-}
-
 protocol SearchManagerProtocol {
     
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void)

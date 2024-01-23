@@ -8,7 +8,6 @@
 import SocketIO
 import Combine
 
-/// Responsible for all the low level socket communication with the server
 class SocketConnectionHandler {
    
     @Published var connected: Bool = false
@@ -24,17 +23,14 @@ class SocketConnectionHandler {
     }
     
     func connect() {
-        print("sending socket connect")
         socket.connect()
     }
     
     func disconnect() {
-        print("sending socket disconnect")
         socket.disconnect()
     }
     
     func emit(event: String, with items: [SocketData] = []) {
-        // attach a correlationID to match request/response
         socket.emit(event, items)
     }
     
@@ -52,11 +48,9 @@ class SocketConnectionHandler {
         }
     }
     
-    // MARK: - Subscription
     var eventPublisher = PassthroughSubject<(String, [Any]), Never>()
     
     func socketDidReceiveEvent(event: String, with items: [Any]) {
-        /// Check to see if the event is specific to connection, otherwise forward to subscribers
         switch event {
         case "connected":
             self.connected = true

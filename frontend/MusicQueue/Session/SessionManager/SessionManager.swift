@@ -3,10 +3,12 @@ import SocketIO
 import SwiftUI
 import Combine
 import MusicKit
+import os
 
 enum SessionManagerError: Error { case InvalidSessionId }
 
 class SessionManager: ObservableObject {
+    let logger = Logger()
     
     @Published var isConnected: Bool = false
     @Published var isActive: Bool = false
@@ -18,17 +20,14 @@ class SessionManager: ObservableObject {
     internal var socketEventSender: SocketEventSender
     private var _isHost: Bool = false
     
-    var searchManager: SearchManager
     internal var _session = Session()
     var _queue: Queue = Queue()
     
     private var cancellables = Set<AnyCancellable>()
     
-    //MARK: - Session data
     init() {
         self.socketConnectionHandler = SocketConnectionHandler()
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
-        self.searchManager = UserPreferences.getUserMusicService() == .apple ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
         
         self._subscribeConnections()
     }
@@ -46,7 +45,6 @@ class SessionManager: ObservableObject {
     }
     
     private func _subscribeConnections() {
-        // Subscribe to the connection changes
         socketConnectionHandler.$connected
             .receive(on: DispatchQueue.main)
             .sink { [weak self] connected in
@@ -54,7 +52,6 @@ class SessionManager: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // subscribe session to socket events
         socketConnectionHandler.eventPublisher
             .sink { [weak self] event, items in
                 self?.handleEvent(event: event, items: items)

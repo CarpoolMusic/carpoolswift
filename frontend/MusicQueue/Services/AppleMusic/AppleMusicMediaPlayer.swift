@@ -7,8 +7,10 @@
 import Foundation
 import MusicKit
 import Combine
+import os
 
 class AppleMusicMediaPlayer: MediaPlayerProtocol {
+    let logger = Logger()
 
     private let _player: ApplicationMusicPlayer
     private var _userQueue: Queue
@@ -16,8 +18,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     private var queueUpdate: AnyCancellable?
     
     var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
-    
-    
     
     init(queue: Queue) {
         _player = ApplicationMusicPlayer.shared
@@ -36,7 +36,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
                     }
                 }
             }
-        
     }
     
     // MARK: - Playback controls
@@ -104,10 +103,20 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
     
     func loadNextSong() -> Void {
-        if let song = convertSongToBase(anyMusicItem: _userQueue.dequeue()!) {
-            enqueue(song: song)
-        } else {
-            print("Error getting song at front of queue.")
+        do {
+            guard let nextSong = _userQueue.dequeue() else {
+                throw QueueUnderflowError(message: "No next song in queue", stacktrace: Thread.callStackSymbols)
+            }
+            
+            let appleSong = try convertSongToBase(anyMusicItem: nextSong)
+            enqueue(song: appleSong)
+        } catch let error as QueueUnderflowError {
+            logger.log(level: .error, "\(error)")
+        } catch let error as SongConversionError {
+            logger.log(level: .error, "\(error)")
+        } catch {
+            logger.log(level: .fault, "Unkown error \(error)")
+            fatalError(error.localizedDescription)
         }
     }
     
@@ -115,15 +124,12 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         return _player.queue.currentEntry?.title ?? "Untitled"
     }
     
-    private func convertSongToBase(anyMusicItem: AnyMusicItem) -> MusicKit.Song? {
-        switch anyMusicItem.getBase() {
-        case .appleSong(let song):
+    private func convertSongToBase(anyMusicItem: AnyMusicItem) throws -> MusicKit.Song {
+        if case .appleSong(let song) = anyMusicItem.getBase() {
             return song
-        default:
-            print("error")
         }
-        return nil
-    }    
+        throw SongConversionError(message: "Unexpected base song type \(anyMusicItem.getBase()). Expected .appleSong", stacktrace: Thread.callStackSymbols)
+    }
     
     private func performAsyncAction(_ action: @escaping () async throws -> Void) {
         Task {
