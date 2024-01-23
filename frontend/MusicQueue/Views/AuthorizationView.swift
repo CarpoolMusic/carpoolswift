@@ -8,17 +8,10 @@
 import SwiftUI
 import MusicKit
 
-// MARK: - Authorization View
-
 struct AuthorizationView: View {
-    // MARK: - Properties
     
-    /// Opens a URL using the appropriate system service.
     @Environment(\.openURL) private var openURL
     @ObservedObject var authorizationViewModel = AuthorizationViewModel()
-    
-    
-    // MARK: - View
     
     var body: some View {
         if authorizationViewModel.isAuthenticated {
@@ -62,7 +55,7 @@ class AuthorizationViewModel: ObservableObject {
         UserPreferences.setUserMusicService(type: .apple)
         
         AppleAuthenticationController().authenticate(authenticated: { result in
-            // Handle result
+            self.isAuthenticated = result
         })
     }
     

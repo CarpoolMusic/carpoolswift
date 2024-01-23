@@ -19,9 +19,9 @@ extension SessionManager {
             handleSongAddedEvent(items: items) { result in
                 switch result {
                 case .success(let song):
-                    self.defaultLogger.log(level: .debug, "Song with id \(song.id) was added to the queue.")
+                    self.logger.log(level: .debug, "Song with id \(song.id) was added to the queue.")
                 case .failure(let error):
-                    self.defaultLogger.log(level: .error, "\(error)")
+                    self.logger.log(level: .error, "\(error)")
                 }
             }
         case "songRemoved":
@@ -48,12 +48,12 @@ extension SessionManager {
             
         } catch let error as EventError {
             ErrorToast.shared.showToast(message: "Unable to create session.")
-            defaultLogger.log(level: .error, "\(error.toString())")
+            logger.log(level: .error, "\(error.toString())")
         } catch let error as UnkownError {
-            defaultLogger.log(level: .fault, "\(error.toString())")
+            logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         } catch {
-            defaultLogger.log(level: .fault, "\(error.localizedDescription)")
+            logger.log(level: .fault, "\(error.localizedDescription)")
             fatalError(error.localizedDescription)
         }
     }
@@ -74,16 +74,16 @@ extension SessionManager {
             self.isActive = true
             
         } catch let error as UnkownError {
-            defaultLogger.log(level: .fault, "\(error.toString())")
+            logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         } catch let error as UnkownResponseError {
-            defaultLogger.log(level: .fault, "\(error.toString())")
+            logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         } catch let error as EventError {
-            defaultLogger.log(level: .error, "\(error.toString())")
+            logger.log(level: .error, "\(error.toString())")
             ErrorToast.shared.showToast(message: "Unable to create session.")
         } catch {
-            defaultLogger.log(level: .fault, "\(error.localizedDescription)")
+            logger.log(level: .fault, "\(error.localizedDescription)")
             fatalError(error.localizedDescription)
         }
     }
@@ -103,13 +103,13 @@ extension SessionManager {
             _session.users.append(user)
             
         } catch let error as EventError {
-            defaultLogger.log(level: .error, "\(error.toString())")
+            logger.log(level: .error, "\(error.toString())")
             ErrorToast.shared.showToast(message: "Unable to create session.")
         }  catch let error as CustomError {
-            defaultLogger.log(level: .fault, "\(error.toString())")
+            logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         } catch {
-            defaultLogger.log(level: .fault, "\(error.localizedDescription)")
+            logger.log(level: .fault, "\(error.localizedDescription)")
             fatalError(error.localizedDescription)
         }
     }
@@ -123,6 +123,7 @@ extension SessionManager {
         
         do {
             let song = try buildMusicItem(songItems: songItems)
+            let searchManager = UserPreferences.getUserMusicService() == .apple ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
             searchManager.resolveSong(song: song) { result in
                 DispatchQueue.main.async {
                     switch result {
@@ -153,7 +154,7 @@ extension SessionManager {
             self._queue.removeItem(id: songId)
             
         } catch {
-            defaultLogger.log(level: .fault, "\(error)")
+            logger.log(level: .fault, "\(error)")
             fatalError(error.localizedDescription)
         }
     }
@@ -174,12 +175,12 @@ extension SessionManager {
             
         } catch let error as EventError {
             ErrorToast.shared.showToast(message: "Voted on song is not in queue")
-            defaultLogger.log(level: .error, "\(error.toString())")
+            logger.log(level: .error, "\(error.toString())")
         } catch let error as CustomError {
-            defaultLogger.log(level: .fault, "\(error.toString())")
+            logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         }  catch {
-            defaultLogger.log(level: .fault, "\(error.localizedDescription)")
+            logger.log(level: .fault, "\(error.localizedDescription)")
             fatalError(error.localizedDescription)
         }
     }

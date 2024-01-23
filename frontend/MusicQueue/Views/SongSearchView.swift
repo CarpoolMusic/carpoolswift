@@ -7,13 +7,15 @@
 
 import SwiftUI
 import Combine
+import os
 
 struct SongSearchView: View {
     
     @ObservedObject var songSearchViewModel: SongSearchViewModel
     
     init(sessionManager: SessionManager) {
-        self.songSearchViewModel = SongSearchViewModel(sessionManager: sessionManager)
+        let viewModel = SongSearchViewModel(sessionManager: sessionManager)
+        self.songSearchViewModel = viewModel
     }
     
     var body: some View {
@@ -45,10 +47,25 @@ struct SongSearchView: View {
 // MARK: - View Model
 
 class SongSearchViewModel: ObservableObject {
-    var searchManager: SearchManager = SearchManager(SpotifySearchManager())
+    let logger = Logger()
+    
+    let searchManager: SearchManager
     
     @Published var songs: [AnyMusicItem] = []
     @Published var songAdded: Bool = false
+    
+    init(sessionManager: SessionManager) {
+        self.sessionManager = sessionManager
+        self.searchManager = (UserPreferences.getUserMusicService() == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
+        
+        sessionManager.$songAdded
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.songAdded = true
+            }
+            .store(in: &cancellables)
+    }
+    
     
     @Published var query: String = "" {
         didSet {
@@ -57,10 +74,8 @@ class SongSearchViewModel: ObservableObject {
                     switch result {
                     case .success(let songs):
                         self?.songs = songs
-                        print(songs)
-                        print("searched")
                     case .failure(let error):
-                        print("Error searching songs \(error)")
+                        self?.logger.log(level: .error, "\(error.localizedDescription)")
                         self?.songs = []
                     }
                 }
@@ -72,18 +87,6 @@ class SongSearchViewModel: ObservableObject {
     let sessionManager: SessionManager
     
     private var cancellables = Set<AnyCancellable>()
-    
-    init(sessionManager: SessionManager) {
-        self.sessionManager = sessionManager
-        
-        // Observe changes in session manager queue
-        sessionManager.$songAdded
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.songAdded = true
-            }
-            .store(in: &cancellables)
-    }
     
     func songInQueue(_ song: AnyMusicItem) -> Bool {
         sessionManager.getQueuedSongs().contains(where: { $0.id == song.id })

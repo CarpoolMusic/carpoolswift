@@ -18,7 +18,7 @@ class CustomError: NSError {
         self.message = message
         self.stacktrace = stacktrace
         
-        super.init()
+        super.init(domain: "com.poles.Carpool", code: 0, userInfo: ["message": message])
     }
     
     required init?(coder: NSCoder) {
@@ -106,6 +106,62 @@ class UnkownError: CustomError {
 class UnkownResponseError: CustomError {
     init(message: String, stacktrace: [String]) {
         super.init(type: "UnkownResponseError", message: message, stacktrace: stacktrace)
+    }
+    
+    override func toString() -> String {
+        super.toString()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class QueueUnderflowError: CustomError {
+    init(message: String, stacktrace: [String]) {
+        super.init(type: "QueueUnderflowError", message: message, stacktrace: stacktrace)
+    }
+    
+    override func toString() -> String {
+        super.toString()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class SearchError: CustomError {
+    init(message: String, stacktrace: [String]) {
+        super.init(type: "SearchError", message: message, stacktrace: stacktrace)
+    }
+    
+    override func toString() -> String {
+        super.toString()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class TokenError: CustomError {
+    init(message: String, stacktrace: [String]) {
+        super.init(type: "TokenError", message: message, stacktrace: stacktrace)
+    }
+    
+    override func toString() -> String {
+        super.toString()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class SerializationError: CustomError {
+    init(message: String, stacktrace: [String]) {
+        super.init(type: "Serialization", message: message, stacktrace: stacktrace)
     }
     
     override func toString() -> String {

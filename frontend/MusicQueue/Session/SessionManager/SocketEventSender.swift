@@ -30,6 +30,7 @@ class SocketEventSender {
     func checkConnection() throws {
         guard connection.connected else {
             throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
+            ErrorToast.shared.showToast(message: "Cannot connect to server. Please check connection and reload.")
         }
     }
     

@@ -42,7 +42,7 @@ struct AppleMusicSong {
         return song.artistURL!
     }
     
-    func toJSONData() -> Data? {
+    func toJSONData() throws -> Data {
         let encoder = JSONEncoder()
         
         let encodableSong = EncodableGenericSong(
@@ -55,6 +55,6 @@ struct AppleMusicSong {
             uri: self.uri
         )
         
-        return try? encoder.encode(encodableSong)
+        return try encoder.encode(encodableSong)
     }
 }

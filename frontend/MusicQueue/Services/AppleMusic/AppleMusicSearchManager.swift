@@ -6,8 +6,10 @@
 //
 
 import MusicKit
+import os
 
 class AppleMusicSearchManager: SearchManagerProtocol {
+    let logger = Logger()
     
     var _query: String = ""
     private var songs: [AnyMusicItem] = []
@@ -33,14 +35,18 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 let searchRequest = MusicCatalogResourceRequest<MusicKit.Song>(matching: \.id, equalTo: id)
                 let searchResponse = try await searchRequest.response()
                 
-                if let matchingSong = searchResponse.items.first.map({ AnyMusicItem($0) }) {
-                    completion(.success(matchingSong))
-                } else {
-                    completion(.failure(SearchError.songNotFound))
+                guard let matchingSong = searchResponse.items.first.map({ AnyMusicItem($0) }) else {
+                    throw SongResolutionError(message: "Unable to resolve song with id \(id)", stacktrace: Thread.callStackSymbols)
                 }
+                completion(.success(matchingSong))
+            } catch let error as SongResolutionError {
+                logger.log(level: .error, "\(error.toString())")
+                completion(.failure(error))
+            } catch {
+                logger.log(level: .error, "\(error.localizedDescription)")
+                completion(.failure(error))
             }
         }
-        
     }
     
     func resolveSong(query: String, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
@@ -50,15 +56,15 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 searchRequest.limit = 1
                 let searchResponse = try await searchRequest.response()
                 
-                if let matchingSong = searchResponse.songs.first.map({ AnyMusicItem($0) }) {
-                    // TODO: Put the mapping in the cache for next time
-            
-                    completion(.success(matchingSong))
-                } else {
-                    completion(.failure(SearchError.songNotFound))
+                guard let matchingSong = searchResponse.songs.first.map({ AnyMusicItem($0) }) else {
+                    throw SongResolutionError(message: "Unable to resolve song with query \(query)", stacktrace: Thread.callStackSymbols)
                 }
+                completion(.success(matchingSong))
+            } catch let error as SongResolutionError {
+                logger.log(level: .error, "\(error.toString())")
+                completion(.failure(error))
             } catch {
-                print("Search request failed with error: \(error).")
+                logger.log(level: .error, "\(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
@@ -66,25 +72,26 @@ class AppleMusicSearchManager: SearchManagerProtocol {
     
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
         self._query = query
+        
         Task {
-            if self._query.isEmpty {
+            guard !self._query.isEmpty else {
                 await self.reset()
                 completion(.success([]))
-            } else {
-                do {
-                    // Issue a catalog search request for songs matching the search term.
-                    var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
-                    searchRequest.limit = limit
-                    searchRequest.includeTopResults = true
-                    let searchResponse = try await searchRequest.response()
-                    
-                    // Update the songs list with the search results
-                    await self.apply(searchResponse, for: self._query)
-                    completion(.success(songs))
-                } catch {
-                    print("Search request failed with error: \(error).")
-                    await self.reset()
-                }
+                return
+            }
+            
+            do {
+                var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
+                searchRequest.limit = limit
+                searchRequest.includeTopResults = true
+                let searchResponse = try await searchRequest.response()
+                
+                await self.apply(searchResponse, for: self._query)
+                completion(.success(songs))
+            } catch {
+                logger.log(level: .error, "Search request failed with error \(error)")
+                await self.reset()
+                completion(.failure(error))
             }
         }
     }

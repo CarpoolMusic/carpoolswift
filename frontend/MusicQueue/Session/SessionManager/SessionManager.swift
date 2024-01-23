@@ -8,7 +8,7 @@ import os
 enum SessionManagerError: Error { case InvalidSessionId }
 
 class SessionManager: ObservableObject {
-    let defaultLogger = Logger()
+    let logger = Logger()
     
     @Published var isConnected: Bool = false
     @Published var isActive: Bool = false
@@ -20,7 +20,6 @@ class SessionManager: ObservableObject {
     internal var socketEventSender: SocketEventSender
     private var _isHost: Bool = false
     
-    var searchManager: SearchManager
     internal var _session = Session()
     var _queue: Queue = Queue()
     
@@ -29,7 +28,6 @@ class SessionManager: ObservableObject {
     init() {
         self.socketConnectionHandler = SocketConnectionHandler()
         self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
-        self.searchManager = UserPreferences.getUserMusicService() == .apple ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
         
         self._subscribeConnections()
     }

@@ -4,13 +4,15 @@
 //
 //  Created by Nolan Biscaro on 2023-11-05.
 //
+import os
 
 class SpotifySearchManager: SearchManagerProtocol {
+    let logger = Logger()
    
     let _spotifyAPIClient: SpotifyAPIClient
     
     init() {
-        self._spotifyAPIClient = SpotifyAPIClient()
+        _spotifyAPIClient = SpotifyAPIClient()
     }
     
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {

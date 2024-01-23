@@ -300,7 +300,6 @@
 		60998ECF2B56082F0022CDB9 /* Session */ = {
 			isa = PBXGroup;
 			children = (
-				60BA77B32A61DF0C00A5516B /* AuthStatus.swift */,
 				607B049F2AB14F19004DB82F /* ConnectionStatus.swift */,
 			);
 			path = Session;
@@ -440,6 +439,8 @@
 		60BA77A12A55FD3B00A5516B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				60BA77B32A61DF0C00A5516B /* AuthStatus.swift */,
+				607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */,
 				60BA77C62A6241CE00A5516B /* AppleMusic */,
 				60BA77BF2A62378600A5516B /* Spotify */,
 				607168752ACB9C8900485AD4 /* TokenVault.swift */,
@@ -450,7 +451,6 @@
 		60BA77BF2A62378600A5516B /* Spotify */ = {
 			isa = PBXGroup;
 			children = (
-				607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */,
 				60998ED22B56285A0022CDB9 /* SpotifyQueue.swift */,
 				60998EE02B5B60950022CDB9 /* Search */,
 				60576CBB2AB62A23005D6E15 /* SessionManager */,
