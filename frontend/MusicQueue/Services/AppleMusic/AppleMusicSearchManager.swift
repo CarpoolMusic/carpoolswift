@@ -74,12 +74,6 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         self._query = query
         
         Task {
-            guard !self._query.isEmpty else {
-                await self.reset()
-                completion(.success([]))
-                return
-            }
-            
             do {
                 var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
                 searchRequest.limit = limit

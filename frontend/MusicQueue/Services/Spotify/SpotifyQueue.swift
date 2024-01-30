@@ -6,7 +6,7 @@
 //
 import os
 
-struct SpotifySongQueue<T> {
+class SongQueue<T: Identifiable> : ObservableObject {
     let logger = Logger()
     
     private var array: [T]
@@ -25,7 +25,18 @@ struct SpotifySongQueue<T> {
         return array[currentIndex]
     }
     
-    mutating func next() -> T? {
+    func getQueueItems() -> [T] {
+        return self.array
+    }
+    
+    func find(id: String) -> T? {
+        if let index = array.firstIndex(where: { $0.id as! String == id }) {
+            return array[index]
+        }
+        return nil
+    }
+    
+    func next() -> T? {
         guard !array.isEmpty, currentIndex < array.index(before: array.endIndex) else {
             logger.log(level: .debug, "No next element in queue.")
             return nil
@@ -34,7 +45,8 @@ struct SpotifySongQueue<T> {
         return array[currentIndex]
     }
 
-    mutating func previous() -> T? {
+    // If there is no previous entry then just return the current entry
+    func previous() -> T? {
         guard !array.isEmpty, currentIndex > array.startIndex else {
             logger.log(level: .debug, "No next element in queue.")
             return nil
@@ -42,12 +54,18 @@ struct SpotifySongQueue<T> {
         currentIndex = array.index(before: currentIndex)
         return array[currentIndex]
     }
+    
+    func removeItem(id: String) -> Void {
+        if let index = array.firstIndex(where: { $0.id as! String == id }) {
+            array.remove(at: index)
+        }
+    }
 
-    mutating func reset() {
+    func reset() {
         currentIndex = array.startIndex
     }
     
-    mutating func append(newElement: T) {
+    func enqueue(newElement: T) {
         array.append(newElement)
     }
 }

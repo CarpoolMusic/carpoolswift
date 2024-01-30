@@ -40,6 +40,4 @@ class AppleAuthenticationController: MusicServiceAuthenticationProtocol {
             }
         }
     }
-    
-
 }

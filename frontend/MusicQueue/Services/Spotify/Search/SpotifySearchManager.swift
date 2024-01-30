@@ -20,7 +20,6 @@ class SpotifySearchManager: SearchManagerProtocol {
     }
     
     func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        print("resovle song \(song)")
         let song = SpotifySong(song: song)
         completion(.success(AnyMusicItem(song)))
     }

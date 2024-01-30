@@ -128,7 +128,7 @@ extension SessionManager {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let song):
-                        self._queue.enqueue(song: song)
+                        self._queue.enqueue(newElement: song)
                         self.songAdded = true
                         completion(.success(song))
                     case .failure(let error):

@@ -6,6 +6,7 @@
 //
 import Foundation
 import MusicKit
+import MediaPlayer
 import Combine
 import os
 
@@ -13,45 +14,47 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     let logger = Logger()
 
     private let _player: ApplicationMusicPlayer
-    private var _userQueue: Queue
+    private var _userQueue: SongQueue<AnyMusicItem>
     private var isPlaybackQueueSet: Bool = false
     private var queueUpdate: AnyCancellable?
     
     var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
     
-    init(queue: Queue) {
+    init(queue: SongQueue<AnyMusicItem>) {
         _player = ApplicationMusicPlayer.shared
-        _player.queue = ApplicationMusicPlayer.Queue()
-        _player.queue.entries = []
         self._userQueue = queue
-        setupQueueUpdateSubscription()
-    }
-    
-    private func setupQueueUpdateSubscription() {
-        queueUpdate = _player.queue.objectWillChange
-            .sink { [weak self] _ in
-                if let currentEntry = self?._player.queue.currentEntry {
-                    if case .song(let song) = currentEntry.item {
-                        self?.currentEntryPublisher.send(AnyMusicItem(song))
-                    }
-                }
-            }
     }
     
     // MARK: - Playback controls
     func play() {
-        if (!isPlaybackQueueSet) {
-            self.loadNextSong()
-            isPlaybackQueueSet = true
-        }
-        
-        performAsyncAction {
-            try await self._player.play()
+        do {
+            guard let currentSong = _userQueue.current else {
+                throw MediaPlayerError(message: "No current song in queue", stacktrace: Thread.callStackSymbols)
+            }
+            
+            if (!isPlaybackQueueSet) {
+                if let song = getMusicKitSong(song: currentSong) {
+                    enqueue(song: song)
+                    currentEntryPublisher.send(currentSong)
+                } else {
+                    print("Cannot get base song")
+                }
+            }
+            
+            Task{
+                try await self._player.play()
+            }
+        } catch let error as MediaPlayerError  {
+            logger.log(level: .error, "\(error.toString())")
+        } catch {
+            logger.log(level: .error, "\(error.localizedDescription)")
         }
     }
     
     func resume() {
-        self.play()
+        Task {
+            try await self._player.play()
+        }
     }
     
     func pause() {
@@ -63,82 +66,69 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     }
 
     func skipToNext() {
-        self.loadNextSong()
-        performAsyncAction {
-            try await self._player.skipToNextEntry()
+        guard let nextSong = _userQueue.next() else {
+            logger.log("No next song in queue")
+            return
+        }
+        
+        do {
+            guard let song = getMusicKitSong(song: nextSong) else {
+                throw SongConversionError(message: "Error converting AnyMusicItem to MusicKit.Song for song \(nextSong)", stacktrace: Thread.callStackSymbols)
+            }
+            
+            self.currentEntryPublisher.send(nextSong)
+            self.enqueue(song: song)
+            self.play()
+            
+        } catch let error as SongConversionError {
+            logger.log(level: .error, "\(error.toString())")
+        } catch {
+            logger.log(level: .error, "\(error.localizedDescription)")
         }
     }
 
     func skipToPrevious() {
-        performAsyncAction {
-            try await self._player.skipToPreviousEntry()
+        guard let previousSong = _userQueue.previous() else {
+            self._player.restartCurrentEntry()
+            return
         }
+        if let song = getMusicKitSong(song: previousSong) {
+            self.currentEntryPublisher.send(previousSong)
+            self.enqueue(song: song)
+        }
+        self.play()
+    }
+    
+    private func enqueue(song: MusicKit.Song) -> Void {
+        let entry = MusicPlayer.Queue.Entry(song)
+        self._player.queue = ApplicationMusicPlayer.Queue([entry])
+        isPlaybackQueueSet = true
     }
     
     func getPlayerState() -> PlayerState {
         switch _player.state.playbackStatus {
         case .playing:
-            return PlayerState.playing
+            return .playing
         case .paused:
-            return PlayerState.paused
+            return .paused
+        case .interrupted:
+            return .paused
         default:
             return PlayerState.undetermined
         }
     }
     
     func isPlaying() -> Bool {
-        return self._player.state.playbackStatus == .playing
+        return self.getPlayerState() == .playing
     }
     
-    private func enqueue(song: MusicKit.Song) -> Void {
-        if (isPlaybackQueueSet) {
-            performAsyncAction {
-                try await self._player.queue.insert(song, position: .tail)
-            }
-        } else {
-            let entry = MusicPlayer.Queue.Entry(song)
-            _player.queue = ApplicationMusicPlayer.Queue([entry])
-            isPlaybackQueueSet = true
-        }
-    }
-    
-    func loadNextSong() -> Void {
-        do {
-            guard let nextSong = _userQueue.dequeue() else {
-                throw QueueUnderflowError(message: "No next song in queue", stacktrace: Thread.callStackSymbols)
-            }
-            
-            let appleSong = try convertSongToBase(anyMusicItem: nextSong)
-            enqueue(song: appleSong)
-        } catch let error as QueueUnderflowError {
-            logger.log(level: .error, "\(error)")
-        } catch let error as SongConversionError {
-            logger.log(level: .error, "\(error)")
-        } catch {
-            logger.log(level: .fault, "Unkown error \(error)")
-            fatalError(error.localizedDescription)
-        }
-    }
-    
-    func currentSongTitle() -> String {
-        return _player.queue.currentEntry?.title ?? "Untitled"
-    }
-    
-    private func convertSongToBase(anyMusicItem: AnyMusicItem) throws -> MusicKit.Song {
-        if case .appleSong(let song) = anyMusicItem.getBase() {
+    func getMusicKitSong(song: AnyMusicItem) -> MusicKit.Song? {
+        switch song.getBase() {
+        case .appleSong(let song):
             return song
-        }
-        throw SongConversionError(message: "Unexpected base song type \(anyMusicItem.getBase()). Expected .appleSong", stacktrace: Thread.callStackSymbols)
-    }
-    
-    private func performAsyncAction(_ action: @escaping () async throws -> Void) {
-        Task {
-            do {
-                try await action()
-            } catch {
-                // Handle error
-                print("An error ocurred: \(error)")
-            }
+        case .spotifySong:
+            print("Wrong base")
+            return nil
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 import Foundation
 import MusicKit
+import MediaPlayer
 
 protocol GenericSong: Identifiable, Equatable {
     var id: String { get }
@@ -24,7 +25,6 @@ protocol GenericSong: Identifiable, Equatable {
 enum baseSong {
     case appleSong(MusicKit.Song)
     case spotifySong(SpotifySong)
-    case queueEntry(ApplicationMusicPlayer.Queue.Entry)
 }
 
 struct AnyMusicItem: GenericSong {
