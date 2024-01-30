@@ -33,7 +33,7 @@ class MediaPlayer: NSObject, ObservableObject {
     
     private let _base: MediaPlayerProtocol
     
-    required init(queue: Queue) {
+    required init(queue: SongQueue<AnyMusicItem>) {
         self._base = UserPreferences.getUserMusicService().rawValue == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer(queue: queue)
         
         super.init()

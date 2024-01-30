@@ -161,7 +161,21 @@ class TokenError: CustomError {
 
 class SerializationError: CustomError {
     init(message: String, stacktrace: [String]) {
-        super.init(type: "Serialization", message: message, stacktrace: stacktrace)
+        super.init(type: "SerializationError", message: message, stacktrace: stacktrace)
+    }
+    
+    override func toString() -> String {
+        super.toString()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class MediaPlayerError: CustomError {
+    init(message: String, stacktrace: [String]) {
+        super.init(type: "MediaPlayerError", message: message, stacktrace: stacktrace)
     }
     
     override func toString() -> String {

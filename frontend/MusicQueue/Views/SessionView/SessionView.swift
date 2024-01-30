@@ -63,6 +63,7 @@ class SessionViewModel: ObservableObject {
         self.sessionManager = sessionManager
         self.sessionIsActive = sessionManager.isConnected
         let service = UserDefaults.standard.string(forKey: "musicServiceType")
+        print("Queue items \(sessionManager._queue.getQueueItems())")
         self.mediaPlayer = MediaPlayer(queue: sessionManager._queue)
     }
     

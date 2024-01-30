@@ -21,7 +21,7 @@ class SessionManager: ObservableObject {
     private var _isHost: Bool = false
     
     internal var _session = Session()
-    var _queue: Queue = Queue()
+    var _queue: SongQueue<AnyMusicItem> = SongQueue()
     
     private var cancellables = Set<AnyCancellable>()
     
