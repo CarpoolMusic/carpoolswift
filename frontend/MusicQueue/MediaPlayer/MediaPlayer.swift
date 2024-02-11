@@ -1,10 +1,31 @@
-//
-//  MediaPlayer.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-09-16.
-//
+// MARK: - CodeAI Output
+/**
+ This code defines a MediaPlayer class that is responsible for controlling the playback of music. It uses the MusicKit framework and SwiftUI for the user interface.
 
+ The PlayerState enum represents the possible states of the player: playing, paused, or undetermined.
+
+ The MediaPlayerProtocol protocol defines the required methods and properties for a media player. It includes methods for playing, pausing, resuming, skipping to the next or previous track, and getting the current player state.
+
+ The MediaPlayer class is an implementation of the MediaPlayerProtocol. It has a published property called currentEntry that represents the currently playing music item. It also has a private property called currentEntrySubscription that holds a subscription to receive updates on the current entry from the base media player.
+
+ The init method of MediaPlayer takes a SongQueue parameter and initializes the base media player based on user preferences. It also sets up the currentEntrySubscription.
+
+ The setupCurrentEntrySubscription method sets up a subscription to receive updates on the current entry from the base media player. When a new song is received, it updates the currentEntry property.
+
+ The play method calls the play method of the base media player.
+
+ The pause method calls the pause method of the base media player.
+
+ The togglePlayPause method checks if the player is currently playing and calls either pause or play accordingly.
+
+ The resume method calls the resume method of the base media player.
+
+ The skipToNext method calls the skipToNext method of the base media player.
+
+ The skipToPrevious method calls the skipToPrevious method of the base media player.
+
+ The getPlayerState method returns th
+*/
 import SwiftUI
 import MusicKit
 import Combine
@@ -17,31 +38,31 @@ enum PlayerState {
 
 protocol MediaPlayerProtocol {
     var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> { get }
-    func play() -> Void
-    func pause() -> Void
-    func resume() -> Void
-    func skipToNext() -> Void
-    func skipToPrevious() -> Void
+    func play()
+    func pause()
+    func resume()
+    func skipToNext()
+    func skipToPrevious()
     func getPlayerState() -> PlayerState
 }
 
 class MediaPlayer: NSObject, ObservableObject {
     
     @Published var currentEntry: AnyMusicItem?
+    
     private var currentEntrySubscription: AnyCancellable?
     
-    
-    private let _base: MediaPlayerProtocol
+    private let base: MediaPlayerProtocol
     
     required init(queue: SongQueue<AnyMusicItem>) {
-        self._base = UserPreferences.getUserMusicService().rawValue == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer(queue: queue)
+        self.base = UserPreferences.getUserMusicService().rawValue == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer(queue: queue)
         
         super.init()
         setupCurrentEntrySubscription()
     }
     
     private func setupCurrentEntrySubscription() {
-        currentEntrySubscription = _base.currentEntryPublisher
+        currentEntrySubscription = base.currentEntryPublisher
             .sink { [weak self] song in
                 self?.currentEntry = song
             }
@@ -50,32 +71,32 @@ class MediaPlayer: NSObject, ObservableObject {
     //MARK: - Music Controls
     
     func play() {
-        _base.play()
+        base.play()
     }
     
     func pause() {
-        _base.pause()
+        base.pause()
     }
     
     func togglePlayPause() {
-        self.isPlaying() ? self.pause() : self.play()
+        isPlaying() ? pause() : play()
     }
     
-    func resume() { _base.resume() }
+    func resume() { base.resume() }
     
     func skipToNext() {
-        _base.skipToNext()
+        base.skipToNext()
     }
     
     func skipToPrevious() {
-        _base.skipToPrevious()
-    }
-    
-    func getPlayerState() -> PlayerState {
-        return _base.getPlayerState()
-    }
-    
-    func isPlaying() -> Bool {
-        return _base.getPlayerState() == .playing
-    }    
+        base.skipToPrevious()
+   }
+
+   func getPlayerState() -> PlayerState {
+       return base.getPlayerState()
+   }
+
+   func isPlaying() -> Bool {
+       return getPlayerState() == .playing
+   }
 }

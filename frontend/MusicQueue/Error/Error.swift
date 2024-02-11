@@ -103,9 +103,9 @@ class UnkownError: CustomError {
 }
 
 
-class UnkownResponseError: CustomError {
+class UnknownResponseError: CustomError {
     init(message: String, stacktrace: [String]) {
-        super.init(type: "UnkownResponseError", message: message, stacktrace: stacktrace)
+        super.init(type: "UnknownResponseError", message: message, stacktrace: stacktrace)
     }
     
     override func toString() -> String {

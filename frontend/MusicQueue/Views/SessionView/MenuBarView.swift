@@ -1,29 +1,29 @@
-//
-//  MenuBarView.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-09-17.
-//
-
 import SwiftUI
-
+/**
+ This struct represents the view for the menu bar.
+ 
+ - Parameters:
+    - sessionManager: An observed object that manages the session.
+    - sessionViewModel: An observed object that represents the session view model.
+ */
 struct MenuBarView: View {
     
     @ObservedObject var sessionManager: SessionManager
     @ObservedObject var sessionViewModel: SessionViewModel
     
+    /**
+     The body of the view.
+     */
     var body: some View {
         HStack {
-            // Queue button.
-            Button(action: handleQueueButtonPressed ) {
+            Button(action: handleQueueButtonPressed) {
                 Image(systemName: "line.horizontal.3")
                     .font(.largeTitle)
             }
             .padding()
-
+            
             Spacer()
             
-            // Chat button.
             Button(action: { /* Handle chat button action */ }) {
                 Image(systemName: "bubble.right")
                     .font(.largeTitle)
@@ -38,17 +38,22 @@ struct MenuBarView: View {
             .padding()
         }
     }
-    /// The action to perform when the user taps the Leave Session button.
+    
+    /**
+     Handles the action when the leave session button is selected.
+     */
     private func handleLeaveSessionButtonSelected() {
         do {
-            try self.sessionManager.leaveSession()
+            try sessionManager.leaveSession()
         } catch {
             print("error leaving session")
         }
     }
     
+    /**
+     Handles the action when the queue button is pressed.
+     */
     private func handleQueueButtonPressed() {
-        self.sessionViewModel.isQueueOpen = true
-        
+        sessionViewModel.isQueueOpen = true
     }
 }

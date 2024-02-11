@@ -1,34 +1,29 @@
-//
-//  SpotifySearchManager.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-11-05.
-//
 import os
 import Foundation
 import UIKit
-
 import Kingfisher
 
 class SpotifySearchManager: SearchManagerProtocol {
     let logger = Logger()
-   
-    let _spotifyAPIClient: SpotifyAPIClient
+    let spotifyAPIClient: SpotifyAPIClient
     
     init() {
-        _spotifyAPIClient = SpotifyAPIClient()
+        spotifyAPIClient = SpotifyAPIClient()
     }
     
+    // Function to search songs based on a query and limit
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        _spotifyAPIClient.searchSongs(query: query, limit: limit, completion: completion)
+        spotifyAPIClient.searchSongs(query: query, limit: limit, completion: completion)
     }
     
+    // Function to resolve a specific song and its artwork
     func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
         var song = SpotifySong(song: song)
         
+        // Resolving the artwork for the song
         resolveArtwork(artworkURL: song.artworkURL) { image in
-            guard let image else {
-                print("Unable to resolve artwork ")
+            guard let image = image else {
+                print("Unable to resolve artwork")
                 return
             }
             song.artworkImage = image
@@ -36,12 +31,14 @@ class SpotifySearchManager: SearchManagerProtocol {
         }
     }
     
+    // Private function to resolve the artwork for a given URL
     private func resolveArtwork(artworkURL: String, completion: @escaping (UIImage?) -> Void) {
         guard let url = URL(string: artworkURL) else {
             completion(nil)
             return
         }
         
+        // Using Kingfisher library to retrieve the image from the URL
         KingfisherManager.shared.retrieveImage(with: url) { result in
             switch result {
             case .success(let value):
