@@ -1,9 +1,26 @@
-//
-//  SocketEventHandler.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-09-07.
-//
+/**
+ This code is a Swift implementation of a SocketIO client. It provides methods to connect to a server, emit events, and handle various socket events.
+ 
+ The `SocketSendEvent` enum defines the different types of events that can be sent to the server.
+ 
+ The `SocketEventSender` class is responsible for sending events to the server. It requires a `SocketConnectionHandler` object to establish and maintain the connection.
+ 
+ The `checkConnection()` method checks if the socket is connected. If not, it displays an error message and throws a `SocketError`.
+ 
+ The `emitEvent(event:jsonData:)` method emits an event with the specified event type and JSON data. It first checks if the socket is connected using `checkConnection()`, then calls the `emit(event:with:)` method of the connection object.
+ 
+ The `createSession(hostName:sessionName:)` method creates a session with the specified host name and session name. It creates a `CreateSessionRequest` object, converts it to JSON data using its `jsonData()` method, and emits an event with the `.createSession` event type.
+ 
+ The `joinSession(sessionId:hostName:)` method joins a session with the specified session ID and host name. It creates a `JoinSessionRequest` object, converts it to JSON data using its `jsonData()` method, and emits an event with the `.joinSession` event type.
+ 
+ The `addSong(sessionId:songItem:)` method adds a song to a session. It creates a `Song` object from the provided song item, creates an `AddSongRequest` object with the session ID and song, converts it to JSON data using its `jsonData()` method, and emits an event with the `.addSong` event type.
+ 
+ The `leaveSession(sessionId:)` method leaves a session with the specified session ID. This method is not implemented in the provided code.
+ 
+ The `removeSong(sessionId:songID:)` method removes a song from a session. It creates a `RemoveSongRequest` object with the session ID and song ID, converts it to JSON data using its `jsonData()` method, and emits an event with the `.removeSong` event type.
+ 
+ The `voteSong(sessionId:songId:vote:)` method votes for a song in a session. It creates a `VoteSongRequest` object with the session ID, song ID, and vote value, converts it to JSON data using its `jsonData()` method, and emits an event with the `.voteSong` event type.
+ */
 
 import SocketIO
 import Foundation
@@ -19,7 +36,7 @@ enum SocketSendEvent: String {
     case voteSong
 }
 
-class SocketEventSender {
+struct SocketEventSender {
     
     let connection: SocketConnectionHandler
     
@@ -35,59 +52,62 @@ class SocketEventSender {
         }
     }
     
-    func createSession(hostName: String, sessionName: String) throws {
-        let createSessionRequest: CreateSessionRequest = CreateSessionRequest(hostID: hostName, sessionName: sessionName)
-            
+    func emitEvent(event: SocketSendEvent, jsonData: Data) throws {
         try checkConnection()
         
-        let event = SocketSendEvent.createSession
-        let json = try createSessionRequest.jsonData()
-        connection.emit(event: event.rawValue, with: [json])
+        connection.emit(event: event.rawValue, with: [jsonData])
+    }
+    
+    func createSession(hostName: String, sessionName: String) throws {
+        let createSessionRequest = CreateSessionRequest(hostID: hostName, sessionName: sessionName)
+        
+        let jsonData = try createSessionRequest.jsonData()
+        
+        try emitEvent(event: .createSession, jsonData: jsonData)
     }
     
     func joinSession(sessionId: String, hostName: String) throws {
-        let joinSessionRequest: JoinSessionRequest = JoinSessionRequest(sessionID: sessionId, userID: hostName)
+        let joinSessionRequest = JoinSessionRequest(sessionID: sessionId, userID: hostName)
         
-        try checkConnection()
+        let jsonData = try joinSessionRequest.jsonData()
         
-        let event = SocketSendEvent.joinSession
-        let json = try joinSessionRequest.jsonData()
-        connection.emit(event: event.rawValue, with: [json])
+        try emitEvent(event: .joinSession, jsonData: jsonData)
     }
     
-    func addSong(sessionId: String, song: AnyMusicItem) throws {
-        let song = Song(id: song.id, appleID: song.appleID, spotifyID: song.spotifyID, uri: song.uri, title: song.title, artist: song.artist, album: song.album, artworkURL: song.artworkURL ?? "", votes: song.votes)
-        let addSongRequest: AddSongRequest = AddSongRequest(sessionID: sessionId, song: song)
+    func addSong(sessionId: String, songItem: AnyMusicItem) throws {
+        let song = Song(id:songItem.id,
+                        appleID:songItem.appleID,
+                        spotifyID:songItem.spotifyID,
+                        uri:songItem.uri,
+                        title:songItem.title,
+                        artist:songItem.artist,
+                        album:songItem.album,
+                        artworkURL:songItem.artworkURL ?? "",
+                        votes:songItem.votes)
         
-        try checkConnection()
+        let addSongRequest = AddSongRequest(sessionID: sessionId, song: song)
         
-        let event = SocketSendEvent.addSong
-        let json = try addSongRequest.jsonData()
-        connection.emit(event: event.rawValue, with: [json])
+        let jsonData = try addSongRequest.jsonData()
+        
+        try emitEvent(event: .addSong, jsonData: jsonData)
     }
     
     func leaveSession(sessionId: String) throws {
-//        let event = SocketSendEvent.leaveSession
-//        connection.emit(event: event.rawValue, with: [sessionID: sessionID])
     }
     
     func removeSong(sessionId: String, songID: String) throws {
-        let removeSongRequest: RemoveSongRequest = RemoveSongRequest(sessionID: sessionId, id: songID)
+        let removeSongRequest = RemoveSongRequest(sessionID: sessionId, id: songID)
         
-        try checkConnection()
+        let jsonData = try removeSongRequest.jsonData()
         
-        let event = SocketSendEvent.removeSong
-        let json = try removeSongRequest.jsonData()
-        connection.emit(event: event.rawValue, with: [json])
+        try emitEvent(event: .removeSong, jsonData: jsonData)
     }
     
     func voteSong(sessionId: String, songId: String, vote: Int) throws {
-        let voteSongRequest: VoteSongRequest = VoteSongRequest(sessionID: sessionId, id: songId, vote: vote)
-       
-        try checkConnection()
+        let voteSongRequest = VoteSongRequest(sessionID: sessionId, id: songId, vote: vote)
         
-        let event = SocketSendEvent.voteSong
-        let json = try voteSongRequest.jsonData()
-        connection.emit(event: event.rawValue, with: [json])
+        let jsonData = try voteSongRequest.jsonData()
+        
+        try emitEvent(event:.voteSong, jsonData:jsonData)
     }
 }
