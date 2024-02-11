@@ -6,6 +6,7 @@
 //
 
 import SocketIO
+import Foundation
 
 enum SocketSendEvent: String {
     case connect
@@ -29,8 +30,8 @@ class SocketEventSender {
     
     func checkConnection() throws {
         guard connection.connected else {
-            throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
             ErrorToast.shared.showToast(message: "Cannot connect to server. Please check connection and reload.")
+            throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
         }
     }
     
@@ -55,7 +56,7 @@ class SocketEventSender {
     }
     
     func addSong(sessionId: String, song: AnyMusicItem) throws {
-        let song = Song(service: song.service, id: song.id, uri: song.uri, title: song.title, artist: song.artist, album: song.album, artworkURL: song.artworkURL ?? "", votes: song.votes)
+        let song = Song(id: song.id, appleID: song.appleID, spotifyID: song.spotifyID, uri: song.uri, title: song.title, artist: song.artist, album: song.album, artworkURL: song.artworkURL ?? "", votes: song.votes)
         let addSongRequest: AddSongRequest = AddSongRequest(sessionID: sessionId, song: song)
         
         try checkConnection()
@@ -71,7 +72,7 @@ class SocketEventSender {
     }
     
     func removeSong(sessionId: String, songID: String) throws {
-        let removeSongRequest: RemoveSongRequest = RemoveSongRequest(sessionID: sessionId, songID: songID)
+        let removeSongRequest: RemoveSongRequest = RemoveSongRequest(sessionID: sessionId, id: songID)
         
         try checkConnection()
         
@@ -81,7 +82,7 @@ class SocketEventSender {
     }
     
     func voteSong(sessionId: String, songId: String, vote: Int) throws {
-        let voteSongRequest: VoteSongRequest = VoteSongRequest(sessionID: sessionId, songID: songId, vote: vote)
+        let voteSongRequest: VoteSongRequest = VoteSongRequest(sessionID: sessionId, id: songId, vote: vote)
        
         try checkConnection()
         

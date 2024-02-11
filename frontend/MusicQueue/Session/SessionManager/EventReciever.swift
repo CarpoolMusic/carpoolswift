@@ -189,8 +189,9 @@ extension SessionManager {
         guard let songJson = songItems["song"] as? [String: Any] else {
             throw SongConversionError(message: "Unable to get songJson for items \(songItems)", stacktrace: Thread.callStackSymbols)
         }
-        guard let service = songJson["service"] as? String,
-              let id = songJson["id"] as? String,
+        guard let id = songJson["id"] as? String,
+              let appleID = songJson["appleID"] as? String,
+              let spotifyID = songJson["spotifyID"] as? String,
               let uri = songJson["uri"] as? String,
               let title = songJson["title"] as? String,
               let album = songJson["album"] as? String,
@@ -200,7 +201,7 @@ extension SessionManager {
             
             throw SongConversionError(message: "Unable to convert song JSON to song for JSON \(songJson)", stacktrace: Thread.callStackSymbols)
         }
-        return Song(service: service, id: id, uri: uri, title: title, artist: album, album: artist, artworkURL: artworkURL, votes: votes)
+        return Song(id: id, appleID: appleID, spotifyID: spotifyID, uri: uri, title: title, artist: album, album: artist, artworkURL: artworkURL, votes: votes)
     }
 }
 
