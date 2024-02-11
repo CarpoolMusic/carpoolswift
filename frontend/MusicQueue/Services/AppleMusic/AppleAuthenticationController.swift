@@ -1,4 +1,3 @@
-// MARK: - CodeAI Output
 /**
  This code is a Swift implementation of an AppleAuthenticationController class that conforms to the MusicServiceAuthenticationProtocol. It provides functionality for authenticating with the MusicKit framework and checking the authorization status.
 
