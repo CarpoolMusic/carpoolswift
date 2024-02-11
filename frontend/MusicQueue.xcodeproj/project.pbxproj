@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		604728C32B5CB0A6009873AD /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604728C22B5CB0A6009873AD /* Error.swift */; };
 		604728C62B5DC556009873AD /* ErrorToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604728C52B5DC556009873AD /* ErrorToast.swift */; };
+		604D0D332B7846050029B57D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 604D0D322B7846050029B57D /* Kingfisher */; };
 		60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */; };
 		60551F2E2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2D2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift */; };
 		60576CB42AB527C6005D6E15 /* SpotifyMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60576CB32AB527C6005D6E15 /* SpotifyMediaPlayer.swift */; };
@@ -173,6 +174,7 @@
 				607168702AC221B600485AD4 /* Alamofire in Frameworks */,
 				60BA77A42A5E351000A5516B /* SocketIO in Frameworks */,
 				60BA77B92A61EE9E00A5516B /* SpotifyiOS in Frameworks */,
+				604D0D332B7846050029B57D /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,6 +514,7 @@
 				60BA77B82A61EE9E00A5516B /* SpotifyiOS */,
 				60BA77CF2A63278000A5516B /* KeychainSwift */,
 				6071686F2AC221B600485AD4 /* Alamofire */,
+				604D0D322B7846050029B57D /* Kingfisher */,
 			);
 			productName = MusicQueue;
 			productReference = 60BA775F2A55E2A400A5516B /* MusicQueue.app */;
@@ -591,6 +594,7 @@
 				60BA77B72A61EE9E00A5516B /* XCRemoteSwiftPackageReference "ios-sdk" */,
 				60BA77CE2A63278000A5516B /* XCRemoteSwiftPackageReference "keychain-swift" */,
 				6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = 60BA77602A55E2A400A5516B /* Products */;
 			projectDirPath = "";
@@ -870,7 +874,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.poles.Carpool;
+				PRODUCT_BUNDLE_IDENTIFIER = com.poles.carpoolapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicQueue/MusicQueue-Bridging-Header.h";
@@ -906,7 +910,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.poles.Carpool;
+				PRODUCT_BUNDLE_IDENTIFIER = com.poles.carpoolapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicQueue/MusicQueue-Bridging-Header.h";
@@ -1033,6 +1037,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.10.2;
+			};
+		};
 		6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -1068,6 +1080,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		604D0D322B7846050029B57D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
 		6071686F2AC221B600485AD4 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */;

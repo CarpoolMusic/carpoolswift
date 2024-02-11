@@ -10,6 +10,8 @@ import MediaPlayer
 
 protocol GenericSong: Identifiable, Equatable {
     var id: String { get }
+    var appleID: String { get }
+    var spotifyID: String { get }
     var uri: String { get }
     var service: String { get }
     var title: String { get }
@@ -20,6 +22,7 @@ protocol GenericSong: Identifiable, Equatable {
     // Types that are specific to Apple Music Song or Spotify song.
     var artwork: Artwork? { get }
     var artworkURL: String? { get }
+    var artworkImage: UIImage? { get }
 }
 
 enum baseSong {
@@ -28,8 +31,9 @@ enum baseSong {
 }
 
 struct AnyMusicItem: GenericSong {
-    
     var id: String
+    var appleID: String
+    var spotifyID: String
     var uri: String
     var service: String
     var title: String
@@ -39,7 +43,7 @@ struct AnyMusicItem: GenericSong {
     
     var artwork: Artwork?
     var artworkURL: String?
-    
+    var artworkImage: UIImage?
     
     private var _base: baseSong
     
@@ -48,6 +52,8 @@ struct AnyMusicItem: GenericSong {
         
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id.rawValue
+        self.appleID = base.id.rawValue
+        self.spotifyID = ""
         self.uri = base.url?.absoluteString ?? ""
         self.title = base.title
         self.artist = base.artistName
@@ -62,12 +68,15 @@ struct AnyMusicItem: GenericSong {
         
         self.service = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
         self.id = base.id
+        self.appleID = ""
+        self.spotifyID = base.id
         self.uri = base.uri
         self.title = base.name
         self.artist = base.artists.first ?? ""
         self.album = base.albumName
         self.artwork = nil
         self.artworkURL = base.artworkURL
+        self.artworkImage = base.artworkImage
         self.votes = 0
     }
     

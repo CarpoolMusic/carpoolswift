@@ -13,6 +13,7 @@ struct SpotifySong {
     let artists: [String]
     let albumName: String
     let artworkURL: String
+    var artworkImage: UIImage?
     
     init(song: Song) {
         self.id = song.id

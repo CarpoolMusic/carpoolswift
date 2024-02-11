@@ -5,6 +5,9 @@
 //  Created by Nolan Biscaro on 2023-08-12.
 //
 
+import ObjectiveC
+import Foundation
+
 class SpotifySessionManager: NSObject {
     // Store these in a secure config file - they cannot stay here !
     let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"

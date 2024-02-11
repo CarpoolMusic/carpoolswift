@@ -143,12 +143,12 @@ extension AddSongRequest {
 
 // MARK: - Song
 struct Song: Codable {
-    let service, id, uri, title: String
-    let artist, album, artworkURL: String
+    let id, appleID, spotifyID, uri: String
+    let title, artist, album, artworkURL: String
     let votes: Int
 
     enum CodingKeys: String, CodingKey {
-        case service, id, uri, title, artist, album
+        case id, appleID, spotifyID, uri, title, artist, album
         case artworkURL = "artworkUrl"
         case votes
     }
@@ -173,8 +173,9 @@ extension Song {
     }
 
     func with(
-        service: String? = nil,
         id: String? = nil,
+        appleID: String? = nil,
+        spotifyID: String? = nil,
         uri: String? = nil,
         title: String? = nil,
         artist: String? = nil,
@@ -183,8 +184,9 @@ extension Song {
         votes: Int? = nil
     ) -> Song {
         return Song(
-            service: service ?? self.service,
             id: id ?? self.id,
+            appleID: appleID ?? self.appleID,
+            spotifyID: spotifyID ?? self.spotifyID,
             uri: uri ?? self.uri,
             title: title ?? self.title,
             artist: artist ?? self.artist,
@@ -479,11 +481,11 @@ extension User {
 
 // MARK: - RemoveSongRequest
 struct RemoveSongRequest: Codable {
-    let sessionID, songID: String
+    let sessionID, id: String
 
     enum CodingKeys: String, CodingKey {
         case sessionID = "sessionId"
-        case songID = "songId"
+        case id
     }
 }
 
@@ -507,11 +509,11 @@ extension RemoveSongRequest {
 
     func with(
         sessionID: String? = nil,
-        songID: String? = nil
+        id: String? = nil
     ) -> RemoveSongRequest {
         return RemoveSongRequest(
             sessionID: sessionID ?? self.sessionID,
-            songID: songID ?? self.songID
+            id: id ?? self.id
         )
     }
 
@@ -566,11 +568,7 @@ extension SongAddedEvent {
 
 // MARK: - SongRemovedEvent
 struct SongRemovedEvent: Codable {
-    let songID: String
-
-    enum CodingKeys: String, CodingKey {
-        case songID = "songId"
-    }
+    let id: String
 }
 
 // MARK: SongRemovedEvent convenience initializers and mutators
@@ -592,10 +590,10 @@ extension SongRemovedEvent {
     }
 
     func with(
-        songID: String? = nil
+        id: String? = nil
     ) -> SongRemovedEvent {
         return SongRemovedEvent(
-            songID: songID ?? self.songID
+            id: id ?? self.id
         )
     }
 
@@ -610,13 +608,8 @@ extension SongRemovedEvent {
 
 // MARK: - VoteSongEvent
 struct VoteSongEvent: Codable {
-    let songID: String
+    let id: String
     let vote: Int
-
-    enum CodingKeys: String, CodingKey {
-        case songID = "songId"
-        case vote
-    }
 }
 
 // MARK: VoteSongEvent convenience initializers and mutators
@@ -638,11 +631,11 @@ extension VoteSongEvent {
     }
 
     func with(
-        songID: String? = nil,
+        id: String? = nil,
         vote: Int? = nil
     ) -> VoteSongEvent {
         return VoteSongEvent(
-            songID: songID ?? self.songID,
+            id: id ?? self.id,
             vote: vote ?? self.vote
         )
     }
@@ -658,13 +651,12 @@ extension VoteSongEvent {
 
 // MARK: - VoteSongRequest
 struct VoteSongRequest: Codable {
-    let sessionID, songID: String
+    let sessionID, id: String
     let vote: Int
 
     enum CodingKeys: String, CodingKey {
         case sessionID = "sessionId"
-        case songID = "songId"
-        case vote
+        case id, vote
     }
 }
 
@@ -688,12 +680,12 @@ extension VoteSongRequest {
 
     func with(
         sessionID: String? = nil,
-        songID: String? = nil,
+        id: String? = nil,
         vote: Int? = nil
     ) -> VoteSongRequest {
         return VoteSongRequest(
             sessionID: sessionID ?? self.sessionID,
-            songID: songID ?? self.songID,
+            id: id ?? self.id,
             vote: vote ?? self.vote
         )
     }

@@ -5,6 +5,7 @@
 //  Created by Nolan Biscaro on 2023-11-05.
 //
 
+import Foundation
 import MusicKit
 import os
 
@@ -15,18 +16,8 @@ class AppleMusicSearchManager: SearchManagerProtocol {
     private var songs: [AnyMusicItem] = []
     
     func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        var query = song.id
-        
-        if song.service == MusicServiceType.apple.rawValue {
-            let id = MusicItemID(song.id)
-            resolveSongById(id: id, completion: completion)
-        } else if (false) {
-            // TODO: Check cache to see if we have a mapping to the correct service type
-        } else {
-            // Otherwise search by query
-            query = song.title + " " + song.artist + " " + song.album
-            resolveSong(query: query, completion: completion)
-        }
+        let id = MusicItemID(song.appleID)
+        resolveSongById(id: id, completion: completion)
     }
             
     private func resolveSongById(id: MusicItemID, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
