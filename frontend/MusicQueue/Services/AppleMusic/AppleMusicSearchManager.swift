@@ -1,9 +1,6 @@
-//
-//  AppleMusicSearchManager.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-11-05.
-//
+/**
+ This class is an implementation of the `SearchManagerProtocol` protocol and provides methods for searching and resolving songs using the Apple Music API.
+ */
 
 import Foundation
 import MusicKit
@@ -15,11 +12,24 @@ class AppleMusicSearchManager: SearchManagerProtocol {
     var _query: String = ""
     private var songs: [AnyMusicItem] = []
     
+    /**
+     Resolves a song by its `Song` object.
+     
+     - Parameters:
+        - song: The `Song` object to resolve.
+        - completion: A closure that is called when the resolution is complete. It takes a `Result<AnyMusicItem, Error>` parameter, where `AnyMusicItem` represents the resolved song or an error if the resolution fails.
+     */
     func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        let id = MusicItemID(song.appleID)
-        resolveSongById(id: id, completion: completion)
+        resolveSongById(id: MusicItemID(song.appleID), completion: completion)
     }
-            
+    
+    /**
+     Resolves a song by its ID.
+     
+     - Parameters:
+        - id: The ID of the song to resolve.
+        - completion: A closure that is called when the resolution is complete. It takes a `Result<AnyMusicItem, Error>` parameter, where `AnyMusicItem` represents the resolved song or an error if the resolution fails.
+     */
     private func resolveSongById(id: MusicItemID, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
         Task {
             do {
@@ -40,6 +50,13 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         }
     }
     
+    /**
+     Resolves a song by its query.
+     
+     - Parameters:
+        - query: The query string to search for.
+        - completion: A closure that is called when the resolution is complete. It takes a `Result<AnyMusicItem, Error>` parameter, where `AnyMusicItem` represents the resolved song or an error if the resolution fails.
+     */
     func resolveSong(query: String, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
         Task {
             do {
@@ -61,9 +78,15 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         }
     }
     
+    /**
+     Searches for songs based on a query string and limit.
+     
+     - Parameters:
+        - query: The query string to search for.
+        - limit: The maximum number of songs to retrieve.
+        - completion: A closure that is called when the search is complete. It takes a `Result<[AnyMusicItem], Error>` parameter, where `[AnyMusicItem]` represents the list of matching songs or an error if the search fails.
+     */
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        self._query = query
-        
         Task {
             do {
                 var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
@@ -71,28 +94,35 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 searchRequest.includeTopResults = true
                 let searchResponse = try await searchRequest.response()
                 
-                await self.apply(searchResponse, for: self._query)
+                await apply(searchResponse, for: self._query)
                 completion(.success(songs))
             } catch {
                 logger.log(level: .error, "Search request failed with error \(error)")
-                await self.reset()
+                await reset()
                 completion(.failure(error))
             }
         }
     }
     
+    /**
+     Applies the search response to the current query.
+     
+     - Parameters:
+        - searchResponse: The `MusicCatalogSearchResponse` object containing the search results.
+        - searchTerm: The original query string used for the search.
+     */
     @MainActor
     private func apply(_ searchResponse: MusicCatalogSearchResponse, for searchTerm: String) {
-        if self._query == searchTerm {
-            let songs = searchResponse.songs.compactMap {
-                song in AnyMusicItem(song)
-            }
-            self.songs = songs
+        if _query == searchTerm {
+            songs = searchResponse.songs.compactMap { AnyMusicItem($0) }
         }
     }
     
+    /**
+     Resets the list of songs to an empty array.
+     */
     @MainActor
     private func reset() {
-        self.songs = []
+        songs = []
     }
 }

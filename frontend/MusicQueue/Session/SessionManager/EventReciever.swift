@@ -82,7 +82,7 @@ extension SessionManager {
             }
             
             guard let users = firstItem["users"] as? [String] else {
-                throw UnkownResponseError(message: "Expected handleJoinSessionResponse but got \(firstItem) instead", stacktrace: Thread.callStackSymbols)
+                throw UnknownResponseError(message: "Expected handleJoinSessionResponse but got \(firstItem) instead", stacktrace: Thread.callStackSymbols)
             }
             
             if let errResponse = firstItem["error"] as? String {
@@ -95,7 +95,7 @@ extension SessionManager {
         } catch let error as UnkownError {
             logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
-        } catch let error as UnkownResponseError {
+        } catch let error as UnknownResponseError {
             logger.log(level: .fault, "\(error.toString())")
             fatalError(error.toString())
         } catch let error as EventError {
@@ -114,7 +114,7 @@ extension SessionManager {
             }
             
             guard let user = firstItem["user"] as? String else {
-                throw UnkownResponseError(message: "Expected handleJoinSessionResponse but got \(firstItem) instead", stacktrace: Thread.callStackSymbols)
+                throw UnknownResponseError(message: "Expected handleJoinSessionResponse but got \(firstItem) instead", stacktrace: Thread.callStackSymbols)
             }
             
             if let errResponse = firstItem["error"] as? String {
@@ -172,7 +172,7 @@ extension SessionManager {
             }
             
             guard let songId = items["songId"] as? String else {
-                throw UnkownResponseError(message: "No songId in response: \(items)", stacktrace: Thread.callStackSymbols)
+                throw UnknownResponseError(message: "No songId in response: \(items)", stacktrace: Thread.callStackSymbols)
             }
             
             self._queue.removeItem(id: songId)
@@ -190,7 +190,7 @@ extension SessionManager {
             }
             
             guard let songId = voteItems["songId"] as? String, let vote = voteItems["vote"] as? Int else {
-                throw UnkownResponseError(message: "Unexpected response \(voteItems)", stacktrace: Thread.callStackSymbols)
+                throw UnknownResponseError(message: "Unexpected response \(voteItems)", stacktrace: Thread.callStackSymbols)
             }
             
             guard var votedSong = self._queue.find(id: songId) else {
