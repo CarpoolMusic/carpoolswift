@@ -87,15 +87,15 @@ struct SpotifyAPIClient {
             
             do {
                 guard let jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                    throw SerializationError(message: "Unable to serialize JSON from response data", stacktrace: Thread.callStackSymbols)
+                    throw SerializationError(message: "Unable to serialize JSON from response data \(data)", stacktrace: Thread.callStackSymbols)
                 }
                 
                 guard let tracksDict = jsonDict["tracks"] as? [String: Any] else {
-                    throw UnknownResponseError(message: "Unexpected data in response", stacktrace: Thread.callStackSymbols)
+                    throw UnknownResponseError(message: "Unexpected data in response \(jsonDict)", stacktrace: Thread.callStackSymbols)
                 }
                 
                 guard let items = tracksDict["items"] as? [[String: Any]] else {
-                    throw UnknownResponseError(message: "Unexpected items in data", stacktrace: Thread.callStackSymbols)
+                    throw UnknownResponseError(message: "Unexpected items in data \(jsonDict)", stacktrace: Thread.callStackSymbols)
                 }
                 
                 let tracks = try items.compactMap { item in

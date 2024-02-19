@@ -10,8 +10,6 @@ import ObjectiveC
 import Foundation
 
 class SpotifySessionManager: NSObject {
-    // MARK: - Properties
-    
     let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
     let requestedScopes: SPTScope = [.appRemoteControl]
@@ -33,13 +31,10 @@ class SpotifySessionManager: NSObject {
         return SPTSessionManager(configuration: configuration, delegate: self)
     }()
     
-    // MARK: - Methods
-    
     /// Initiates the Spotify session.
     ///
     /// - Parameter authenticated: A closure to be called when the session is authenticated.
     func initiateSession(authenticated: @escaping (Bool) -> Void) {
-        print("TRYING TO CONNECT")
         self.authenticated = authenticated
         sessionManager.initiateSession(with: requestedScopes)
     }

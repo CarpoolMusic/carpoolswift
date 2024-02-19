@@ -9,7 +9,7 @@ class TokenVault {
      Upserts a token to the keychain.
      
      - Parameters:
-        - token: The token to be stored in the keychain.
+     - token: The token to be stored in the keychain.
      */
     static func upsertTokenToKeychain(token: String) -> Void {
         let data = Data(token.utf8)
@@ -55,8 +55,8 @@ class TokenVault {
         // Retrieve the item from the keychain
         guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
               let data = item as? Data else {
-                  return nil
-              }
+            return nil
+        }
         
         return String(data: data, encoding: .utf8)
     }

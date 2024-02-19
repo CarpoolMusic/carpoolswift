@@ -14,6 +14,7 @@ extension SpotifySessionManager: SPTSessionManagerDelegate {
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         print("success", session)
         TokenVault.upsertTokenToKeychain(token: session.accessToken)
+        print("GOT TOKEN")
         authenticated?(true)
     }
     

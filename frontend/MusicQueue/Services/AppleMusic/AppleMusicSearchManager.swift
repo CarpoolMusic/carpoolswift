@@ -51,34 +51,6 @@ class AppleMusicSearchManager: SearchManagerProtocol {
     }
     
     /**
-     Resolves a song by its query.
-     
-     - Parameters:
-        - query: The query string to search for.
-        - completion: A closure that is called when the resolution is complete. It takes a `Result<AnyMusicItem, Error>` parameter, where `AnyMusicItem` represents the resolved song or an error if the resolution fails.
-     */
-    func resolveSong(query: String, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        Task {
-            do {
-                var searchRequest = MusicCatalogSearchRequest(term: query, types: [MusicKit.Song.self])
-                searchRequest.limit = 1
-                let searchResponse = try await searchRequest.response()
-                
-                guard let matchingSong = searchResponse.songs.first.map({ AnyMusicItem($0) }) else {
-                    throw SongResolutionError(message: "Unable to resolve song with query \(query)", stacktrace: Thread.callStackSymbols)
-                }
-                completion(.success(matchingSong))
-            } catch let error as SongResolutionError {
-                logger.log(level: .error, "\(error.toString())")
-                completion(.failure(error))
-            } catch {
-                logger.log(level: .error, "\(error.localizedDescription)")
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    /**
      Searches for songs based on a query string and limit.
      
      - Parameters:
@@ -87,8 +59,12 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         - completion: A closure that is called when the search is complete. It takes a `Result<[AnyMusicItem], Error>` parameter, where `[AnyMusicItem]` represents the list of matching songs or an error if the search fails.
      */
     func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
+        
+        self._query = query
+        
         Task {
             do {
+                print("Query inside", self._query)
                 var searchRequest = MusicCatalogSearchRequest(term: self._query, types: [MusicKit.Song.self])
                 searchRequest.limit = limit
                 searchRequest.includeTopResults = true

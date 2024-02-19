@@ -32,15 +32,11 @@ class SpotifyAppRemoteManager: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlaye
        - songUri: The URI of the song to play.
      */
     func connect(with songUri: String) {
-        print("connecting with song \(songUri)")
-        
-        guard !connected else { return }
-        
         DispatchQueue.main.async {
-            self.appRemote.authorizeAndPlayURI(songUri)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 self.appRemote.connectionParameters.accessToken = TokenVault.getTokenFromKeychain()
                 self.appRemote.connect()
+                self.appRemote.authorizeAndPlayURI(songUri)
             }
         }
     }
