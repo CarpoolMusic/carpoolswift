@@ -17,7 +17,8 @@ struct DashboardView: View {
             VStack {
                 
                 if (dashboardViewModel.isActive) {
-                    SessionView(sessionManager: dashboardViewModel.sessionManager)
+//                    NowPlayingView(sessionManager: dashboardViewModel.sessionManager)
+                    SessionView()
                     
                 } else {
                     TitleView(title: "Carpool")
@@ -39,7 +40,7 @@ struct DashboardView: View {
                 }
             }
             .sheet(isPresented: $dashboardViewModel.createSession) {
-                SessionCreationView(sessionManager: dashboardViewModel.sessionManager)
+                SessionSettingsView(sessionManager: dashboardViewModel.sessionManager)
             }
         }
     }

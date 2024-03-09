@@ -6,42 +6,42 @@
 import SwiftUI
 import Combine
 
-struct SessionView: View {
+struct NowPlayingView: View {
     
-    @ObservedObject var sessionViewModel: SessionViewModel
+    @ObservedObject var sessionViewModel: NowPlayingViewModel
+    @State private var showingQueue: Bool = false
     
     init(sessionManager: SessionManager) {
-        self.sessionViewModel = SessionViewModel(sessionManager: sessionManager)
+        self.sessionViewModel = NowPlayingViewModel(sessionManager: sessionManager)
     }
     
     var body: some View {
-        NavigationStack {
+        ZStack {
             VStack {
-                HStack {
-                    TitleView(title: "TESTESTST")
-                    
-                    Spacer()
-                    
-                    ButtonImageView(action: sessionViewModel.handleSearchButtonPressed, buttonImage: Image(systemName: "magnifyingglass"))
-                }
-                
-                NowPlayingView(mediaPlayer: sessionViewModel.mediaPlayer)
+                AlbumArtView(mediaPlayer: sessionViewModel.mediaPlayer)
                 
                 Spacer()
                 
                 AudioControlView(mediaPlayer: sessionViewModel.mediaPlayer, isHost: sessionViewModel.sessionManager.isHost())
                 
                 Spacer()
-                
-                MenuBarView(sessionManager: sessionViewModel.sessionManager, sessionViewModel: sessionViewModel)
             }
-            .sheet(isPresented: $sessionViewModel.isQueueOpen) {
+            .blur(radius: showingQueue ? 3 : 0)
+            .disabled(showingQueue)
+            .padding()
+        
+            if showingQueue {
                 QueueView(sessionManager: sessionViewModel.sessionManager)
-            }
-            .sheet(isPresented: $sessionViewModel.isSearching) {
-                SongSearchView(sessionManager: sessionViewModel.sessionManager)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
             }
             
+            VStack {
+                Spacer()
+                
+                PlayerControlView(showingQueue: $showingQueue)
+                    .zIndex(2)
+            }
         }
     }
 }
@@ -50,13 +50,11 @@ struct SessionView: View {
  This class represents the view model for a session. It manages the state and functionality of the view.
  */
 
-class SessionViewModel: ObservableObject {
+class NowPlayingViewModel: ObservableObject {
     
     @Published private var isPlaying = false
     @Published var sessionManager: SessionManager
     @Published var mediaPlayer: MediaPlayer
-    @Published var isQueueOpen = false
-    @Published var isSearching = false
     @Published var sessionIsActive = false
     
     private var cancellables = Set<AnyCancellable>()
@@ -68,16 +66,24 @@ class SessionViewModel: ObservableObject {
     }
     
     /**
-     Handles the button press for the search button.
-     */
-    func handleSearchButtonPressed() {
-        self.isSearching = true
-    }
-    
-    /**
      Loads songs asynchronously.
      */
     private func loadSongs() async throws {
         // Code to load songs
+    }
+}
+
+
+// MARK: - NowPlayingView Preview
+
+struct SessionView_Previews: PreviewProvider {
+    static var previews: some View {
+        // Create mock instances of your dependencies
+        let mockSessionManager = MockSessionManager()
+        let mockMediaPlayer = MockMediaPlayer(queue: mockSessionManager._queue)
+
+        // Return the SessionView for preview
+        NowPlayingView(sessionManager: mockSessionManager)
+            .environmentObject(mockSessionManager) // If you use environment objects
     }
 }

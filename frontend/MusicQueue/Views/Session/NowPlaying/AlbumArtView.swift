@@ -1,46 +1,48 @@
-//
-//  NowPlayingView.swift
-//  MusicQueue
-//
-//  Created by Nolan Biscaro on 2023-09-16.
-//
 import SwiftUI
 import MusicKit
 import Combine
 
-struct NowPlayingView: View {
-    
-    
-    @ObservedObject var viewModel: NowPlayingViewModel
+struct AlbumArtView: View {
+    @ObservedObject var viewModel: AlbumArtViewModel
     @ObservedObject var mediaPlayer: MediaPlayer
     
-    
     init(mediaPlayer: MediaPlayer) {
-        viewModel = NowPlayingViewModel(mediaPlayer: mediaPlayer)
+        viewModel = AlbumArtViewModel(mediaPlayer: mediaPlayer)
         self.mediaPlayer = mediaPlayer
     }
 
     var body: some View {
         VStack {
-            if let artwork = viewModel.artwork {
-                ArtworkImage(artwork, width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight)
+            Group {
+                if let artwork = viewModel.artwork {
+                    ArtworkImage(artwork, width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight)
+                }
+                else if let artworkImage = viewModel.loadedImage {
+                    Image(uiImage: artworkImage)
+                        .resizable()
+                } else {
+                    viewModel.albumArtPlaceholder
+                        .resizable()
+                }
             }
-            else if let artworkImage = viewModel.loadedImage {
-                Image(uiImage: artworkImage)
-                    .resizable()
-            } else {
-                viewModel.albumArtPlaceholder
-                    .resizable()
-            }
+//            .aspectRatio(contentMode: .fill)
+            .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.4)
+            .cornerRadius(20) // This rounds the corners of the image
+            .overlay(
+                RoundedRectangle(cornerRadius: 20) // This adds a border around the image
+                    .stroke(Color.white, lineWidth: 4)
+            )
+            .shadow(radius: 10)
+            .padding(.top, 50)
+            .animation(.default, value: viewModel.loadedImage)
+            .transition(.opacity)
         }
-        .animation(.default, value: viewModel.loadedImage)
-        .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.3)
-        .clipped()
-        .transition(.opacity)
+        .foregroundColor(.white)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
-class NowPlayingViewModel: ObservableObject {
+class AlbumArtViewModel: ObservableObject {
     
     // Get screen dimenesions
     let screenWidth = UIScreen.main.bounds.width
@@ -50,7 +52,7 @@ class NowPlayingViewModel: ObservableObject {
     @Published var loadedImage: UIImage?
     @Published var artwork: MusicKit.Artwork?
     
-    let albumArtPlaceholder = Image(systemName: "photo")
+    let albumArtPlaceholder = Image(systemName: "music.note")
     private var cancellables = Set<AnyCancellable>()
     
     init(mediaPlayer: MediaPlayer) {
@@ -98,4 +100,14 @@ class NowPlayingViewModel: ObservableObject {
         }.resume()
     }
     
+}
+
+struct NowPlayingView_Previews: PreviewProvider {
+    static var previews: some View {
+        // Mock data for preview
+        let mockMediaPlayer = MediaPlayer(queue: MockSongQueue())
+        AlbumArtView(mediaPlayer: mockMediaPlayer)
+            .previewLayout(.sizeThatFits)
+            .padding()
+    }
 }
