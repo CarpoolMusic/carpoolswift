@@ -24,7 +24,7 @@ jobs:
       
       - name: Decrypt Certificate
         run: |
-          echo "${{ secrets.CERTIFICATE_P12_ENC }}" | base64 --decode | openssl aes-256-cbc -k "${{ secrets.CERT_ENCRYPTION_PASSWORD }}" -d -out yourfile.p12
+          echo "${{ secrets.CERTIFICATE_P12_ENC }}" | base64 --decode | openssl aes-256-cbc -k "${{ secrets.CERT_ENCRYPTION_PASSWORD }}" -d -a -pbkdf2 -iter 10000 -out yourfile.p12
       
       - name: Build
         env:
@@ -37,4 +37,3 @@ jobs:
       
       - name: PlantUML diagram generator
         uses: holowinski/plantuml-github-action@1.2021.1
-
