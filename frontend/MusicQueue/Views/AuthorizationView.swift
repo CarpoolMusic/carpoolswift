@@ -1,4 +1,3 @@
-// MARK: - CodeAI Output
 /**
  The code provided is a SwiftUI view called `AuthorizationView` that handles the authentication process for a music service. Here's the documentation for each part of the code:
  
@@ -40,22 +39,24 @@ import SwiftUI
 
 struct AuthorizationView: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.presentationMode) var presentationMode
+    
     @ObservedObject var authorizationViewModel = AuthorizationViewModel()
-
+    
     var body: some View {
-        if authorizationViewModel.isAuthenticated {
-            DashboardView()
-        } else {
+        NavigationView {
             authenticationContent()
+        }
+        .onChange(of: authorizationViewModel.isAuthenticated) { isAuthenticated in
+            if isAuthenticated {
+                self.presentationMode.wrappedValue.dismiss()
+            }
         }
     }
 
     private func authenticationContent() -> some View {
         ZStack {
             VStack(spacing: 0) {
-                Spacer()
-                AppTitleView(title: "Carpool", subtitle: "Some slogan")
-                Spacer()
                 loginButtons()
             }
         }
@@ -73,14 +74,8 @@ struct AuthorizationView: View {
     }
 }
 
-struct AuthorizationView_Previews: PreviewProvider {
-    static var previews: some View {
-        AuthorizationView()
-    }
-}
-
 class AuthorizationViewModel: ObservableObject { // Added for completeness
-    @Published var isAuthenticated = false
+    @Published var isAuthenticated: Bool = false
     var sessionManager: SpotifySessionManager?
 
     func handleAppleButtonPressed() {
@@ -100,3 +95,12 @@ class AuthorizationViewModel: ObservableObject { // Added for completeness
         })
     }
 }
+
+// MARK: - Preview
+
+struct AuthorizationView_Previews: PreviewProvider {
+    static var previews: some View {
+        AuthorizationView()
+    }
+}
+

@@ -11,12 +11,11 @@ struct ContentView: View {
     @ObservedObject var contentViewModel = ContentViewModel()
     
     var body: some View {
-        Group {
-            if contentViewModel.isAuthenticated {
-                DashboardView()
-            } else {
-                AuthorizationView()
-            }
+        if contentViewModel.isAuthenticated {
+            MainTabView()
+                .environmentObject(SessionManager())
+        } else {
+            AuthorizationView()
         }
     }
 }
