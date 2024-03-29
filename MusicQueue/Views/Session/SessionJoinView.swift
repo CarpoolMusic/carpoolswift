@@ -52,7 +52,7 @@ struct SessionJoinView: View {
 
 struct SessionJoinView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionJoinView(sessionManager: MockSessionManager())
+        SessionJoinView(sessionManager: MockSessionManager(sessionId: "", sessionName: "", hostName: ""))
     }
 }
 

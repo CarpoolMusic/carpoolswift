@@ -67,9 +67,9 @@ struct SessionAnalyticsView: View {
 }
 
 // Preview
-struct SessionDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        SessionView()
-            .environmentObject(SessionManager())
-    }
-}
+//struct SessionDetailView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SessionView()
+//            .environmentObject(SessionManager())
+//    }
+//}

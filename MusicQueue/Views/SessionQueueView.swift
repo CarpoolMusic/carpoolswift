@@ -132,9 +132,9 @@ class QueueViewModel: ObservableObject {
     
 }
 
-struct QueueViewModel_Previews: PreviewProvider {
-    static var previews: some View {
-        let sessionManager = SessionManager()
-        SessionQueueView(sessionManager: sessionManager)
-    }
-}
+//struct QueueViewModel_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let sessionManager = SessionManager()
+//        SessionQueueView(sessionManager: sessionManager)
+//    }
+//}

@@ -69,11 +69,11 @@ struct SocketEventSender: SocketEventSenderProtocol {
     }
     
     func createSession(hostName: String, sessionName: String) throws {
-        let createSessionRequest = CreateSessionRequest(hostID: hostName, sessionName: sessionName)
-        
-        let jsonData = try createSessionRequest.jsonData()
-        
-        try emitEvent(event: .createSession, jsonData: jsonData)
+//        let createSessionRequest = CreateSessionRequest(hostID: hostName, socketID: <#String#>, sessionName: sessionName)
+//        
+//        let jsonData = try createSessionRequest.jsonData()
+//        
+//        try emitEvent(event: .createSession, jsonData: jsonData)
     }
     
     func joinSession(sessionId: String, hostName: String) throws {

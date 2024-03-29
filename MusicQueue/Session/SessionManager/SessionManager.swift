@@ -57,8 +57,8 @@ class SessionManager: ObservableObject {
     }
     
     func createSession(hostId: String, sessionName: String) throws {
-        apiManager.createSessionRequest(hostId: hostName, socketId: <#T##String#>, sessionName: <#T##String#>, completion: <#T##(Result<CreateSessionResponse, Error>) -> Void#>)
-    }
+//        apiManager.createSessionRequest(hostId: hostName, socketId: <#T##String#>, sessionName: <#T##String#>, completion: <#T##(Result<CreateSessionResponse, Error>) -> Void#>)
+}
     
     func joinSession(sessionId: String, hostName: String) throws {
         try self.socketEventSender.joinSession(sessionId: sessionId, hostName: hostName)
