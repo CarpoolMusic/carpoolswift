@@ -14,29 +14,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      
       - name: Set Default Scheme
         run: |
           scheme_list=$(xcodebuild -list -json | tr -d "\n")
           default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
           echo $default | cat >default
           echo "Using default scheme: $default"
-
-      - name: Decrypt Certificate
+      
+      - name: Decode and Install Certificate
         run: |
           echo "${{ secrets.CERTIFICATE_P12_ENC }}" | base64 --decode > cert.p12
-
-      - name: Create temporary keychain
-        run: |
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
+          security import cert.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERT_ENCRYPTION_PASSWORD }}" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-
-      - name: Import certificate to keychain
-        run: |
-          security import cert.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERT_P12_PASSWORD }}" -T /usr/bin/codesign
-
+      
       - name: Build
         env:
           scheme: ${{ 'default' }}
