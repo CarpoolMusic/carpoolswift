@@ -14,7 +14,7 @@ struct MusicQueueApp: App {
         DependencyContainer.shared.registerNotificationCenter(NotificationCenter.default as NotificationCenterProtocol)
         
        
-        DependencyContainer.shared.registerSessionManager(sessionId: <#T##String#>, sessionName: <#T##String#>, hostName: <#T##String#>)
+        DependencyContainer.shared.registerSessionManager(sessionId: "", sessionName: "", hostName: "")
         
         DependencyContainer.shared.registerAPIManager(APIManager() as APIManagerProtocol)
     }

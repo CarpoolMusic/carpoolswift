@@ -112,10 +112,10 @@ class AuthorizationViewModel: ObservableObject { // Added for completeness
 
 // MARK: - Preview
 
-struct AuthorizationView_Previews: PreviewProvider {
-    static var previews: some View {
-        @State var temp = false
-        AuthorizationView(isAuthenticated: $temp)
-    }
-}
+//struct AuthorizationView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        @State var temp = false
+//        AuthorizationView(isAuthenticated: $temp)
+//    }
+//}
 

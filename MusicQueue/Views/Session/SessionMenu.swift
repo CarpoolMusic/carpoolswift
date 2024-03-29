@@ -49,7 +49,7 @@ struct SessionMenu: View {
                         .padding(.horizontal)
                 }
                 .sheet(isPresented: $showingSessionJoinView) {
-                    SessionJoinView()
+//                    SessionJoinView()
                 }
 
                 Spacer()

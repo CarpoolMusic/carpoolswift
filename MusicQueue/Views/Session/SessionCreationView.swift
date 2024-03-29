@@ -128,8 +128,8 @@ class SessionCreationViewModel: ObservableObject {
         self.sessionName = sessionName
         self.hostName = hostName
         do {
-            DependencyContainer.shared.registerSessionManager(sessionName: sessionName, hostName: hostName)
-            try self.sessionManager?.createSession(hostName: hostName, sessionName: sessionName)
+            DependencyContainer.shared.registerSessionManager(sessionId: "", sessionName: sessionName, hostName: hostName)
+            try self.sessionManager?.createSession(hostId: hostName, sessionName: sessionName)
         } catch {
             print("Error creating session")
         }
