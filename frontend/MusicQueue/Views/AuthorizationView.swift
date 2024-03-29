@@ -41,24 +41,32 @@ struct AuthorizationView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.presentationMode) var presentationMode
     
+    @Binding var isAuthenticated: Bool
     @ObservedObject var authorizationViewModel = AuthorizationViewModel()
     
     var body: some View {
-        NavigationView {
-            authenticationContent()
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                .edgesIgnoringSafeArea(.all)
+            
+            VStack {
+                Spacer()
+                Text("Welcome to MusicQueue")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Text("Please log in to continue")
+                    .font(.title3)
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(.bottom, 50)
+                
+                loginButtons()
+                Spacer()
+            }
         }
         .onChange(of: authorizationViewModel.isAuthenticated) { isAuthenticated in
-            if isAuthenticated {
-                self.presentationMode.wrappedValue.dismiss()
-            }
-        }
-    }
-
-    private func authenticationContent() -> some View {
-        ZStack {
-            VStack(spacing: 0) {
-                loginButtons()
-            }
+            self.isAuthenticated = authorizationViewModel.isAuthenticated
         }
         .onOpenURL { url in
             authorizationViewModel.sessionManager?.application(UIApplication.shared, open: url)
@@ -67,10 +75,12 @@ struct AuthorizationView: View {
 
     private func loginButtons() -> some View {
         VStack(spacing: 16) {
-            ButtonImageTextView(action: authorizationViewModel.handleAppleButtonPressed, buttonText: Text("Login with Apple Music"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+            AuthenticationButton(action: authorizationViewModel.handleAppleButtonPressed, text: "Login with Apple Music", systemImageName: "applelogo")
             
-            ButtonImageTextView(action: authorizationViewModel.handleSpotifyButtonPressed, buttonText: Text("Login with Spotify"), buttonStyle: ButtonBackgroundStyle(), buttonImage: Image(systemName: "applelogo"))
+            AuthenticationButton(action: authorizationViewModel.handleSpotifyButtonPressed, text: "Login with Spotify", systemImageName: "music.note")
+                .padding(.top, 10)
         }
+        .padding(.horizontal, 30)
     }
 }
 
@@ -82,7 +92,9 @@ class AuthorizationViewModel: ObservableObject { // Added for completeness
         UserPreferences.setUserMusicService(type: .apple)
 
         AppleAuthenticationController().authenticate(authenticated: { result in
-            self.isAuthenticated = result
+            DispatchQueue.main.async {
+                self.isAuthenticated = result
+            }
         })
     }
 
@@ -91,7 +103,9 @@ class AuthorizationViewModel: ObservableObject { // Added for completeness
 
         self.sessionManager = SpotifySessionManager()
         sessionManager?.initiateSession(authenticated: { authenticated in
-            self.isAuthenticated = authenticated
+            DispatchQueue.main.async {
+                self.isAuthenticated = authenticated
+            }
         })
     }
 }
@@ -100,7 +114,8 @@ class AuthorizationViewModel: ObservableObject { // Added for completeness
 
 struct AuthorizationView_Previews: PreviewProvider {
     static var previews: some View {
-        AuthorizationView()
+        @State var temp = false
+        AuthorizationView(isAuthenticated: $temp)
     }
 }
 

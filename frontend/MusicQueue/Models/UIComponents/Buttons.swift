@@ -76,10 +76,69 @@ struct IconButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
-            .font(.title2)
-            .foregroundColor(isSelected ? .blue : .primary) // Change color if selected
-            .background(isSelected ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1)) // Change background if selected
-            .scaleEffect(configuration.isPressed || isSelected ? 0.9 : 1.0) // Scale down when pressed or if selected
-            .animation(.spring(), value: configuration.isPressed)
+            .foregroundColor(isSelected ? .blue : .primary)
+            .padding()
+            .background(isSelected ? Color.blue.opacity(0.2) : Color.clear)
+            .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(Color.blue, lineWidth: isSelected ? 2 : 0)
+            )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .animation(.easeOut, value: configuration.isPressed)
+    }
+}
+
+struct AuthenticationButton: View {
+    let action: () -> Void
+    let text: String
+    let systemImageName: String
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: systemImageName)
+                    .foregroundColor(.white)
+                Text(text)
+                    .foregroundColor(.white)
+                    .fontWeight(.medium)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color.black.opacity(0.5))
+            .cornerRadius(10)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct PlaybackButton: View {
+    let systemImageName: String
+    let action: () -> Void
+    var buttonSize: CGFloat = 50
+    var backgroundColors: [Color] = [Color.blue, Color.purple]
+    var foregroundColor: Color = .white
+    var cornerRadius: CGFloat = 25
+
+    // State for the button's scale effect to animate on tap
+    @State private var buttonScale: CGFloat = 1.0
+
+    var body: some View {
+        Button(action: {
+            // Temporarily scale down the button to give feedback on tap
+            self.buttonScale = 0.8
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.action()
+                self.buttonScale = 1.0
+            }
+        }) {
+            Image(systemName: systemImageName)
+                .foregroundColor(foregroundColor)
+                .frame(width: buttonSize, height: buttonSize)
+                .background(LinearGradient(gradient: Gradient(colors: backgroundColors), startPoint: .leading, endPoint: .trailing))
+                .cornerRadius(cornerRadius)
+                .scaleEffect(buttonScale) // Apply the scale effect
+        }
+        .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0), value: buttonScale)
     }
 }

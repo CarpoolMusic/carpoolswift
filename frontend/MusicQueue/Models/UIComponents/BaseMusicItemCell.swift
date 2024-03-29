@@ -1,159 +1,72 @@
-
-import MusicKit
 import SwiftUI
+import MusicKit
 
-/// `MusicItemCell` is a view to use in a SwiftUI `List` to represent a `MusicItem`.
 struct BaseMusicItemCell: View {
-    
-    // MARK: - Properties
-    
     private let artwork: Artwork?
     private let artworkURL: String?
     private let title: String
     private let artist: String
     
-    init(song: AnyMusicItem, songInQueue: Binding<Bool> = .constant(false), onAddToQueue: @escaping () -> Void = {}, inSearch: Bool = false) {
+    init(song: AnyMusicItem) {
         self.title = song.title
         self.artist = song.artist
         self.artwork = song.artwork
         self.artworkURL = song.artworkURL
     }
     
-    // MARK: - View
-    
     var body: some View {
         HStack {
-            VStack {
-                Spacer()
-                if let artwork = self.artwork {
-                    // Show apple music artwork
-                    ArtworkImage(artwork, width: 50)
-                        .cornerRadius(6)
-                } else if let urlString = self.artworkURL, let artworkURL = URL(string: urlString) {
-                    // Get Spotify artwork image from URL
-                    AsyncImage(url: artworkURL) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50, height: 50)
-                        case .failure(_):
-                            Image(systemName: "music.note.list")
-                        default:
-                            ProgressView()
-                                .frame(width: 50, height: 50)
-                        }
-                        
-                    }
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 50)
-                        .clipped()
-                        .cornerRadius(6)
-                } else {
-                    Image(systemName: "music.note.list")
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(6)
-                }
-                Spacer()
-            }
-            VStack(alignment: .leading) {
+            ArtworkImageView(artwork: artwork, artworkURL: artworkURL)
+                .frame(width: 50, height: 50)
+                .cornerRadius(8)
+                .padding(.trailing, 8)
+            
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
+                    .font(.headline)
                     .lineLimit(1)
-                    .foregroundColor(.primary)
                 Text(artist)
+                    .font(.subheadline)
                     .lineLimit(1)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.secondary)
             }
-        }
-    }
-}
-
-struct SearchMusicItemCell: View {
-    var song: AnyMusicItem
-    var songInQueue: Binding<Bool>
-    var onAddToQueue: () -> Void
-    
-    init(song: AnyMusicItem, songInQueue: Binding<Bool>, onAddToQueue: @escaping () -> Void) {
-        self.song = song
-        self.songInQueue = songInQueue
-        self.onAddToQueue = onAddToQueue
-    }
-    
-    var body: some View {
-        HStack {
-            BaseMusicItemCell(song: song)
             
             Spacer()
-            
-            if songInQueue.wrappedValue {
-                Image(systemName: "checkmark")
-                    .foregroundColor(.green)
-                    .transition(.scale)
-            } else {
-                Button(action: {
-                    onAddToQueue()
-                }) {
-                    Image(systemName: "plus")
-                }
-                .transition(.scale)
-            }
         }
+        .padding(.vertical, 8)
     }
 }
 
-struct QueueMusicItemCell: View {
-    let song: AnyMusicItem
-    private var sessionManager: SessionManager
-    @State private var thumbsUpPressed = false
-    @State private var thumbsDownPressed = false
-    
-    init(song: AnyMusicItem, sessionManager: SessionManager) {
-        self.song = song
-        self.sessionManager = sessionManager
-    }
+struct ArtworkImageView: View {
+    let artwork: Artwork?
+    let artworkURL: String?
     
     var body: some View {
-        VStack {
-            BaseMusicItemCell(song: song)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
-
-            HStack {
-                Button(action: {
-                    do {
-                        (thumbsUpPressed) ? try sessionManager.voteSong(songId: song.id, vote: -1) : try sessionManager.voteSong(songId: song.id, vote: 1)
-                        thumbsUpPressed.toggle()
-                        thumbsDownPressed = false
-                    } catch {
-                        print("Error downvoting on song")
+        Group {
+            if let artwork = artwork {
+                // Assuming ArtworkImage is a provided view capable of displaying MusicKit.Artwork
+                ArtworkImage(artwork, width: 50, height: 50)
+            } else if let urlString = artworkURL, let url = URL(string: urlString) {
+                // For loading and displaying an image from a URL
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable()
+                    case .failure(_):
+                        Image(systemName: "music.note")
+                            .resizable()
+                    default:
+                        ProgressView()
                     }
-                }) {
-                    Image(systemName: thumbsUpPressed ? "hand.thumbsup.fill" : "hand.thumbsup")
-                        .foregroundColor(.blue)
                 }
-                .buttonStyle(PlainButtonStyle())
-                .animation(.easeInOut, value: thumbsUpPressed)
-                
-                Spacer()
-                
-                Button(action: {
-                    do {
-                        (thumbsDownPressed) ? try sessionManager.voteSong(songId: song.id, vote: 1) : try sessionManager.voteSong(songId: song.id, vote: -1)
-                        thumbsDownPressed.toggle()
-                        thumbsUpPressed = false
-                    } catch {
-                        print("Error upvoting song")
-                    }
-                }) {
-                    Image(systemName: thumbsDownPressed ? "hand.thumbsdown.fill" : "hand.thumbsdown")
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .animation(.easeInOut, value: thumbsDownPressed)
+            } else {
+                // Fallback placeholder image
+                Image(systemName: "music.note")
+                    .resizable()
             }
         }
+        .aspectRatio(contentMode: .fill)
+        .frame(width: 50, height: 50)
+        .clipped()
     }
-    
 }
-

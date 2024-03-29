@@ -207,10 +207,11 @@ extension Song {
 
 // MARK: - CreateSessionRequest
 struct CreateSessionRequest: Codable {
-    let hostID, sessionName: String
+    let hostID, socketID, sessionName: String
 
     enum CodingKeys: String, CodingKey {
         case hostID = "hostId"
+        case socketID = "socketId"
         case sessionName
     }
 }
@@ -235,10 +236,12 @@ extension CreateSessionRequest {
 
     func with(
         hostID: String? = nil,
+        socketID: String? = nil,
         sessionName: String? = nil
     ) -> CreateSessionRequest {
         return CreateSessionRequest(
             hostID: hostID ?? self.hostID,
+            socketID: socketID ?? self.socketID,
             sessionName: sessionName ?? self.sessionName
         )
     }

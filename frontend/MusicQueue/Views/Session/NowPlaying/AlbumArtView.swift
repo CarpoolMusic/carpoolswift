@@ -4,40 +4,47 @@ import Combine
 
 struct AlbumArtView: View {
     @ObservedObject var viewModel: AlbumArtViewModel
-    @ObservedObject var mediaPlayer: MediaPlayer
-    
-    init(mediaPlayer: MediaPlayer) {
-        viewModel = AlbumArtViewModel(mediaPlayer: mediaPlayer)
-        self.mediaPlayer = mediaPlayer
+
+    init() {
+        viewModel = AlbumArtViewModel()
     }
 
     var body: some View {
         VStack {
-            Group {
-                if let artwork = viewModel.artwork {
-                    ArtworkImage(artwork, width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight)
+            ZStack {
+                // Gradient background (optional dynamic adaptation)
+                Rectangle()
+                    .fill(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.4)
+                    .cornerRadius(20)
+                    .shadow(radius: 10)
+                
+                // Album artwork or placeholder
+                Group {
+                    if let artwork = viewModel.artwork {
+                        ArtworkImage(artwork, width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight)
+                    }
+                    else if let artworkImage = viewModel.loadedImage {
+                        Image(uiImage: artworkImage)
+                            .resizable()
+                    } else {
+                        viewModel.albumArtPlaceholder
+                            .resizable()
+                            .foregroundColor(.gray)
+                            .opacity(0.3) // Makes the placeholder less prominent
+                    }
                 }
-                else if let artworkImage = viewModel.loadedImage {
-                    Image(uiImage: artworkImage)
-                        .resizable()
-                } else {
-                    viewModel.albumArtPlaceholder
-                        .resizable()
-                }
+                .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.4)
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white, lineWidth: 4)
+                )
+                .shadow(radius: 10)
+                .animation(.easeInOut, value: viewModel.loadedImage)
+                .transition(.opacity)
             }
-//            .aspectRatio(contentMode: .fill)
-            .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.4)
-            .cornerRadius(20) // This rounds the corners of the image
-            .overlay(
-                RoundedRectangle(cornerRadius: 20) // This adds a border around the image
-                    .stroke(Color.white, lineWidth: 4)
-            )
-            .shadow(radius: 10)
-            .padding(.top, 50)
-            .animation(.default, value: viewModel.loadedImage)
-            .transition(.opacity)
         }
-        .foregroundColor(.white)
         .edgesIgnoringSafeArea(.all)
     }
 }
@@ -48,22 +55,21 @@ class AlbumArtViewModel: ObservableObject {
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     
-    @ObservedObject var mediaPlayer: MediaPlayer
     @Published var loadedImage: UIImage?
     @Published var artwork: MusicKit.Artwork?
     
-    let albumArtPlaceholder = Image(systemName: "music.note")
+    let albumArtPlaceholder = Image("AlbumArtPlaceholder")
     private var cancellables = Set<AnyCancellable>()
     
-    init(mediaPlayer: MediaPlayer) {
-        self.mediaPlayer = mediaPlayer
-        
-        // Listen for changes to the current song.
-        mediaPlayer.$currentEntry
-            .sink { [weak self] entry in
-                if let _entry = entry {
-                    self?._resolveArtwork(currentEntry: _entry)
-                }
+    init() {
+        setupCurrentSongChangeSubscriber()
+    }
+    
+    private func setupCurrentSongChangeSubscriber() {
+        NotificationCenter.default.publisher(for: .currentSongChangedNotification)
+            .compactMap { $0.object as? AnyMusicItem }
+            .sink { [weak self] currentSong in
+                self?._resolveArtwork(currentEntry: currentSong)
             }
             .store(in: &cancellables)
     }
@@ -104,9 +110,7 @@ class AlbumArtViewModel: ObservableObject {
 
 struct NowPlayingView_Previews: PreviewProvider {
     static var previews: some View {
-        // Mock data for preview
-        let mockMediaPlayer = MediaPlayer(queue: MockSongQueue())
-        AlbumArtView(mediaPlayer: mockMediaPlayer)
+        AlbumArtView()
             .previewLayout(.sizeThatFits)
             .padding()
     }

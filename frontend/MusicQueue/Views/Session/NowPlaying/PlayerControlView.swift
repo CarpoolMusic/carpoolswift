@@ -12,34 +12,34 @@ struct PlayerControlView: View {
     var body: some View {
         VStack {
             HStack {
-                Button(action: { toggleQueue() }) {
-                    Image(systemName: "music.note.list")
-                        .accessibilityLabel("Queue")
-                }
-                .buttonStyle(IconButtonStyle(isSelected: selectedButton == .queue))
+                PlayerControlButton(
+                    iconName: "music.note.list",
+                    isSelected: selectedButton == .queue,
+                    action: { toggleQueue() }
+                )
 
                 Spacer()
 
-                Button(action: { toggleSelection(.airPlay) }) {
-                    Image(systemName: "airplayaudio")
-                        .accessibilityLabel("AirPlay")
-                }
-                .buttonStyle(IconButtonStyle(isSelected: selectedButton == .airPlay))
+                PlayerControlButton(
+                    iconName: "airplayaudio",
+                    isSelected: selectedButton == .airPlay,
+                    action: { toggleSelection(.airPlay) }
+                )
 
                 Spacer()
 
-                Button(action: { toggleSelection(.share) }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .accessibilityLabel("Share")
-                }
-                .buttonStyle(IconButtonStyle(isSelected: selectedButton == .share))
+                PlayerControlButton(
+                    iconName: "square.and.arrow.up",
+                    isSelected: selectedButton == .share,
+                    action: { toggleSelection(.share) }
+                )
             }
-            .padding()
         }
-        .padding()
+        .background(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.1)]), startPoint: .top, endPoint: .bottom))
+        .cornerRadius(15)
+        .shadow(radius: 5)
     }
     
-    // Functions remain unchanged
     func toggleQueue() {
         toggleSelection(.queue)
         showingQueue = !showingQueue
@@ -62,9 +62,35 @@ struct PlayerControlView: View {
     }
 }
 
-struct PlayerControlView_Previews: PreviewProvider {
-    static var previews: some View {
-        @State var mockBool = false
-        PlayerControlView(showingQueue: $mockBool)
+struct PlayerControlButton: View {
+    let iconName: String
+    var isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: iconName)
+                .foregroundColor(isSelected ? Color.blue : Color.white)
+                .frame(width: 44, height: 44)
+                .background(isSelected ? Color.white.opacity(0.2) : Color.clear)
+                .cornerRadius(22)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.easeInOut, value: isSelected)
     }
 }
+
+struct PlayerControlView_Previews: PreviewProvider {
+    static var previews: some View {
+        StateWrapper()
+    }
+
+    struct StateWrapper: View {
+        @State var showingQueue = false
+
+        var body: some View {
+            PlayerControlView(showingQueue: $showingQueue)
+        }
+    }
+}
+
