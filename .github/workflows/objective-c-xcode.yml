@@ -2,9 +2,9 @@ name: Xcode - Build and Analyze
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -65,5 +65,19 @@ jobs:
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
           xcodebuild clean build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -allowProvisioningUpdates
 
-      - name: PlantUML diagram generator
-        uses: holowinski/plantuml-github-action@1.2021.1
+  generate_plantuml:
+    name: generate plantuml
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: plantuml
+        id: plantuml
+        uses: grassedge/generate-plantuml-action@v1.5
+        with:
+          path: example
+          message: "Render PlantUML files"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
