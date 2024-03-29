@@ -12,12 +12,12 @@ import Combine
 
 final class TestSocketConnectionHandler: XCTestCase {
     
-    var socketConnectionHandler: SocketConnectionHandler!
+    var socketConnectionHandler: Socket!
     var cancellables = Set<AnyCancellable>()
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        socketConnectionHandler = SocketConnectionHandler()
+        socketConnectionHandler = Socket()
         // Assume that the initial state is unconnected
         XCTAssertFalse(socketConnectionHandler.connected)
     }

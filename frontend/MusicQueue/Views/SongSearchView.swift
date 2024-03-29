@@ -10,21 +10,26 @@ import Combine
 import os
 
 struct SongSearchView: View {
-    
     @ObservedObject var songSearchViewModel: SongSearchViewModel
-    
+
     init(sessionManager: SessionManager) {
         let viewModel = SongSearchViewModel(sessionManager: sessionManager)
         self.songSearchViewModel = viewModel
     }
-    
+
     var body: some View {
         NavigationView {
             VStack {
-                TextField("Search songs", text: $songSearchViewModel.query)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    TextField("Search songs", text: $songSearchViewModel.query)
+                }
+                .padding(.all, 10)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
                 .padding()
-                
+
                 List(songSearchViewModel.songs) { song in
                     SearchMusicItemCell(
                         song: song,
@@ -36,11 +41,12 @@ struct SongSearchView: View {
                             songSearchViewModel.addSongToQueue(song)
                         }
                     )
+                    .listRowBackground(songSearchViewModel.songInQueue(song) ? Color.green.opacity(0.1) : Color.clear)
                 }
             }
             .navigationTitle("Song Search")
         }
-        Spacer()
+        .accentColor(.primary)
     }
 }
 
@@ -52,18 +58,10 @@ class SongSearchViewModel: ObservableObject {
     let searchManager: SearchManager
     
     @Published var songs: [AnyMusicItem] = []
-    @Published var songAdded: Bool = false
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
         self.searchManager = (UserPreferences.getUserMusicService() == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
-        
-        sessionManager.$songAdded
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.songAdded = true
-            }
-            .store(in: &cancellables)
     }
     
     
@@ -98,7 +96,7 @@ class SongSearchViewModel: ObservableObject {
                 try sessionManager.addSong(song: song)
             }
         } catch {
-            print("Error adding song")
+            logger.error("Error adding song")
         }
     }
 }
@@ -106,7 +104,7 @@ class SongSearchViewModel: ObservableObject {
 struct SongSearchView_Preview: PreviewProvider {
     
     static var previews: some View {
-        let sessionManager = SessionManager()
+        let sessionManager = SessionManager(sessionId: "", sessionName: "", hostName: "")
         SongSearchView(sessionManager: sessionManager)
     }
 }

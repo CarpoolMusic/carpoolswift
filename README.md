@@ -1,34 +1,31 @@
-# Carpool iOS App
+# SPEC-<n>: MusicQueue App
 
-## Overview
-MusicQueue is a cross-platform participatory music queueing application designed to integrate seamlessly with major music streaming services like Apple Music and Spotify. The app allows users to collectively manage a music playlist in real-time, making it ideal for parties, group gatherings, or collaborative listening sessions.
+## Background
 
-## Features
-- **Real-Time Music Sessions**: Create or join music sessions where participants can add songs to a shared queue. Supports both local and remote sessions. A local session is where only the session admins devices plays the music. Remote is when all devices connected to the session play music.
-- **Cross-Platform Streaming Service Integration**: Supports Apple Music and Spotify, allowing users to add songs from either service to the shared queue.
-- **Voting System**: Users can vote on songs in the queue, influencing the order of playback.
-- **Admin Controls**: Session creators have administrative privileges to manage the queue and participants.
-- **User Profile Management**: Users can create and manage their profiles, including music preferences and service integrations.
+The creation of the MusicQueue application stems from the need for a more inclusive and democratic way to enjoy music in group settings, accommodating both local gatherings and remote, distributed groups. Traditional music playing methods often fail to cater to the diverse tastes of all participants, leading to an unbalanced experience. MusicQueue addresses this by integrating popular music services like Apple Music and Spotify and by facilitating group participation in music selection, whether participants are sharing a physical space or connecting from different locations.
 
-## Upcoming Features
-- ** Persistent "listening rooms" where users can create persistent rooms and join/unjoin
-- ** Live feed where users can see what listening rooms there friends are in
-- ** Session statistics such as best/worst contributor, best/worst songs etc. 
-- ** Chat Feature
+## Requirements
 
-## View Components
+### Must Have (MoSCoW)
+- Integration with Apple Music and Spotify to access users' personal music libraries.
+- Functionality for users to create or join real-time music sessions, distinguishable into two types:
+  - **Local Sessions:** Designed for users in the same physical location. Only the device connected to a speaker plays music, while other participants contribute to the music queue.
+  - **Remote Sessions:** Catering to users not in the same location. Each participant's device plays music, ensuring everyone can listen synchronously while interacting with the session.
+- A voting system where songs can be upvoted or downvoted by participants to organize the queue.
+- Administrative controls for session creators, including song removal, skipping, and participant management.
+- The use of unique session codes for joining sessions.
+- User profiles and settings management, including connected music service accounts.
 
-### 1. AuthorizationView
-Handles the authentication and authorization process for Apple Music and Spotify. Ensures secure and seamless access to user's music accounts.
+### Should Have
+- A user-friendly interface designed with SwiftUI for a seamless iOS experience.
+- Real-time updates to the music queue as votes are cast.
+- Automatic adjustment of playback to ensure synchronization across all participant devices in remote sessions.
 
-### 2. SessionCreationView
-Allows users to create new music sessions, setting parameters like session name, privacy settings, and allowed streaming services.
+### Could Have
+- Recommendations for songs to add to the queue based on the collective tastes of session participants.
+- Integration with more music streaming services beyond Apple Music and Spotify for greater accessibility.
 
-### 3. SessionView
-Displays the current music session with real-time updates to the music queue. Participants can add songs, vote on the queue, and view current playing track.
+### Won't Have (initially)
+- Cross-platform support for Android or web, focusing initially on iOS development.
+- Offline functionality for music sessions.
 
-### 4. NowPlayingView
-Shows the currently playing song with controls for play, pause, skip, and volume adjustments. Displays song information including title, artist, and album art.
-
-### 5. QueueView
-Presents the upcoming songs in the queue. Users can add songs to the queue from Apple Music or Spotify libraries.

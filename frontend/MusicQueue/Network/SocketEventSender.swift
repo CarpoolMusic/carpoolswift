@@ -36,17 +36,27 @@ enum SocketSendEvent: String {
     case voteSong
 }
 
-struct SocketEventSender {
+protocol SocketEventSenderProtocol {
+}
+
+struct SocketEventSender: SocketEventSenderProtocol {
     
-    let connection: SocketConnectionHandler
+    let socket: Socket
     
-    init(connection: SocketConnectionHandler) {
-        self.connection = connection
-        connection.connect()
+    init(socket: Socket) {
+        self.socket = socket
+    }
+    
+    func connect() {
+        self.socket.connect()
+    }
+    
+    func disconnect() {
+        self.socket.disconnect()
     }
     
     func checkConnection() throws {
-        guard connection.connected else {
+        guard socket.connected else {
             ErrorToast.shared.showToast(message: "Cannot connect to server. Please check connection and reload.")
             throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
         }
@@ -55,7 +65,7 @@ struct SocketEventSender {
     func emitEvent(event: SocketSendEvent, jsonData: Data) throws {
         try checkConnection()
         
-        connection.emit(event: event.rawValue, with: [jsonData])
+        socket.emit(event: event.rawValue, with: [jsonData])
     }
     
     func createSession(hostName: String, sessionName: String) throws {

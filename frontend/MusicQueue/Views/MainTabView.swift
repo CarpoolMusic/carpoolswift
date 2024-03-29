@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @EnvironmentObject var sessionManager: SessionManager
+    @State private var activeSession: Bool = false
     @State private var selection: Tab = .home
-
+    
     enum Tab {
         case home
         case session
@@ -19,11 +19,19 @@ struct MainTabView: View {
                 }
                 .tag(Tab.home)
             
-            SessionListView(sessionManager: sessionManager)
-                .tabItem {
-                    Label("Session", systemImage: "music.note.list")
+                if activeSession {
+                    SessionView()
+                    .tabItem {
+                        Label("Session", systemImage: "music.note.list")
+                    }
+                    .tag(Tab.session)
+                } else {
+                    SessionMenu()
+                    .tabItem {
+                        Label("Session", systemImage: "music.note.list")
+                    }
+                    .tag(Tab.session)
                 }
-                .tag(Tab.session)
         
             AccountView()
                 .tabItem {
@@ -38,7 +46,6 @@ struct MainTabView: View {
 struct MainTabView_Previews: PreviewProvider {
     static var previews: some View {
         MainTabView()
-            .environmentObject(SessionManager())
     }
 }
 

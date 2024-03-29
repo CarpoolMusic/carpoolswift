@@ -22,45 +22,54 @@ enum SessionManagerError: Error {
  The SessionManager class is an ObservableObject that manages the session and connection with the server using SocketIO.
  */
 class SessionManager: ObservableObject {
-    let logger = Logger()
+    @Injected private var apiManager: APIManagerProtocol
+    
+    private let logger = Logger()
     
     /// Indicates if the user is connected to the server.
     @Published var isConnected: Bool = false
-    
     /// Indicates if the user's session is active.
     @Published var isActive: Bool = false
     
-    /// Indicates if a song has been added to the queue.
-    @Published var songAdded: Bool = false
+    private(set) var queue: SongQueue<AnyMusicItem> = SongQueue()
+    private var users: [User] = []
+    private var socketEventSender: SocketEventSender
     
-    /// Indicates if the queue has been updated.
-    @Published var queueUpdated: Bool = false
+    private(set) var isHost: Bool = true
+    private var hostName: String
     
-    internal var socketConnectionHandler: SocketConnectionHandler
-    internal var socketEventSender: SocketEventSender
+    private var sessionId: String
+    private var sessionName: String
     
-    private var _isHost: Bool = false
-    var _session = Session()
-    
-    var _queue: SongQueue<AnyMusicItem> = SongQueue()
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    /**
-     Initializes a new instance of SessionManager.
-     */
-    init() {
-        self.socketConnectionHandler = SocketConnectionHandler()
-        self.socketEventSender = SocketEventSender(connection: socketConnectionHandler)
-        
-        self._subscribeConnections()
+    init(sessionId: String, sessionName: String, hostName: String) {
+        self.socketEventSender = SocketEventSender(socket: Socket())
+        self.sessionId = sessionId
+        self.sessionName = sessionName
+        self.hostName = hostName
     }
     
-    /**
-     Deinitializes an instance of SessionManager by disconnecting from the server.
-     */
     deinit {
-        socketConnectionHandler.disconnect()
+        self.socketEventSender.disconnect()
+    }
+    
+    func connect() {
+        self.socketEventSender.connect()
+    }
+    
+    func createSession(hostId: String, sessionName: String) throws {
+        apiManager.createSessionRequest(hostId: hostName, socketId: <#T##String#>, sessionName: <#T##String#>, completion: <#T##(Result<CreateSessionResponse, Error>) -> Void#>)
+    }
+    
+    func joinSession(sessionId: String, hostName: String) throws {
+        try self.socketEventSender.joinSession(sessionId: sessionId, hostName: hostName)
+    }
+    
+    func addSong(song: AnyMusicItem) throws {
+        try self.socketEventSender.addSong(sessionId: self.sessionId, songItem: song)
+    }
+    
+    func removeSong(songId: String) throws {
+        try self.socketEventSender.removeSong(sessionId: sessionId, songID: songId)
     }
     
    /**
@@ -69,36 +78,6 @@ class SessionManager: ObservableObject {
      - Returns: An array of AnyMusicItem objects representing the queued songs.
      */
     func getQueuedSongs() -> [AnyMusicItem] {
-        return _queue.getQueueItems()
-    }
-    
-    /**
-     Checks if the user is the host of the current session.
-     
-     - Returns: A boolean value indicating if the user is the host.
-     */
-    func isHost() -> Bool {
-        return self._isHost
-    }
-    
-    private func _subscribeConnections() {
-        socketConnectionHandler.$connected.receive(on: DispatchQueue.main).sink { [weak self] connected in
-            self?.isConnected = connected
-        }.store(in: &cancellables)
-        
-        socketConnectionHandler.eventPublisher.sink { [weak self] event, items in
-            self?.handleEvent(event: event, items: items)
-        }.store(in: &cancellables)
-    }
-    
-    /**
-     Handles incoming socket events and updates the corresponding properties accordingly.
-     
-     - Parameters:
-       - event: The SocketEvent received from the server.
-       - items: An array of AnyMusicItem objects associated with the event.
-     */
-    private func handleEvent(event: SocketEvent, items: [AnyMusicItem]) {
-        // Handle different events and update properties accordingly
+        return queue.getQueueItems()
     }
 }

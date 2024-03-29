@@ -37,7 +37,6 @@ enum PlayerState {
 }
 
 protocol MediaPlayerProtocol {
-    var currentEntryPublisher: PassthroughSubject<AnyMusicItem, Never> { get }
     func play()
     func pause()
     func resume()
@@ -58,14 +57,6 @@ class MediaPlayer: NSObject, ObservableObject {
         self.base = UserPreferences.getUserMusicService().rawValue == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer(queue: queue)
         
         super.init()
-        setupCurrentEntrySubscription()
-    }
-    
-    private func setupCurrentEntrySubscription() {
-        currentEntrySubscription = base.currentEntryPublisher
-            .sink { [weak self] song in
-                self?.currentEntry = song
-            }
     }
     
     //MARK: - Music Controls

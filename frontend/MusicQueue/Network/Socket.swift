@@ -23,21 +23,26 @@
 
 import SocketIO
 import Combine
+import os
 
-class SocketConnectionHandler {
+class Socket {
+    @Injected private var notificationCenter: NotificationCenterProtocol
    
     @Published var connected: Bool = false
     
+    private var logger = Logger()
+    
     private let manager: SocketManager
     private let socket: SocketIOClient
+    private let socketEventReciever: SocketEventReceiver
     
     init() {
         let url = URL(string: "http://192.168.1.160:3000")!
         self.manager = SocketManager(socketURL: url, config: [.log(true), .compress])
         self.socket = self.manager.defaultSocket
-        self.setupHandlers()
+        self.socketEventReciever = SocketEventReceiver(socket: socket)
     }
-    
+        
     func connect() {
         socket.connect()
     }
@@ -46,34 +51,35 @@ class SocketConnectionHandler {
         socket.disconnect()
     }
     
-    func emit(event: String, with items: [SocketData] = []) {
-        socket.emit(event, items)
-    }
-    
-    func getConnectionStatus() -> SocketIOStatus {
-        return self.socket.status
+    func isConnected() -> Bool {
+        return connected
     }
     
     func getSocketId() -> String {
         return socket.sid ?? ""
     }
     
+    func emit(event: String, with items: [SocketData] = []) {
+        socket.emit(event, items)
+    }
+    
     private func setupHandlers() {
         self.socket.onAny { [weak self] event in
-            self?.socketDidReceiveEvent(event: event.event, with: event.items ?? [])
+            self?.socketEventReciever.receivedEvent(event: event.event, with: event.items ?? [])
         }
     }
     
-    var eventPublisher = PassthroughSubject<(String, [Any]), Never>()
-    
-    func socketDidReceiveEvent(event: String, with items: [Any]) {
-        switch event {
-        case "connected":
-            self.connected = true
-        case "disconnect":
-            self.connected = false
-        default:
-            eventPublisher.send((event, items))
+    private func setupSocketConnectionEvents() {
+        socket.on(clientEvent: .connect) { [weak self] data, ack in
+            self?.notificationCenter.post(name: .socketConnectedNotification, object: nil)
+            self?.connected = true
+            self?.logger.debug("Socket connected")
+        }
+
+        socket.on(clientEvent: .disconnect) { [weak self] data, ack in
+            self?.notificationCenter.post(name: .socketDisconnectedNotification, object: nil)
+            self?.connected = false
+            self?.logger.debug("Socket disconnected")
         }
     }
 }

@@ -10,7 +10,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     private var userQueue: SongQueue<AnyMusicItem>
     private var isPlaybackQueueSet = false
     private var queueUpdate: AnyCancellable?
-    var currentEntryPublisher = PassthroughSubject<AnyMusicItem, Never>()
     
     init(queue: SongQueue<AnyMusicItem>) {
         player = ApplicationMusicPlayer.shared
@@ -28,7 +27,7 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
             
             if !isPlaybackQueueSet, let song = getMusicKitSong(song: currentSong) {
                 enqueue(song: song)
-                currentEntryPublisher.send(currentSong)
+                NotificationCenter.default.post(name: .currentSongChangedNotification, object: currentSong)
             } else {
                 print("Cannot get base song")
             }
@@ -72,7 +71,7 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
                 throw SongConversionError(message: "Error converting AnyMusicItem to MusicKit.Song for song \(nextSong)", stacktrace: Thread.callStackSymbols)
             }
             
-            currentEntryPublisher.send(nextSong)
+            NotificationCenter.default.post(name: .currentSongChangedNotification, object: nextSong)
             enqueue(song: song)
             play()
             
@@ -91,7 +90,7 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         }
         
         if let song = getMusicKitSong(song: previousSong) {
-            currentEntryPublisher.send(previousSong)
+            NotificationCenter.default.post(name: .currentSongChangedNotification, object: previousSong)
             enqueue(song: song)
         }
         

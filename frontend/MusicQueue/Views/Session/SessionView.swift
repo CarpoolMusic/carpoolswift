@@ -1,13 +1,17 @@
 import SwiftUI
 
 struct SessionView: View {
-    @State private var selectedTab = 0
+    @EnvironmentObject var sessionManager: SessionManager
+    
+    @State private var selectedTab = 1
+    @State private var showNowPlaying = false
     
     var body: some View {
         VStack {
             Picker("Categories", selection: $selectedTab) {
                 Text("Timeline").tag(0)
-                Text("Analytics").tag(1)
+                Text("Queue").tag(1)
+                Text("Search").tag(2)
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding()
@@ -16,13 +20,21 @@ struct SessionView: View {
             
             // Content based on selected tab
             TabContent(selectedTab: $selectedTab)
+                .environmentObject(sessionManager)
             
             Spacer()
+            
+            MiniPlayerBar(showingNowPlaying: $showNowPlaying)
+        }
+        .sheet(isPresented: $showNowPlaying) {
+            NowPlayingView()
+                .environmentObject(sessionManager)
         }
     }
 }
 
 struct TabContent: View {
+    @EnvironmentObject var sessionManager: SessionManager
     @Binding var selectedTab: Int
     
     var body: some View {
@@ -30,7 +42,9 @@ struct TabContent: View {
         case 0:
             DynamicSessionTimelineView()
         case 1:
-            SessionAnalyticsView()
+            SessionQueueView(sessionManager: sessionManager)
+        case 2:
+            SongSearchView(sessionManager: sessionManager)
         default:
             Text("Selection does not exist")
         }
@@ -56,5 +70,6 @@ struct SessionAnalyticsView: View {
 struct SessionDetailView_Previews: PreviewProvider {
     static var previews: some View {
         SessionView()
+            .environmentObject(SessionManager())
     }
 }

@@ -34,8 +34,6 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     private var playerState: SPTAppRemotePlayerState?
     private var _playerQueue: SongQueue<AnyMusicItem>
     
-    var currentEntryPublisher = PassthroughSubject<AnyMusicItem, Never>()
-    
     /**
      Initializes a new instance of the `SpotifyMediaPlayer` class with a given song queue.
      
@@ -64,7 +62,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
             }
             
             appRemoteManager.connect(with: currentSong.uri)
-            currentEntryPublisher.send(currentSong)
+            NotificationCenter.default.post(name: .sessionCreatedNotification, object: currentSong)
             playbackSet = true
             
         } catch let error as MediaPlayerError {
@@ -100,7 +98,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
         }
         
         appRemoteManager.appRemote.playerAPI?.play(nextSong.uri)
-        currentEntryPublisher.send(nextSong)
+        NotificationCenter.default.post(name: .sessionCreatedNotification, object: nextSong)
     }
     
     /**
@@ -111,7 +109,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
     func skipToPrevious() {
         if let previousSong = _playerQueue.previous() {
             appRemoteManager.appRemote.playerAPI?.play(previousSong.uri)
-            currentEntryPublisher.send(previousSong)
+            NotificationCenter.default.post(name: .sessionCreatedNotification, object: previousSong)
         } else if let currentSong = _playerQueue.current {
             logger.log(level: .info, "No previous entry. Restarting current.")
             appRemoteManager.appRemote.playerAPI?.play(currentSong.uri)
