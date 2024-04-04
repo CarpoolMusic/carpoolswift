@@ -7,7 +7,7 @@
 import os
 
 class SongQueue<T: Identifiable>: ObservableObject {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
     
     private var array: [T]
     private var currentIndex: Int
@@ -27,7 +27,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      */
     var current: T? {
         guard array.indices.contains(currentIndex) else {
-            logger.log(level: .debug, "No current element in queue.")
+            logger.debug("No current element in queue.")
             return nil
         }
         return array[currentIndex]
@@ -53,6 +53,10 @@ class SongQueue<T: Identifiable>: ObservableObject {
         return array.first(where: { $0.id as! String == id })
     }
     
+    func contains(songId: String) -> Bool {
+        return self.find(id: songId) != nil
+    }
+    
     /**
      Moves to the next element in the queue and returns it.
      
@@ -60,7 +64,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      */
     func next() -> T? {
         guard !array.isEmpty, currentIndex < array.index(before: array.endIndex) else {
-            logger.log(level: .debug, "No next element in queue.")
+            logger.debug("No next element in queue.")
             return nil
         }
         
@@ -75,7 +79,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      */
     func previous() -> T? {
         guard !array.isEmpty, currentIndex > 0 else {
-            logger.log(level: .debug, "No previous element in queue.")
+            logger.debug("No previous element in queue.")
             return nil
         }
         

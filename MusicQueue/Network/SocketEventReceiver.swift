@@ -6,11 +6,10 @@
 //
 
 import SocketIO
-import os
 
 class SocketEventReceiver {
     @Injected private var notificationCenter: NotificationCenterProtocol
-    private var logger = Logger()
+    @Injected private var logger: CustomLogger
     
     private var socket: SocketIOClient
     
@@ -183,7 +182,7 @@ class SocketEventReceiver {
             throw SongConversionError(message: "Unable to convert song JSON to song for JSON \(songJson)", stacktrace: Thread.callStackSymbols)
         }
         
-        return Song(id: id, appleID: appleID, spotifyID: spotifyID, uri: uri, title: title, artist: album, album: artist, artworkURL: artworkURL, votes: votes)
+        return Song(id: id, appleId: appleID, spotifyId: spotifyID, uri: uri, title: title, artist: album, album: artist, artworkUrl: artworkURL, votes: votes)
     }
     
     private func postResponse(from notificationName: Notification.Name) {

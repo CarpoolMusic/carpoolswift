@@ -5,7 +5,8 @@ import Combine
 import os
 
 class AppleMusicMediaPlayer: MediaPlayerProtocol {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
+    
     private let player: ApplicationMusicPlayer
     private var userQueue: SongQueue<AnyMusicItem>
     private var isPlaybackQueueSet = false
@@ -36,9 +37,9 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
                 try await player.play()
             }
         } catch let error as MediaPlayerError  {
-            logger.log(level: .error, "\(error.toString())")
+            logger.error("\(error.toString())")
         } catch {
-            logger.log(level: .error, "\(error.localizedDescription)")
+            logger.error("\(error.localizedDescription)")
         }
     }
     
@@ -62,7 +63,7 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
     /// Skips to the next song in the queue.
     func skipToNext() {
         guard let nextSong = userQueue.next() else {
-            logger.log("No next song in queue")
+            logger.error ("No next song in queue")
             return
         }
         
@@ -76,9 +77,9 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
             play()
             
         } catch let error as SongConversionError {
-            logger.log(level: .error, "\(error.toString())")
+            logger.error ("\(error.toString())")
         } catch {
-            logger.log(level: .error, "\(error.localizedDescription)")
+            logger.error("\(error.localizedDescription)")
         }
     }
     

@@ -42,7 +42,7 @@ struct TabContent: View {
         case 0:
             DynamicSessionTimelineView()
         case 1:
-            SessionQueueView(sessionManager: sessionManager)
+            SessionQueueView()
         case 2:
             SongSearchView(sessionManager: sessionManager)
         default:

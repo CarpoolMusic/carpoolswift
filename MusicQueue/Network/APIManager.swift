@@ -8,14 +8,15 @@
 import Foundation
 
 protocol APIManagerProtocol {
-    func createSessionRequest(hostId: String, socketId: String, sessionName: String, completion: @escaping (Result<CreateSessionResponse, Error>) -> Void)
+    func createSessionRequest(hostId: String, sessionName: String, completion: @escaping (Result<CreateSessionResponse, Error>) -> Void)
 }
 
 class APIManager: APIManagerProtocol {
-    private let createSessionURLString = "http://localhost:3000"
+    private let baseUrl: String = "http://localhost:300"
+    private let createSessionUrl = "/create-session"
     
-    func createSessionRequest(hostId: String, socketId: String, sessionName: String, completion: @escaping (Result<CreateSessionResponse, Error>) -> Void) {
-        guard let url = URL(string: createSessionURLString) else {
+    func createSessionRequest(hostId: String, sessionName: String, completion: @escaping (Result<CreateSessionResponse, Error>) -> Void) {
+        guard let url = URL(string: baseUrl + createSessionUrl) else {
             completion(.failure(URLError(.badURL)))
             return
         }
@@ -24,7 +25,7 @@ class APIManager: APIManagerProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let createSessionRequest = CreateSessionRequest(hostID: hostId, socketID: socketId, sessionName: sessionName)
+        let createSessionRequest = CreateSessionRequest(hostId: hostId, sessionName: sessionName)
         do {
             request.httpBody = try JSONEncoder().encode(createSessionRequest)
         } catch {

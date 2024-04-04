@@ -53,11 +53,12 @@ struct SongSearchView: View {
 // MARK: - View Model
 
 class SongSearchViewModel: ObservableObject {
-    let logger = Logger()
-    
-    let searchManager: SearchManager
+    @Injected private var logger: CustomLogger
     
     @Published var songs: [AnyMusicItem] = []
+    
+    private let searchManager: SearchManager
+    
     
     init(sessionManager: SessionManager) {
         self.sessionManager = sessionManager
@@ -73,7 +74,7 @@ class SongSearchViewModel: ObservableObject {
                     case .success(let songs):
                         self?.songs = songs
                     case .failure(let error):
-                        self?.logger.log(level: .error, "\(error.localizedDescription)")
+                        self?.logger.error("\(error.localizedDescription)")
                         self?.songs = []
                     }
                 }
@@ -87,16 +88,22 @@ class SongSearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     func songInQueue(_ song: AnyMusicItem) -> Bool {
-        sessionManager.getQueuedSongs().contains(where: { $0.id == song.id })
+        guard let session = sessionManager.getActiveSession() else {
+            logger.error("Checkf for song but no active queue")
+            return false
+        }
+        return session.contains(songId: song.id)
     }
     
     func addSongToQueue(_ song: AnyMusicItem) {
-        do {
-            if !songInQueue(song) {
-                try sessionManager.addSong(song: song)
-            }
-        } catch {
-            logger.error("Error adding song")
+        guard let session = sessionManager.getActiveSession() else {
+            logger.error("Check for song but no active queue")
+            return
+        }
+        
+        if session.contains(songId: song.id) {
+            logger.debug("Song \(song.id) already in queue.")
+            return
         }
     }
 }
@@ -104,7 +111,7 @@ class SongSearchViewModel: ObservableObject {
 struct SongSearchView_Preview: PreviewProvider {
     
     static var previews: some View {
-        let sessionManager = SessionManager(sessionId: "", sessionName: "", hostName: "")
+        let sessionManager = SessionManager()
         SongSearchView(sessionManager: sessionManager)
     }
 }

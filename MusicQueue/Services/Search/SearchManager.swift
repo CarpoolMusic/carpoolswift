@@ -35,8 +35,7 @@ protocol SearchManagerProtocol {
  A concrete implementation of the SearchManagerProtocol.
  */
 class SearchManager: SearchManagerProtocol {
-    
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
     private var _base: SearchManagerProtocol
     private var searchTask: Task<(), Never>? = nil
     let DEBOUNCE_TIME: UInt64 = 200_000_000 // 0.2 seconds
@@ -69,7 +68,7 @@ class SearchManager: SearchManagerProtocol {
                     throw SearchError(message: "Task has been cancelled", stacktrace: Thread.callStackSymbols)
                 }
             } catch let error {
-                logger.log(level: .error, "Failed to search song with error \(error)")
+                logger.error("Failed to search song with error \(error)")
             }
         }
         

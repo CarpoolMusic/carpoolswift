@@ -109,6 +109,7 @@ struct SessionCreationView: View {
 // A view model for session creation
 class SessionCreationViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
+    @Injected private var logger: CustomLogger
     
     @Published var activeSession = false
     
@@ -127,11 +128,14 @@ class SessionCreationViewModel: ObservableObject {
     func handleCreateSessionButtonPressed(sessionName: String, hostName: String) {
         self.sessionName = sessionName
         self.hostName = hostName
-        do {
-            DependencyContainer.shared.registerSessionManager(sessionId: "", sessionName: sessionName, hostName: hostName)
-            try self.sessionManager?.createSession(hostId: hostName, sessionName: sessionName)
-        } catch {
-            print("Error creating session")
+        self.sessionManager?.createSession(hostId: hostName, sessionName: sessionName) { result in
+            switch result {
+            case .success(let sessionId):
+                self.sessionManager?.joinSession(sessionId: sessionId, hostName: hostName)
+            case .failure(let error):
+                // report error
+                self.logger.error(error.localizedDescription)
+            }
         }
     }
 }

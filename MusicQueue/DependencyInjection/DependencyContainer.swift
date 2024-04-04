@@ -27,20 +27,6 @@ class DependencyContainer {
         }
         return service
     }
-    
-    func registerLazy<T>(_ protocolType: T.Type, factory: @escaping () -> T) {
-        let key = String(describing: protocolType)
-        services[key] = factory
-    }
-    
-    static func resolveLazy<T>(_ type: T.Type) -> T {
-        let key = String(describing: type)
-        if let factory = shared.services[key] as? () -> T {
-            return factory()
-        } else {
-            fatalError("No registered factory for type \(key)")
-        }
-    }
 }
 
 extension DependencyContainer {
@@ -48,14 +34,15 @@ extension DependencyContainer {
         register(service: notificationCenter, as: NotificationCenterProtocol.self)
     }
     
-    func registerSessionManager(sessionId: String, sessionName: String, hostName: String) {
-        registerLazy(SessionManager.self) {
-            // This block is only executed when SessionManager is first resolved
-            return SessionManager(sessionId: sessionId, sessionName: sessionName, hostName: hostName)
-        }
+    func registerSessionManager(sessionManager: SessionManagerProtocol) {
+        register(service: sessionManager, as: SessionManagerProtocol.self)
     }
     
     func registerAPIManager(_ apiManager: APIManagerProtocol = APIManager()) {
         register(service: apiManager, as: APIManagerProtocol.self)
+    }
+    
+    func registerLogger(_ logger: CustomLoggerProtocol = CustomLogger()) {
+        register(service: logger, as: CustomLoggerProtocol.self)
     }
 }

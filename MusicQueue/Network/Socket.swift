@@ -23,14 +23,12 @@
 
 import SocketIO
 import Combine
-import os
 
 class Socket {
     @Injected private var notificationCenter: NotificationCenterProtocol
+    @Injected private var logger: CustomLoggerProtocol
    
     @Published var connected: Bool = false
-    
-    private var logger = Logger()
     
     private let manager: SocketManager
     private let socket: SocketIOClient
@@ -63,6 +61,16 @@ class Socket {
         socket.emit(event, items)
     }
     
+    func emitWithAck<T>(event: String, with items: SocketData, completion: @escaping (Result<T, Error>) -> Void) {
+        socket.emitWithAck(event, items).timingOut(after: 0) { data in
+            if let response = data.first as? T {
+                completion(.success(response))
+            } else if let errorString = data.first as? String {
+                completion(.failure(SocketError(message: errorString)))
+            }
+        }
+    }
+    
     private func setupHandlers() {
         self.socket.onAny { [weak self] event in
             self?.socketEventReciever.receivedEvent(event: event.event, with: event.items ?? [])
@@ -73,13 +81,13 @@ class Socket {
         socket.on(clientEvent: .connect) { [weak self] data, ack in
             self?.notificationCenter.post(name: .socketConnectedNotification, object: nil)
             self?.connected = true
-            self?.logger.debug("Socket connected")
+            self?.logger.debug("Socket connected", includeStackTrace: true)
         }
 
         socket.on(clientEvent: .disconnect) { [weak self] data, ack in
             self?.notificationCenter.post(name: .socketDisconnectedNotification, object: nil)
             self?.connected = false
-            self?.logger.debug("Socket disconnected")
+            self?.logger.debug("Socket disconnected", includeStackTrace: true)
         }
     }
 }

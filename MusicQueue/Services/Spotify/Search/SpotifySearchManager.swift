@@ -4,7 +4,8 @@ import UIKit
 import Kingfisher
 
 class SpotifySearchManager: SearchManagerProtocol {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
+    
     let spotifyAPIClient: SpotifyAPIClient
     
     init() {

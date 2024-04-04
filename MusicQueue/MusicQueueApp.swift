@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import os
 
 @main
 struct MusicQueueApp: App {
@@ -14,9 +15,11 @@ struct MusicQueueApp: App {
         DependencyContainer.shared.registerNotificationCenter(NotificationCenter.default as NotificationCenterProtocol)
         
        
-        DependencyContainer.shared.registerSessionManager(sessionId: "", sessionName: "", hostName: "")
+        DependencyContainer.shared.registerSessionManager(sessionManager: SessionManager() as SessionManagerProtocol)
         
         DependencyContainer.shared.registerAPIManager(APIManager() as APIManagerProtocol)
+        
+        DependencyContainer.shared.registerLogger(CustomLogger() as CustomLoggerProtocol)
     }
     
     var body: some Scene {

@@ -35,7 +35,7 @@ struct SpotifySong {
         self.duration = 0
         self.artists = [""]
         self.albumName = ""
-        self.artworkURL = song.artworkURL
+        self.artworkURL = song.artworkUrl
     }
     
    /**

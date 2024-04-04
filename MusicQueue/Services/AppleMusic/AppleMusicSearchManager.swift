@@ -7,7 +7,7 @@ import MusicKit
 import os
 
 class AppleMusicSearchManager: SearchManagerProtocol {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
     
     var _query: String = ""
     private var songs: [AnyMusicItem] = []
@@ -20,7 +20,7 @@ class AppleMusicSearchManager: SearchManagerProtocol {
         - completion: A closure that is called when the resolution is complete. It takes a `Result<AnyMusicItem, Error>` parameter, where `AnyMusicItem` represents the resolved song or an error if the resolution fails.
      */
     func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        resolveSongById(id: MusicItemID(song.appleID), completion: completion)
+        resolveSongById(id: MusicItemID(song.appleId), completion: completion)
     }
     
     /**
@@ -41,10 +41,10 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 }
                 completion(.success(matchingSong))
             } catch let error as SongResolutionError {
-                logger.log(level: .error, "\(error.toString())")
+                logger.error("\(error.toString())")
                 completion(.failure(error))
             } catch {
-                logger.log(level: .error, "\(error.localizedDescription)")
+                logger.error("\(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
@@ -73,7 +73,7 @@ class AppleMusicSearchManager: SearchManagerProtocol {
                 await apply(searchResponse, for: self._query)
                 completion(.success(songs))
             } catch {
-                logger.log(level: .error, "Search request failed with error \(error)")
+                logger.error("Search request failed with error \(error)")
                 await reset()
                 completion(.failure(error))
             }

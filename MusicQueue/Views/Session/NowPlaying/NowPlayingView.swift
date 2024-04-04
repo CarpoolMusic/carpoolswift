@@ -16,15 +16,15 @@ struct NowPlayingView: View {
             VStack {
                 AlbumArtView()
                 
-                AudioControlView(isHost: sessionManager.isHost)
-                    .environmentObject(MediaPlayer(queue: sessionManager.queue))
+                AudioControlView(isHost: false)
+                    .environmentObject(MediaPlayer(queue: SongQueue<AnyMusicItem>()))
             }
             .blur(radius: showingQueue ? 3 : 0)
             .disabled(showingQueue)
             .padding()
         
             if showingQueue {
-                SessionQueueView(sessionManager: sessionManager)
+                SessionQueueView()
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }
@@ -44,6 +44,6 @@ struct NowPlayingView: View {
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
         NowPlayingView()
-            .environmentObject(SessionManager(sessionId: "", sessionName: "", hostName: "")) // If you use environment objects
+            .environmentObject(SessionManager()) // If you use environment objects
     }
 }

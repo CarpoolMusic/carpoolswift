@@ -26,7 +26,7 @@ import Combine
 import os
 
 class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerStateDelegate {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
     
     private let appRemoteManager: SpotifyAppRemoteManager
     
@@ -66,9 +66,9 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
             playbackSet = true
             
         } catch let error as MediaPlayerError {
-            logger.log(level: .error, "\(error.toString())")
+            logger.error("\(error.toString())")
         } catch {
-            logger.log(level: .error, "\(error.localizedDescription)")
+            logger.error("\(error.localizedDescription)")
         }
     }
     
@@ -93,7 +93,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
      */
     func skipToNext() {
         guard let nextSong = _playerQueue.next() else {
-            logger.log(level: .info, "No next song in queue")
+            logger.info("No next song in queue")
             return
         }
         
@@ -111,10 +111,10 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
             appRemoteManager.appRemote.playerAPI?.play(previousSong.uri)
             NotificationCenter.default.post(name: .sessionCreatedNotification, object: previousSong)
         } else if let currentSong = _playerQueue.current {
-            logger.log(level: .info, "No previous entry. Restarting current.")
+            logger.info("No previous entry. Restarting current.")
             appRemoteManager.appRemote.playerAPI?.play(currentSong.uri)
         } else {
-            logger.log(level: .info, "No previous or current entry to play")
+            logger.info("No previous or current entry to play")
         }
     }
     

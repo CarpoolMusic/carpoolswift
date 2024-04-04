@@ -16,7 +16,7 @@ import os
 // MARK: - CodeAI Output
 
 struct SpotifyAPIClient {
-    let logger = Logger()
+    @Injected private var logger: CustomLogger
     let baseURL = "https://api.spotify.com/v1"
     let accessToken: String
     
@@ -28,9 +28,9 @@ struct SpotifyAPIClient {
     init() {
         self.accessToken = TokenVault.getTokenFromKeychain() ?? ""
         if self.accessToken.isEmpty {
-            logger.log(level: .error, "Unable to fetch access token")
+            logger.error("Unable to fetch access token")
         } else {
-            logger.log(level: .debug, "Token fetched")
+            logger.debug("Token fetched")
         }
     }
     
@@ -61,7 +61,7 @@ struct SpotifyAPIClient {
         
         guard let requestUrl = URL(string: url) else {
             let searchError = SearchError(message: "Invalid URL", stacktrace: Thread.callStackSymbols)
-            logger.log(level: .error, "\(searchError.toString())")
+            logger.error ("\(searchError.toString())")
             completion(.failure(searchError))
             return
         }
@@ -73,14 +73,14 @@ struct SpotifyAPIClient {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 let searchError = SearchError(message: error.localizedDescription, stacktrace: Thread.callStackSymbols)
-                self.logger.log(level: .error, "\(searchError.toString())")
+                self.logger.error("\(searchError.toString())")
                 completion(.failure(searchError))
                 return
             }
             
             guard let data = data else {
                 let searchError = SearchError(message: "Data in response is empty.", stacktrace: Thread.callStackSymbols)
-                self.logger.log(level: .error, "\(searchError.toString())")
+                self.logger.error("\(searchError.toString())")
                 completion(.failure(searchError))
                 return
             }
@@ -107,10 +107,10 @@ struct SpotifyAPIClient {
                 
                 completion(.success(tracks))
             } catch let error as CustomError {
-                self.logger.log(level: .error, "\(error.toString())")
+                self.logger.error("\(error.toString())")
                 completion(.failure(error))
             } catch {
-                self.logger.log(level: .fault, "Unhandled error \(error.localizedDescription)")
+                self.logger.fault("Unhandled error \(error.localizedDescription)")
                 fatalError(error.localizedDescription)
             }
         }.resume()

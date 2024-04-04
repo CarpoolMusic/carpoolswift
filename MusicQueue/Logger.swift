@@ -8,23 +8,38 @@
 import Foundation
 import os
 
-extension Logger {
+protocol CustomLoggerProtocol {
+    func debug(_ message: String, includeStackTrace: Bool)
+    func error(_ message: String, includeStackTrace: Bool)
+    func fault(_ message: String, includeStackTrace: Bool)
+}
+
+class CustomLogger: CustomLoggerProtocol {
+    
+    private let _logger = Logger()
+    
+    /// Logs a debug message with optional stack trace.
+    func info(_ message: String, includeStackTrace: Bool = false) {
+        let finalMessage = includeStackTrace ? messageWithStackTrace(message) : message
+        _logger.log(level: .info, "\(finalMessage)")
+    }
+    
     /// Logs a debug message with optional stack trace.
     func debug(_ message: String, includeStackTrace: Bool = false) {
         let finalMessage = includeStackTrace ? messageWithStackTrace(message) : message
-        log(level: .debug, "\(finalMessage)")
+        _logger.log(level: .debug, "\(finalMessage)")
     }
 
     /// Logs an error message with optional stack trace.
     func error(_ message: String, includeStackTrace: Bool = true) {
         let finalMessage = includeStackTrace ? messageWithStackTrace(message) : message
-        log(level: .error, "\(finalMessage)")
+        _logger.log(level: .error, "\(finalMessage)")
     }
 
     /// Logs a fault message with stack trace.
     func fault(_ message: String, includeStackTrace: Bool = true) {
         let finalMessage = includeStackTrace ? messageWithStackTrace(message) : message
-        log(level: .fault, "\(finalMessage)")
+        _logger.log(level: .fault, "\(finalMessage)")
     }
 
     /// Prepends stack trace to the log message if requested.
@@ -32,4 +47,5 @@ extension Logger {
         let stackTrace = Thread.callStackSymbols.joined(separator: "\n")
         return "\(message)\nStack Trace:\n\(stackTrace)"
     }
+     
 }
