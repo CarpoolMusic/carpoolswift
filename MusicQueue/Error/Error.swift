@@ -35,6 +35,47 @@ class SocketError: CustomError {
     }
 }
 
+class CustomURLError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "URLError", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class URLSessionError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "EncodingError", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class EncodingError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "EncodingError", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class SessionManagerError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "SessionManagerError", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+
 class EventError: CustomError {
     init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
         super.init(type: "EventError", message: message, stacktrace: stacktrace)
@@ -135,6 +176,16 @@ class MediaPlayerError: CustomError {
     }
 }
 
+class APIError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "APIError ", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 class UnkownError: CustomError {
     init(stacktrace: [String]? = Thread.callStackSymbols) {
         super.init(type: "MediaPlayerError", message: "Unkown Error", stacktrace: stacktrace)
@@ -144,3 +195,4 @@ class UnkownError: CustomError {
         fatalError("init(coder:) has not been implemented")
     }
 }
+

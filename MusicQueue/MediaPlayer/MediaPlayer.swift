@@ -36,7 +36,7 @@ enum PlayerState {
     case undetermined
 }
 
-protocol MediaPlayerProtocol {
+protocol MediaPlayerBaseProtocol{
     func play()
     func pause()
     func resume()
@@ -45,46 +45,50 @@ protocol MediaPlayerProtocol {
     func getPlayerState() -> PlayerState
 }
 
-class MediaPlayer: NSObject, ObservableObject {
+protocol MediaPlayerProtocol: MediaPlayerBaseProtocol {
+    func isPlaying() -> Bool
+    func togglePlayPause()
+}
+
+
+class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     
-    @Published var currentEntry: AnyMusicItem?
+    @Published var currentEntry: (SongProtocol)?
     
     private var currentEntrySubscription: AnyCancellable?
     
-    private let base: MediaPlayerProtocol
-    
-    required init(queue: SongQueue<AnyMusicItem>) {
-        self.base = UserPreferences.getUserMusicService().rawValue == "apple" ? AppleMusicMediaPlayer(queue: queue) : SpotifyMediaPlayer(queue: queue)
-        
-        super.init()
-    }
+    private var base: MediaPlayerBaseProtocol?
     
     //MARK: - Music Controls
     
+    func initializeBase(base: MediaPlayerBaseProtocol) {
+        self.base = base
+    }
+    
     func play() {
-        base.play()
+        base?.play()
     }
     
     func pause() {
-        base.pause()
+        base?.pause()
     }
     
     func togglePlayPause() {
         isPlaying() ? pause() : play()
     }
     
-    func resume() { base.resume() }
+    func resume() { base?.resume() }
     
     func skipToNext() {
-        base.skipToNext()
+        base?.skipToNext()
     }
     
     func skipToPrevious() {
-        base.skipToPrevious()
+        base?.skipToPrevious()
    }
 
    func getPlayerState() -> PlayerState {
-       return base.getPlayerState()
+       return base?.getPlayerState() ?? .undetermined
    }
 
    func isPlaying() -> Bool {

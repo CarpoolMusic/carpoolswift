@@ -6,10 +6,10 @@
  */
 import os
 
-class SongQueue<T: Identifiable>: ObservableObject {
-    @Injected private var logger: CustomLogger
+class SongQueue: ObservableObject {
+    @Injected private var logger: CustomLoggerProtocol
     
-    private var array: [T]
+    private var array: [SongProtocol]
     private var currentIndex: Int
     
     /**
@@ -25,7 +25,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Returns: The current element in the queue, or `nil` if there is no current element.
      */
-    var current: T? {
+    var current: (SongProtocol)? {
         guard array.indices.contains(currentIndex) else {
             logger.debug("No current element in queue.")
             return nil
@@ -38,7 +38,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Returns: An array of all elements in the queue.
      */
-    func getQueueItems() -> [T] {
+    func getQueueItems() -> [SongProtocol] {
         return array
     }
     
@@ -49,8 +49,8 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Returns: The first element with the specified identifier, or `nil` if no such element exists.
      */
-    func find(id: String) -> T? {
-        return array.first(where: { $0.id as! String == id })
+    func find(id: String) -> (SongProtocol)? {
+        return array.first(where: { $0.id == id })
     }
     
     func contains(songId: String) -> Bool {
@@ -62,7 +62,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Returns: The next element in the queue, or `nil` if there is no next element.
      */
-    func next() -> T? {
+    func next() -> (SongProtocol)? {
         guard !array.isEmpty, currentIndex < array.index(before: array.endIndex) else {
             logger.debug("No next element in queue.")
             return nil
@@ -77,7 +77,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Returns: The previous element in the queue, or `nil` if there is no previous element.
      */
-    func previous() -> T? {
+    func previous() -> (SongProtocol)? {
         guard !array.isEmpty, currentIndex > 0 else {
             logger.debug("No previous element in queue.")
             return nil
@@ -93,7 +93,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      - Parameter id: The identifier of the element to remove.
      */
     func removeItem(id: String) {
-        if let index = array.firstIndex(where: { $0.id as! String == id }) {
+        if let index = array.firstIndex(where: { $0.id == id }) {
             array.remove(at: index)
         }
     }
@@ -110,7 +110,7 @@ class SongQueue<T: Identifiable>: ObservableObject {
      
      - Parameter newElement: The new element to enqueue.
      */
-    func enqueue(newElement: T) {
+    func enqueue(newElement: SongProtocol) {
         array.append(newElement)
     }
 }

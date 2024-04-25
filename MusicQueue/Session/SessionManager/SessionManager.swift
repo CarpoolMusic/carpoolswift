@@ -12,9 +12,13 @@ import MusicKit
 import os
 
 protocol SessionManagerProtocol {
-    func createSession(hostId: String, sessionName: String, completion: @escaping (Result<String, Error>) -> Void)
-    func joinSession(sessionId: String, hostName: String) throws
-    func deleteSession(sessionId: String, hostName: String) throws
+    var sessionConnectivityPublisher: PassthroughSubject<Bool, Never> { get }
+    
+    func createSession(hostId: String, sessionName: String) async throws -> Session
+    func joinSession(sessionId: String, hostName: String) async throws
+    func deleteSession(sessionId: String, hostName: String) async throws
+    
+    func getActiveSession() -> Session?
 }
 
 /**
@@ -22,26 +26,43 @@ protocol SessionManagerProtocol {
  */
 class SessionManager: SessionManagerProtocol, ObservableObject {
     @Injected private var apiManager: APIManagerProtocol
-    @Injected private var logger: Logger
+    @Injected private var logger: CustomLoggerProtocol
+    
+    var sessionConnectivityPublisher = PassthroughSubject<Bool, Never>()
     
     
     private var activeSessionId: String = ""
     private var sessions: [String: Session] = [:]
     
-    func createSession(hostId: String, sessionName: String, completion: @escaping (Result<String, Error>) -> Void) {
-        apiManager.createSessionRequest(hostId: hostId, sessionName: "Test") { [weak self] result in
-            switch result {
-            case .success(let createSessionResponse):
-                let sessionId = createSessionResponse.sessionId
-                self?.sessions[sessionId] = Session(sessionId: sessionId, sessionName: sessionName, hostName: hostId)
-                completion(.success(sessionId))
-            case .failure(let error):
-                completion(.failure(error))
-            }
+    
+    func createSession(hostId: String, sessionName: String) async throws -> Session {
+        guard let resp = try await apiManager.createSessionRequest(hostId: hostId, sessionName: sessionName) as? CreateSessionResponse else {
+            throw UnknownResponseError(message: "Unexpected response.")
         }
+        
+        let sessionId = resp.sessionId
+        let session = Session(sessionId: sessionId, sessionName: sessionName, hostName: hostId)
+        self.sessions[sessionId] = session
+        self.activeSessionId = sessionId
+        
+        return session
     }
     
-    func joinSession(sessionId: String, hostName: String) {
+    func joinSession(sessionId: String, hostName: String) async throws {
+        guard let session = self.getActiveSession() else {
+            throw SessionManagerError(message: "Trying to join session with no active sessions.")
+        }
+        
+        try await self.connect(sessionId: sessionId)
+        
+        let status = try await session.join(hostName: hostName)
+        if (status["status"] as? String == "success") {
+            sessionConnectivityPublisher.send(true)
+        } else {
+            throw EventError(message: "Unable to join session with error \(String(describing: status["message"]))")
+        }
+        
+        logger.debug("Session \(sessionId) joined successfully")
     }
     
     func deleteSession(sessionId: String, hostName: String) {
@@ -50,4 +71,21 @@ class SessionManager: SessionManagerProtocol, ObservableObject {
     func getActiveSession() -> Session? {
         return sessions[activeSessionId]
     }
+    
+    func connect(sessionId: String) async throws {
+        guard let session = getActiveSession() else {
+            throw SocketError(message: "Attempting to connect with no active session.")
+        }
+        
+        try await session.connect()
+    }
+    
+    func isConnected() -> Bool {
+        guard let session = getActiveSession() else {
+            return false
+        }
+        
+        return session.isConnected()
+    }
+    
 }

@@ -10,7 +10,7 @@ import Combine
 class MusicPlayerEventPublisher {
     static let shared = MusicPlayerEventPublisher()
 
-    var currentSongChanged: PassthroughSubject<AnyMusicItem, Never> = PassthroughSubject<AnyMusicItem, Never>()
+    var currentSongChanged: PassthroughSubject<SongProtocol, Never> = PassthroughSubject<SongProtocol, Never>()
     var playerStateChanged: PassthroughSubject<PlayerState, Never> = PassthroughSubject<PlayerState, Never>()
 
     private var cancellables: Set<AnyCancellable> = []

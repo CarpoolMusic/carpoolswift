@@ -47,54 +47,55 @@ struct SocketEventSender: SocketEventSenderProtocol {
         self.socket = socket
     }
     
-    func connect() {
-        self.socket.connect()
+    func connect() async throws {
+        try await self.socket.connect()
+    }
+    
+    func isConnected() -> Bool {
+        return socket.isConnected()
     }
     
     func disconnect() {
         self.socket.disconnect()
     }
     
-    func emitEventWithAck<T>(event: SocketSendEvent, jsonData: [String: Any], completion: @escaping (Result<T, Error>) -> Void) {
-        socket.emitWithAck(event: event.rawValue, with: jsonData, completion: completion)
-    }
     
-    func joinSession(sessionId: String, hostName: String, completion: @escaping (Result<JoinSessionResponse, Error>) -> Void) {
+    func joinSession(sessionId: String, hostName: String) async throws -> [String: Any] {
         let joinSessionRequest = JoinSessionRequest(sessionId: sessionId, hostName: hostName)
         
-        emitEventWithAck(event: .joinSession, jsonData: joinSessionRequest.flatten(), completion: completion)
-    }
-    
-    func addSong(sessionId: String, songItem: AnyMusicItem, completion: @escaping (Result<Bool, Error>) -> Void) {
-        let song = Song(id:songItem.id,
-                        appleId:songItem.appleID,
-                        spotifyId:songItem.spotifyID,
-                        uri:songItem.uri,
-                        title:songItem.title,
-                        artist:songItem.artist,
-                        album:songItem.album,
-                        artworkUrl:songItem.artworkURL ?? "",
-                        votes:songItem.votes)
-        let addSongRequest = AddSongRequest(sessionId: sessionId, song: song)
+        let jsonData = try JSONEncoder().encode(joinSessionRequest)
         
-        emitEventWithAck(event: .addSong, jsonData: addSongRequest.flatten(), completion: completion)
+        let data = try await socket.emitWithAck(.joinSession, jsonData)
+        
+        return data
+    }
+
+    
+    func addSong(sessionId: String, song: SongProtocol) async throws -> [String: Any] {
+        let addSongRequest = AddSongRequest(sessionId: sessionId, song: song.toSocketSong())
+        
+        let jsonData = try JSONEncoder().encode(addSongRequest)
+        
+        let data = try await socket.emitWithAck(.addSong, jsonData)
+        
+        return data
     }
     
     func leaveSession(sessionId: String, completion: @escaping (Result<LeaveSessionResponse, Error>) -> Void) {
-        let leaveSessionRequest = LeaveSessionRequest(sessionId: sessionId)
-        
-        emitEventWithAck(event: .leaveSession, jsonData: leaveSessionRequest.flatten(), completion: completion)
+//        let leaveSessionRequest = LeaveSessionRequest(sessionId: sessionId)
+//        
+//        emitEventWithAck(event: .leaveSession, jsonData: leaveSessionRequest.flatten(), completion: completion)
     }
     
     func removeSong(sessionId: String, songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let removeSongRequest = RemoveSongRequest(sessionId: sessionId, songId: songID)
-        
-        emitEventWithAck(event: .removeSong, jsonData: removeSongRequest.flatten(), completion: completion)
+//        let removeSongRequest = RemoveSongRequest(sessionId: sessionId, songId: songID)
+//        
+//        emitEventWithAck(event: .removeSong, jsonData: removeSongRequest.flatten(), completion: completion)
     }
     
     func voteSong(sessionId: String, songId: String, vote: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-        let voteSongRequest = VoteSongRequest(sessionId: sessionId, songId: songId, vote: vote)
-        
-        emitEventWithAck(event: .voteSong, jsonData: voteSongRequest.flatten(), completion: completion)
+//        let voteSongRequest = VoteSongRequest(sessionId: sessionId, songId: songId, vote: vote)
+//        
+//        emitEventWithAck(event: .voteSong, jsonData: voteSongRequest.flatten(), completion: completion)
     }
 }

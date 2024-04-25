@@ -9,9 +9,11 @@ import Foundation
 import SwiftUI
 
 struct SearchMusicItemCell: View {
-    var song: AnyMusicItem
+    var song: SongProtocol
     var songInQueue: Binding<Bool>
     var onAddToQueue: () -> Void
+    
+    @State var cellTapped: Bool
     
     var body: some View {
         HStack {
@@ -19,11 +21,14 @@ struct SearchMusicItemCell: View {
             
             Spacer()
             
-            if songInQueue.wrappedValue {
+            if songInQueue.wrappedValue || cellTapped {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.green)
             } else {
-                Button(action: onAddToQueue) {
+                Button(action: {
+                    onAddToQueue()
+                    cellTapped = true
+                }) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.blue)
                 }

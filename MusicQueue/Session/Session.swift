@@ -1,8 +1,8 @@
 class Session {
-    @Injected private var logger: CustomLogger
+    @Injected private var logger: CustomLoggerProtocol
     @Injected private var notificationCenter: NotificationCenterProtocol
     
-    private var _queue: SongQueue<AnyMusicItem> = SongQueue()
+    private var _queue: SongQueue = SongQueue()
     private var _users: [User] = []
     private var _socketEventSender: SocketEventSender
     
@@ -16,9 +16,11 @@ class Session {
         self.sessionName = sessionName
         self.hostName = hostName
         self._socketEventSender = SocketEventSender(socket: Socket())
+        
+        subscribeToSessionEvents()
     }
     
-    var queue: SongQueue<AnyMusicItem> {
+    var queue: SongQueue {
         get { return _queue }
         set { _queue = newValue }
     }
@@ -28,23 +30,27 @@ class Session {
         set { _users = newValue }
     }
     
-    var socketEventSender: SocketEventSender {
-        get { return _socketEventSender }
+    func connect() async throws {
+        try await _socketEventSender.connect()
     }
     
-    func join(hostName: String, completion: @escaping (Result<JoinSessionResponse, Error>) -> Void) {
-        socketEventSender.joinSession(sessionId: self.sessionId, hostName: hostName, completion: completion)
+    func isConnected() -> Bool {
+        return _socketEventSender.isConnected()
     }
     
-    func addSong(song: AnyMusicItem, completion: @escaping (Result<Bool, Error>) -> Void) {
-        _socketEventSender.addSong(sessionId: self.sessionId, songItem: song, completion: completion)
+    func join(hostName: String) async throws -> [String: Any] {
+        return try await _socketEventSender.joinSession(sessionId: self.sessionId, hostName: hostName)
+    }
+    
+    func addSong(song: SongProtocol) async throws -> [String: Any] {
+        return try await _socketEventSender.addSong(sessionId: self.sessionId, song: song)
     }
     
     func removeSong(songId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         _socketEventSender.removeSong(sessionId: sessionId, songID: songId, completion: completion)
     }
     
-    func getQueuedSongs() -> [AnyMusicItem] {
+    func getQueuedSongs() -> [SongProtocol] {
         return _queue.getQueueItems()
     }
     
@@ -56,19 +62,16 @@ class Session {
 extension Session {
     
     private func subscribeToSessionEvents() {
-        notificationCenter.addObserver(self, selector: #selector(songAddedHandler(_:)), name: .songAddedNotification, object: SocketEventReceiver.self)
-    }
-    
-    private func userJoinedHanlder() {
+        notificationCenter.addObserver(self, selector: #selector(songAddedHandler(_:)), name: .songAddedNotification, object: nil)
     }
     
     @objc private func songAddedHandler(_ notificaiton: Notification) {
-        guard let song = notificaiton.object as? AnyMusicItem else {
+        guard let song = notificaiton.object as? SongProtocol else {
             logger.error("Could not extract song from the notificaiton")
             return
         }
         
-        _queue.enqueue(newElement:  song)
+        _queue.enqueue(newElement: song)
     }
 }
 

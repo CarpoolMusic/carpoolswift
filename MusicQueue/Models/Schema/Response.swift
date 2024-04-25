@@ -4,17 +4,31 @@
 //
 //  Created by Nolan Biscaro on 2024-04-01.
 //
+import SocketIO
 
-protocol Response {
+protocol ResponseProtocol {
     
 }
 
-struct CreateSessionResponse: Response, Codable {
+struct CreateSessionResponse: ResponseProtocol, Codable {
     let sessionId: String
 }
 
-struct JoinSessionResponse: Response, Codable {
+struct JoinSessionResponse: ResponseProtocol, Codable {
+    let users: [User]
 }
 
-struct LeaveSessionResponse: Response, Codable {
+struct User: Codable {
+    let userId: String
+}
+
+struct AddSongResponse: ResponseProtocol, Codable {
+    let song: SocketSong
+}
+
+struct LeaveSessionResponse: ResponseProtocol, Codable {
+}
+
+struct SocketConnectionResponse: ResponseProtocol, Codable {
+    let status: Bool
 }

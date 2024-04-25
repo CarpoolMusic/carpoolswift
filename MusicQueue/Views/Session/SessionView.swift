@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct SessionView: View {
-    @EnvironmentObject var sessionManager: SessionManager
-    
     @State private var selectedTab = 1
     @State private var showNowPlaying = false
     
@@ -20,7 +18,6 @@ struct SessionView: View {
             
             // Content based on selected tab
             TabContent(selectedTab: $selectedTab)
-                .environmentObject(sessionManager)
             
             Spacer()
             
@@ -28,13 +25,11 @@ struct SessionView: View {
         }
         .sheet(isPresented: $showNowPlaying) {
             NowPlayingView()
-                .environmentObject(sessionManager)
         }
     }
 }
 
 struct TabContent: View {
-    @EnvironmentObject var sessionManager: SessionManager
     @Binding var selectedTab: Int
     
     var body: some View {
@@ -44,7 +39,7 @@ struct TabContent: View {
         case 1:
             SessionQueueView()
         case 2:
-            SongSearchView(sessionManager: sessionManager)
+            SongSearchView()
         default:
             Text("Selection does not exist")
         }
@@ -67,9 +62,9 @@ struct SessionAnalyticsView: View {
 }
 
 // Preview
-//struct SessionDetailView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SessionView()
-//            .environmentObject(SessionManager())
-//    }
-//}
+struct SessionDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        SessionView()
+            .environmentObject(SessionManager())
+    }
+}

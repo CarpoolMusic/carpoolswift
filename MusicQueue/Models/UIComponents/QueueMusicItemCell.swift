@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct QueueMusicItemCell: View {
-    let song: AnyMusicItem
+    let song: SongProtocol
     private var sessionManager: SessionManager
     @State private var thumbsUpPressed = false
     @State private var thumbsDownPressed = false
     
-    init(song: AnyMusicItem, sessionManager: SessionManager) {
+    init(song: SongProtocol, sessionManager: SessionManager) {
         self.song = song
         self.sessionManager = sessionManager
     }

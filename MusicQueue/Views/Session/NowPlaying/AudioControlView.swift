@@ -1,11 +1,10 @@
 import SwiftUI
 
 struct AudioControlView: View {
-    @EnvironmentObject private var mediaPlayer: MediaPlayer
+    @Injected private var mediaPlayer: MediaPlayerProtocol
     
     @State var currentTrackTime: Double = 45.0
-    @State var isPlaying: Bool = false
-    @State var isHost: Bool = false
+    @State var isHost: Bool = true
     
     init(isHost: Bool) {
         self.isHost = isHost
@@ -33,7 +32,7 @@ struct AudioControlView: View {
 
             HStack {
                 PlaybackButton(systemImageName: "backward.fill", action: {
-                    previousTrack()
+                    mediaPlayer.skipToPrevious()
                 }, buttonSize: 50, backgroundColors: [Color.blue, Color.purple], cornerRadius: 25)
                 .disabled(!isHost)
                 .opacity(isHost ? 1.0 : 0.5)
@@ -41,7 +40,7 @@ struct AudioControlView: View {
                 Spacer()
 
                 PlaybackButton(systemImageName: mediaPlayer.isPlaying() ? "pause.fill" : "play.fill", action: {
-                    togglePlayPause()
+                    mediaPlayer.togglePlayPause()
                 }, buttonSize: 60, backgroundColors: [Color.green, Color.blue], cornerRadius: 30)
                 .disabled(!isHost)
                 .opacity(isHost ? 1.0 : 0.5)
@@ -49,7 +48,7 @@ struct AudioControlView: View {
                 Spacer()
 
                 PlaybackButton(systemImageName: "forward.fill", action: {
-                    nextTrack()
+                    mediaPlayer.skipToNext()
                 }, buttonSize: 50, backgroundColors: [Color.purple, Color.red], cornerRadius: 25)
                 .disabled(!isHost)
                 .opacity(isHost ? 1.0 : 0.5)
@@ -61,26 +60,13 @@ struct AudioControlView: View {
         .shadow(radius: 10)
         .padding()
     }
-
-    func togglePlayPause() {
-        mediaPlayer.togglePlayPause()
-        isPlaying = mediaPlayer.isPlaying()
-    }
-
-    func previousTrack() {
-        mediaPlayer.skipToPrevious()
-    }
-
-    func nextTrack() {
-        mediaPlayer.skipToNext()
-    }
 }
 
 // Assuming MockMediaPlayer and MockSongQueue are placeholder types for the preview
 struct AudioControlView_Previews: PreviewProvider {
     static var previews: some View {
         AudioControlView(isHost: true)
-            .environmentObject(MockMediaPlayer(queue: MockSongQueue()))
+            .environmentObject(MockMediaPlayer())
     }
 }
 

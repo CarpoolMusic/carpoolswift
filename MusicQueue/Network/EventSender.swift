@@ -60,11 +60,11 @@
 //     Adds a song to the current session's playlist.
 //     
 //     - Parameters:
-//        - song: The song item to add to the playlist. Must conform to `AnyMusicItem` protocol.
+//        - song: The song item to add to the playlist. Must conform to `SongProtocol` protocol.
 //     
 //     - Throws: An error if there is an issue adding the song to the playlist.
 //     */
-//    func addSong(song: AnyMusicItem) throws {
+//    func addSong(song: SongProtocol) throws {
 //        try self.socketEventSender.addSong(sessionId: self._session.sessionId, songItem: song)
 //    }
 //    

@@ -10,7 +10,7 @@
 //
 //4. `handleUserJoinedEvent(items: [Any]) throws`: This method handles the "userJoined" event. It expects an array of items containing information about a user joining a session. If there is a valid user in the response, it adds that user to the session's list of users.
 //
-//5. `handleSongAddedEvent(items: [Any], completion: @escaping (Result<AnyMusicItem, Error>) -> Void)`: This method handles the "songAdded" event. It expects an array of items containing information about a song being added to a queue and a completion closure to handle asynchronous operations related to resolving and adding songs to the queue.
+//5. `handleSongAddedEvent(items: [Any], completion: @escaping (Result<SongProtocol, Error>) -> Void)`: This method handles the "songAdded" event. It expects an array of items containing information about a song being added to a queue and a completion closure to handle asynchronous operations related to resolving and adding songs to the queue.
 //
 //6. `handleSongRemovedEvent(items: [Any])`: This method handles the "songRemoved" event. It expects an array of items containing information about a song being removed from the queue. It removes the song from the queue based on its ID.
 //

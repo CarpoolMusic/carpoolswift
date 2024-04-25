@@ -4,15 +4,15 @@ import MediaPlayer
 import Combine
 import os
 
-class AppleMusicMediaPlayer: MediaPlayerProtocol {
-    @Injected private var logger: CustomLogger
+class AppleMusicMediaPlayer: MediaPlayerBaseProtocol {
+    @Injected private var logger: CustomLoggerProtocol
     
     private let player: ApplicationMusicPlayer
-    private var userQueue: SongQueue<AnyMusicItem>
+    private var userQueue: SongQueue
     private var isPlaybackQueueSet = false
     private var queueUpdate: AnyCancellable?
     
-    init(queue: SongQueue<AnyMusicItem>) {
+    init(queue: SongQueue) {
         player = ApplicationMusicPlayer.shared
         userQueue = queue
     }
@@ -26,11 +26,9 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
                 throw MediaPlayerError(message: "No current song in queue", stacktrace: Thread.callStackSymbols)
             }
             
-            if !isPlaybackQueueSet, let song = getMusicKitSong(song: currentSong) {
-                enqueue(song: song)
+            if !isPlaybackQueueSet {
+                enqueue(song: currentSong)
                 NotificationCenter.default.post(name: .currentSongChangedNotification, object: currentSong)
-            } else {
-                print("Cannot get base song")
             }
             
             Task{
@@ -55,11 +53,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         player.pause()
     }
     
-    /// Toggles between play and pause states.
-    func togglePlayPause() {
-        isPlaying() ? pause() : play()
-    }
-    
     /// Skips to the next song in the queue.
     func skipToNext() {
         guard let nextSong = userQueue.next() else {
@@ -68,18 +61,9 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
         }
         
         do {
-            guard let song = getMusicKitSong(song: nextSong) else {
-                throw SongConversionError(message: "Error converting AnyMusicItem to MusicKit.Song for song \(nextSong)", stacktrace: Thread.callStackSymbols)
-            }
-            
             NotificationCenter.default.post(name: .currentSongChangedNotification, object: nextSong)
-            enqueue(song: song)
+            enqueue(song: nextSong)
             play()
-            
-        } catch let error as SongConversionError {
-            logger.error ("\(error.toString())")
-        } catch {
-            logger.error("\(error.localizedDescription)")
         }
     }
     
@@ -90,16 +74,17 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
             return
         }
         
-        if let song = getMusicKitSong(song: previousSong) {
-            NotificationCenter.default.post(name: .currentSongChangedNotification, object: previousSong)
-            enqueue(song: song)
-        }
+        NotificationCenter.default.post(name: .currentSongChangedNotification, object: previousSong)
+        enqueue(song: previousSong)
         
         play()
     }
     
-    private func enqueue(song: MusicKit.Song) {
-        let entry = MusicPlayer.Queue.Entry(song)
+    private func enqueue(song: SongProtocol) {
+        guard let musicItem = song as? AppleSong else {
+            return
+        }
+        let entry = MusicPlayer.Queue.Entry(musicItem.getMusicKitBase())
         player.queue = ApplicationMusicPlayer.Queue([entry])
         isPlaybackQueueSet = true
     }
@@ -115,22 +100,6 @@ class AppleMusicMediaPlayer: MediaPlayerProtocol {
             return .paused
         default:
             return PlayerState.undetermined
-        }
-    }
-    
-    /// Returns a boolean indicating if the player is currently playing.
-    func isPlaying() -> Bool {
-        return getPlayerState() == .playing
-    }
-    
-    /// Converts an AnyMusicItem to a MusicKit.Song.
-    func getMusicKitSong(song: AnyMusicItem) -> MusicKit.Song? {
-        switch song.getBase() {
-        case .appleSong(let song):
-            return song
-        case .spotifySong:
-            print("Wrong base")
-            return nil
         }
     }
 }

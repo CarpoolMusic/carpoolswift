@@ -40,7 +40,7 @@ struct SessionJoinView: View {
     func joinSession() {
         // Validate session ID
         // Join Session
-        self.sessionManager.joinSession(sessionId: sessionID, hostName: "current host name")
+//        self.sessionManager.joinSession(sessionId: sessionID, hostName: "current host name")
         presentationMode.wrappedValue.dismiss()
     }
 }

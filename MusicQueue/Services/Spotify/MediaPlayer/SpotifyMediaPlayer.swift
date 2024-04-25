@@ -1,38 +1,16 @@
-/**
- This class represents a Spotify media player that conforms to the `MediaPlayerProtocol` and `SPTAppRemotePlayerStateDelegate` protocols.
- 
- ## Properties:
- - `logger`: An instance of the `Logger` class used for logging.
- - `appRemoteManager`: An instance of the `SpotifyAppRemoteManager` class used for managing the Spotify app remote.
- - `_playerQueue`: A generic `SongQueue` object that holds a queue of music items.
- - `playbackSet`: A boolean value indicating whether playback has been set or not.
- - `playerState`: An optional instance of the `SPTAppRemotePlayerState` class representing the current player state.
- - `currentEntryPublisher`: A publisher that emits the current music item being played.
- 
- ## Methods:
- - `init(queue:)`: Initializes a new instance of the `SpotifyMediaPlayer` class with a given song queue.
- - `play()`: Plays the current song in the queue or resumes playback if already set.
- - `pause()`: Pauses playback.
- - `resume()`: Resumes playback.
- - `skipToNext()`: Skips to the next song in the queue and plays it.
- - `skipToPrevious()`: Skips to the previous song in the queue and plays it, or restarts the current song if no previous song exists.
- - `getPlayerState() -> PlayerState`: Returns the current player state (playing, paused, or undetermined).
- - `playerStateDidChange(_:)`: Called when the player state changes.
-
- */
 import SwiftUI
 import MusicKit
 import Combine
 import os
 
-class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerStateDelegate {
-    @Injected private var logger: CustomLogger
+class SpotifyMediaPlayer: NSObject, MediaPlayerBaseProtocol, SPTAppRemotePlayerStateDelegate {
+    @Injected private var logger: CustomLoggerProtocol
     
     private let appRemoteManager: SpotifyAppRemoteManager
     
     private var playbackSet: Bool = false
     private var playerState: SPTAppRemotePlayerState?
-    private var _playerQueue: SongQueue<AnyMusicItem>
+    private var _playerQueue: SongQueue
     
     /**
      Initializes a new instance of the `SpotifyMediaPlayer` class with a given song queue.
@@ -40,7 +18,7 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerProtocol, SPTAppRemotePlayerState
      - Parameters:
         - queue: A `SongQueue` object representing the queue of music items.
      */
-    init(queue: SongQueue<AnyMusicItem>) {
+    init(queue: SongQueue) {
         self._playerQueue = queue
         self.appRemoteManager = SpotifyAppRemoteManager()
     }

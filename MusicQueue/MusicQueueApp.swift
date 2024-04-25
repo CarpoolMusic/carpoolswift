@@ -12,14 +12,15 @@ import os
 struct MusicQueueApp: App {
     
     init() {
-        DependencyContainer.shared.registerNotificationCenter(NotificationCenter.default as NotificationCenterProtocol)
+        DependencyContainer.shared.registerLogger(CustomLogger() as CustomLoggerProtocol)
         
-       
-        DependencyContainer.shared.registerSessionManager(sessionManager: SessionManager() as SessionManagerProtocol)
+        DependencyContainer.shared.registerNotificationCenter(NotificationCenter.default as NotificationCenterProtocol)
         
         DependencyContainer.shared.registerAPIManager(APIManager() as APIManagerProtocol)
         
-        DependencyContainer.shared.registerLogger(CustomLogger() as CustomLoggerProtocol)
+        DependencyContainer.shared.registerSessionManager(SessionManager() as SessionManagerProtocol)
+        
+        DependencyContainer.shared.registerMediaPlayer(MediaPlayer() as MediaPlayerProtocol)
     }
     
     var body: some Scene {

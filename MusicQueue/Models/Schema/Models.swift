@@ -1,48 +1,40 @@
+////
+////  Models.swift
+////  MusicQueue
+////
+////  Created by Nolan Biscaro on 2024-04-01.
+////
 //
-//  Models.swift
-//  MusicQueue
+//struct SocketSong: Codable,  {
+//    
+//    let id: String
+//    let uri: String
+//    let title: String
+//    let artist: String
+//    let album: String
+//    let artworkUrl: String
+//    var votes: Int
+//    let artworkURL: URL?
+//    var artworkImage: UIImage?
+//    
+//    let serviceType: MusicServiceType
+//    
+//    mutating func upvote() {
+//        votes += 1
+//    }
+//    
+//    mutating func downvote() {
+//        votes -= 1
+//    }
+//    
+//    func artworkImageURL(size: CGSize) -> URL? {
+//        artworkURL
+//    }
+//    
+//    enum CodingKeys: String, CodingKey {
+//        case id, uri, title, artist, album, artworkUrl, votes, artworkURL, serviceType
+//    }
+//}
 //
-//  Created by Nolan Biscaro on 2024-04-01.
 //
-
-protocol Model {
-    func flatten() -> [String: Any]
-}
-
-struct Song: Model, Codable {
-    let id: String
-    let appleId: String
-    let spotifyId: String
-    let uri: String
-    let title: String
-    let artist: String
-    let album: String
-    let artworkUrl: String
-    let votes: Int
-    
-    func flatten() -> [String: Any] {
-        return [
-            "id": id,
-            "appleId": appleId,
-            "spotifyId": spotifyId,
-            "uri": uri,
-            "title": title,
-            "artist": artist,
-            "album": album,
-            "artworkUrl": artworkUrl,
-            "votes": votes
-        ]
-    }
-}
-
-struct User: Model, Codable {
-    let userId: String
-    
-    func flatten() -> [String : Any] {
-        return [
-            "userId": userId
-        ]
-    }
-    
-    
-}
+//

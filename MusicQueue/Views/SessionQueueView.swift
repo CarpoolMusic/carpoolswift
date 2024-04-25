@@ -10,14 +10,13 @@ import Combine
 import os
 
 struct MusicCellView: View {
-    var song: AnyMusicItem
+    var song: SongProtocol
     var queueViewModel: QueueViewModel
     
     var body: some View {
         HStack {
-            // Assuming `song` has properties like `title` and `artist`
             VStack(alignment: .leading) {
-                Text(song.title)
+                Text(song.songTitle)
                     .font(.headline)
                     .foregroundColor(.primary)
                 Text(song.artist)
@@ -25,11 +24,9 @@ struct MusicCellView: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
-            // Additional controls or information can go here, if any.
         }
         .padding(.vertical, 8)
         .padding(.horizontal)
-        // Additional visual styling
         .background(Color(UIColor.systemBackground))
         .cornerRadius(10)
         .shadow(radius: 1)
@@ -92,10 +89,11 @@ struct SongQueueList: View {
 
 class QueueViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
-    @Injected private var logger: CustomLogger
-    @Injected private var sessionManager: SessionManager
+    @Injected private var logger: CustomLoggerProtocol
+    @Injected private var sessionManager: SessionManagerProtocol
     
     private var cancellables = Set<AnyCancellable>()
+    
     
     func removeSong(songId: String) {
         guard let activeSession = sessionManager.getActiveSession() else {
@@ -113,7 +111,7 @@ class QueueViewModel: ObservableObject {
         }
     }
     
-    func getSongs() -> [AnyMusicItem] {
+    func getSongs() -> [SongProtocol] {
         guard let activeSession = sessionManager.getActiveSession() else {
             logger.error("Trying to get songs in queue with no active session.")
             return []
@@ -122,9 +120,8 @@ class QueueViewModel: ObservableObject {
     }
 }
 
-//struct QueueViewModel_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let sessionManager = SessionManager()
-//        SessionQueueView(sessionManager: sessionManager)
-//    }
-//}
+struct QueueViewModel_Previews: PreviewProvider {
+    static var previews: some View {
+        SessionQueueView()
+    }
+}

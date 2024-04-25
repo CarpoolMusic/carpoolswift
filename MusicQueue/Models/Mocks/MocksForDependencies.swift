@@ -19,7 +19,7 @@ class MockMediaPlayer: MediaPlayer {
     override func skipToNext() {}
 }
 
-class MockSongQueue: SongQueue<AnyMusicItem> {
+class MockSongQueue: SongQueue {
     
 }
 

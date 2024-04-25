@@ -5,7 +5,7 @@
  - spotify: Represents the Spotify service.
  - unselected: Represents that no music service is selected.
  */
-enum MusicServiceType: String {
+enum MusicServiceType: String, Codable {
     case apple, spotify, unselected
 }
 

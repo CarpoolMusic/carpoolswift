@@ -7,17 +7,23 @@ import SwiftUI
 import Combine
 
 struct NowPlayingView: View {
+    @ObservedObject private var viewModel = NowPlayingViewModel()
     
-    @EnvironmentObject private var sessionManager: SessionManager
     @State private var showingQueue: Bool = false
+    
     
     var body: some View {
         ZStack {
             VStack {
-                AlbumArtView()
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    
+                } else {
+                    AlbumArtView(currentArtwork: viewModel.artworkImage)
+                }
                 
                 AudioControlView(isHost: false)
-                    .environmentObject(MediaPlayer(queue: SongQueue<AnyMusicItem>()))
             }
             .blur(radius: showingQueue ? 3 : 0)
             .disabled(showingQueue)
@@ -34,6 +40,44 @@ struct NowPlayingView: View {
                 
                 PlayerControlView(showingQueue: $showingQueue)
                     .zIndex(2)
+            }
+        }
+    }
+}
+
+class NowPlayingViewModel: ObservableObject {
+    @Injected private var notificationCenter: NotificationCenterProtocol
+    
+    @State var isLoading = false
+    @Published var artworkImage: UIImage
+    
+    private let defaultArtwork = UIImage(named: "defaultArtwork")!
+    private var songResolver = SongResolver()
+    
+    init() {
+        self.artworkImage = defaultArtwork
+        setupCurrentSongChangeSubscriber()
+    }
+    
+    
+    private func setupCurrentSongChangeSubscriber() {
+        notificationCenter.addObserver(self, selector: #selector(currentSongChangedHandler(_:)), name: .currentSongChangedNotification, object: nil)
+    }
+    
+    @objc private func currentSongChangedHandler(_ notification: Notification) async {
+        guard let song = notification.object as? (SongProtocol) else {
+            return
+        }
+        resolveArtwork(for: song.artworkImageURL(size: CGSize(width: 300, height: 300)))
+    }
+    
+    func resolveArtwork(for url: URL?) {
+        isLoading = true
+        Task {
+            let resolvedImage = await songResolver.resolveArtwork(for: url)
+            DispatchQueue.main.async { [weak self] in
+                self?.artworkImage = resolvedImage
+                self?.isLoading = false
             }
         }
     }

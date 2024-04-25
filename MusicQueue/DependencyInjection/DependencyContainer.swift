@@ -23,7 +23,7 @@ class DependencyContainer {
     static func resolve<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
         guard let service = shared.services[key] as? T else {
-            fatalError("No regisered service for type \(key)")
+            fatalError("No registered service for type \(key)")
         }
         return service
     }
@@ -34,15 +34,20 @@ extension DependencyContainer {
         register(service: notificationCenter, as: NotificationCenterProtocol.self)
     }
     
-    func registerSessionManager(sessionManager: SessionManagerProtocol) {
+    func registerSessionManager(_ sessionManager: SessionManagerProtocol) {
         register(service: sessionManager, as: SessionManagerProtocol.self)
     }
     
-    func registerAPIManager(_ apiManager: APIManagerProtocol = APIManager()) {
+    func registerAPIManager(_ apiManager: APIManagerProtocol) {
         register(service: apiManager, as: APIManagerProtocol.self)
     }
     
-    func registerLogger(_ logger: CustomLoggerProtocol = CustomLogger()) {
+    func registerMediaPlayer(_ mediaPlayer: MediaPlayerProtocol) {
+        register(service: mediaPlayer, as: MediaPlayerProtocol.self)
+    }
+    
+    func registerLogger(_ logger: CustomLoggerProtocol) {
         register(service: logger, as: CustomLoggerProtocol.self)
     }
+    
 }

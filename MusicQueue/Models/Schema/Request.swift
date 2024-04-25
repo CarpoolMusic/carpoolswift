@@ -6,7 +6,6 @@
 //
 
 protocol Request {
-    func flatten() -> [String: Any]
 }
 
 // MARK: - Requests
@@ -15,11 +14,8 @@ struct CreateSessionRequest: Request, Codable {
     let hostId: String
     let sessionName: String
     
-    func flatten() -> [String: Any] {
-         return [
-            "hostId": hostId,
-            "sessionName": sessionName
-         ]
+    enum CodingKeys: String, CodingKey {
+        case hostId, sessionName
     }
 }
 
@@ -27,33 +23,25 @@ struct JoinSessionRequest: Request, Codable {
     let sessionId: String
     let hostName: String
     
-    func flatten() -> [String: Any] {
-        return [
-            "sessionId": sessionId,
-            "hostName": hostName
-        ]
+    enum CodingKeys: String, CodingKey {
+        case sessionId, hostName
     }
 }
 
 struct LeaveSessionRequest: Request, Codable {
     let sessionId: String
     
-    func flatten() -> [String: Any] {
-        return [
-            "sessionId": sessionId
-        ]
+    enum CodingKeys: String, CodingKey {
+        case sessionId
     }
 }
 
 struct AddSongRequest: Request, Codable {
     let sessionId: String
-    let song: Song
+    let song: SocketSong
     
-    func flatten() -> [String: Any] {
-        return [
-            "sessionId": sessionId,
-            "song": song.flatten()
-        ]
+    enum CodingKeys: String, CodingKey {
+        case sessionId, song
     }
 }
 
@@ -61,11 +49,8 @@ struct RemoveSongRequest: Request, Codable {
     let sessionId: String
     let songId: String
     
-    func flatten() -> [String: Any] {
-        return [
-            "sessionId": sessionId,
-            "songId": songId
-        ]
+    enum CodingKeys: String, CodingKey {
+        case sessionId, songId
     }
 }
 
@@ -74,12 +59,8 @@ struct VoteSongRequest: Request, Codable {
     let songId: String
     let vote: Int
     
-    func flatten() -> [String: Any] {
-        return [
-            "sessionId": sessionId,
-            "songId": songId,
-            "vote": vote
-        ]
+    enum CodingKeys: String, CodingKey {
+        case sessionId, songId, vote
     }
 }
 

@@ -1,94 +1,68 @@
-// MARK: - CodeAI Output
-/**
- This code demonstrates a SearchManager class that conforms to the SearchManagerProtocol. It provides methods for searching songs and resolving a specific song.
- */
+import Combine
 
-import MusicKit
-import os
-
-/**
- A protocol that defines the required methods for a search manager.
- */
 protocol SearchManagerProtocol {
-    
-    /**
-     Searches for songs based on the given query.
-     
-     - Parameters:
-        - query: The search query.
-        - limit: The maximum number of results to return.
-        - completion: A closure that is called when the search is complete. It returns a Result object containing an array of AnyMusicItem objects or an error.
-     */
-    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void)
-    
-    /**
-     Resolves a specific song.
-     
-     - Parameters:
-        - song: The song to resolve.
-        - completion: A closure that is called when the resolution is complete. It returns a Result object containing an AnyMusicItem object or an error.
-     */
-    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void)
+    func initiateSearch(query: String, limit: Int)
 }
 
-/**
- A concrete implementation of the SearchManagerProtocol.
- */
-class SearchManager: SearchManagerProtocol {
-    @Injected private var logger: CustomLogger
-    private var _base: SearchManagerProtocol
-    private var searchTask: Task<(), Never>? = nil
-    let DEBOUNCE_TIME: UInt64 = 200_000_000 // 0.2 seconds
+protocol SearchManagerBaseProtocol {
+    func searchSongs(query: String, limit: Int) async throws -> [SongProtocol]
+}
+
+class SearchManager: ObservableObject, SearchManagerProtocol, SearchManagerBaseProtocol {
+    @Injected private var logger: CustomLoggerProtocol
+    private var base: SearchManagerBaseProtocol
     
-    /**
-     Initializes a new instance of the SearchManager class with a base implementation of the SearchManagerProtocol.
-     
-     - Parameter base: The base implementation of the SearchManagerProtocol to use as the underlying search manager.
-     */
-    init(_ base: SearchManagerProtocol) {
-        self._base = base
+    @Published var songs: [SongProtocol] = []
+    
+    // Subjects and Publishers
+    private var searchQueryPublisher = PassthroughSubject<(String, Int), Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    init(_ base: SearchManagerBaseProtocol) {
+        self.base = base
+        setupSearchPublisher()
     }
     
-    /**
-     Searches for songs based on the given query.
-     
-     - Parameters:
-        - query: The search query.
-        - limit: The maximum number of results to return.
-        - completion: A closure that is called when the search is complete. It returns a Result object containing an array of AnyMusicItem objects or an error.
-     */
-    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        searchTask?.cancel()
-        
-        // Debounce the search task to avoid excessive API calls
-        searchTask = Task {
+    private func setupSearchPublisher() {
+        // Debounce search queries
+        searchQueryPublisher
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
+            .removeDuplicates(by: { (lhs, rhs) -> Bool in
+                lhs.0 == rhs.0 && lhs.1 == rhs.1 // Avoid repeating the same query and limit
+            })
+            .sink { [weak self] query, limit in
+                self?.performSearch(query: query, limit: limit)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func performSearch(query: String, limit: Int) {
+        if query.isEmpty {
+            self.songs = []
+            return
+        }
+        Task {
             do {
-                try await Task.sleep(nanoseconds: DEBOUNCE_TIME)
-                guard !Task.isCancelled else {
-                    throw SearchError(message: "Task has been cancelled", stacktrace: Thread.callStackSymbols)
+                let results: [SongProtocol] = try await base.searchSongs(query: query, limit: limit)
+                DispatchQueue.main.async { [weak self] in
+                    self?.logger.debug("New results from search \(results)")
+                    self?.songs = results
                 }
-            } catch let error {
-                logger.error("Failed to search song with error \(error)")
+            } catch let error as CustomError {
+                logger.error(error)
+                
+            } catch {
+                logger.error("\(error)")
             }
         }
-        
-        // If the query is empty, return an empty result
-        if query.isEmpty {
-            return completion(.success([]))
-        }
-        
-        // Call the base implementation to perform the actual search
-        self._base.searchSongs(query: query, limit: limit, completion: completion)
     }
     
-    /**
-     Resolves a specific song.
-     
-     - Parameters:
-        - song: The song to resolve.
-        - completion: A closure that is called when the resolution is complete. It returns a Result object containing an AnyMusicItem object or an error.
-     */
-    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        self._base.resolveSong(song: song, completion: completion)
+    func initiateSearch(query: String, limit: Int) {
+        // Send queries to the search query publisher
+        searchQueryPublisher.send((query, limit))
+    }
+    
+    internal func searchSongs(query: String, limit: Int) async throws -> [SongProtocol] {
+        return try await base.searchSongs(query: query, limit: limit)
     }
 }
