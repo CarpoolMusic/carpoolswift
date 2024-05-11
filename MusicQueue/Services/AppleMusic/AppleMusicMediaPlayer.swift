@@ -8,77 +8,39 @@ class AppleMusicMediaPlayer: MediaPlayerBaseProtocol {
     @Injected private var logger: CustomLoggerProtocol
     
     private let player: ApplicationMusicPlayer
-    private var userQueue: SongQueue
     private var isPlaybackQueueSet = false
     private var queueUpdate: AnyCancellable?
     
-    init(queue: SongQueue) {
+    init() {
         player = ApplicationMusicPlayer.shared
-        userQueue = queue
     }
     
-    // MARK: - Playback controls
-    
-    /// Starts playing the current song in the queue.
-    func play() {
-        do {
-            guard let currentSong = userQueue.current else {
-                throw MediaPlayerError(message: "No current song in queue", stacktrace: Thread.callStackSymbols)
-            }
-            
-            if !isPlaybackQueueSet {
-                enqueue(song: currentSong)
-                NotificationCenter.default.post(name: .currentSongChangedNotification, object: currentSong)
-            }
-            
-            Task{
-                try await player.play()
-            }
-        } catch let error as MediaPlayerError  {
-            logger.error("\(error.toString())")
-        } catch {
-            logger.error("\(error.localizedDescription)")
+    func play(song: SongProtocol) {
+        Task {
+            enqueue(song: song)
+            try await player.play()
         }
     }
     
-    /// Resumes playback.
     func resume() {
         Task {
             try await player.play()
         }
     }
     
-    /// Pauses playback.
+    func restartCurrentEntry() {
+        player.restartCurrentEntry()
+    }
+    
     func pause() {
         player.pause()
     }
     
-    /// Skips to the next song in the queue.
-    func skipToNext() {
-        guard let nextSong = userQueue.next() else {
-            logger.error ("No next song in queue")
-            return
-        }
-        
-        do {
-            NotificationCenter.default.post(name: .currentSongChangedNotification, object: nextSong)
-            enqueue(song: nextSong)
-            play()
-        }
+    func seek(toTime: TimeInterval) {
+        // The player does not currently have any sort of seek to method. Disabling this until we find a solution.
+        //        player.seek(to: toTime)
     }
     
-    /// Skips to the previous song in the queue.
-    func skipToPrevious() {
-        guard let previousSong = userQueue.previous() else {
-            player.restartCurrentEntry()
-            return
-        }
-        
-        NotificationCenter.default.post(name: .currentSongChangedNotification, object: previousSong)
-        enqueue(song: previousSong)
-        
-        play()
-    }
     
     private func enqueue(song: SongProtocol) {
         guard let musicItem = song as? AppleSong else {
@@ -89,7 +51,6 @@ class AppleMusicMediaPlayer: MediaPlayerBaseProtocol {
         isPlaybackQueueSet = true
     }
     
-    /// Returns the current state of the player.
     func getPlayerState() -> PlayerState {
         switch player.state.playbackStatus {
         case .playing:

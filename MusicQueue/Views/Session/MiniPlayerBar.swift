@@ -2,21 +2,19 @@ import SwiftUI
 
 struct MiniPlayerBar: View {
     @Binding var showingNowPlaying: Bool
-
+    
+    @EnvironmentObject private var session: Session
+    
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "music.note")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 30, height: 30)
-                .clipped()
-                .cornerRadius(5)
+            ArtworkImageView(artworkURL: session.queue.currentSong?.artworkImageURL(size: CGSize(width: 30, height: 30)))
+            .frame(width: 30, height: 30)
                 .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.white, lineWidth: 1))
                 .shadow(radius: 2)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Song Name").bold().font(.footnote)
-                Text("Artist Name").font(.caption).foregroundColor(.secondary)
+                Text(session.queue.currentSong?.songTitle ?? "").bold().font(.footnote)
+                Text(session.queue.currentSong?.artist ?? "").font(.caption).foregroundColor(.secondary)
             }
 
             Spacer()
@@ -47,7 +45,9 @@ struct MiniPlayerBar: View {
 // Preview
 struct MiniPlayerBar_Previews: PreviewProvider {
     static var previews: some View {
+        let session = Session(sessionId: "", sessionName: "", hostName: "")
         MiniPlayerBar(showingNowPlaying: .constant(false))
+            .environmentObject(session)
             .previewLayout(.sizeThatFits)
     }
 }

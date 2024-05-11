@@ -24,7 +24,7 @@ struct SongSearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .onChange(of: searchQuery) { newValue in
-                            viewModel.searchManager.initiateSearch(query: newValue, limit: 10)
+                            viewModel.searchManager?.initiateSearch(query: newValue, limit: 10)
                         }
                 }
                 .padding(.all, 10)
@@ -57,8 +57,9 @@ class SongSearchViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var sessionManager: SessionManagerProtocol
     @Injected private var notificationCenter: NotificationCenterProtocol
+    @Injected private var userSettings: UserSettingsProtocol
     
-    var searchManager: SearchManager
+    var searchManager: SearchManager?
     
     @Published var songs: [SongProtocol] = []
     
@@ -67,9 +68,9 @@ class SongSearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        self.searchManager = (UserPreferences.getUserMusicService() == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
+        self.searchManager = (userSettings.musicServiceType == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
         
-        searchManager.$songs
+        searchManager?.$songs
             .receive(on: DispatchQueue.main)
             .assign(to: &$songs)
     }
@@ -77,7 +78,7 @@ class SongSearchViewModel: ObservableObject {
     
     @Published var query: String = "" {
         didSet {
-            searchManager.initiateSearch(query: query, limit: 20)
+            searchManager?.initiateSearch(query: query, limit: 20)
         }
     }
     

@@ -3,8 +3,12 @@ import MusicKit
 import Combine
 
 struct AlbumArtView: View {
-    var currentArtwork: UIImage
     @ObservedObject var viewModel = AlbumArtViewModel()
+    
+    @EnvironmentObject private var session: Session
+    
+    @State private var cancellables = Set<AnyCancellable>()
+    @State private var currentSong: (SongProtocol)?
 
     var body: some View {
         VStack {
@@ -16,26 +20,38 @@ struct AlbumArtView: View {
                     .cornerRadius(20)
                     .shadow(radius: 10)
                 
-                // Album artwork or placeholder
-                Image(uiImage: currentArtwork)
+                ArtworkImageView(artworkURL: currentSong?.artworkImageURL(size: CGSize(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight *  0.4)))
                     .frame(width: viewModel.screenWidth * 0.85, height: viewModel.screenHeight * 0.4)
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white, lineWidth: 4)
-                )
-                .shadow(radius: 10)
-                .animation(.easeInOut, value: viewModel.artworkImage)
-                .transition(.opacity)
+                    .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white, lineWidth: 4)
+                    )
+                    .shadow(radius: 10)
+                    .animation(.easeInOut, value: viewModel.artworkImage)
+                    .transition(.opacity)
             }
         }
+        .onAppear {
+            setupSubscriptions()
+        }
         .edgesIgnoringSafeArea(.all)
+    }
+    private func setupSubscriptions() {
+        session.queue.$currentSong
+            .receive(on: RunLoop.main)
+            .sink { newSong in
+                self.currentSong = newSong
+            }
+            .store(in: &cancellables)
     }
 }
 
 class AlbumArtViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var notificationCenter: NotificationCenterProtocol
+    
+    @Published var currentArtworkURL: URL?
     
     // Get screen dimenesions
     let screenWidth = UIScreen.main.bounds.width
@@ -75,10 +91,10 @@ class AlbumArtViewModel: ObservableObject {
     }
 }
 
-struct NowPlayingView_Previews: PreviewProvider {
-    static var previews: some View {
-        AlbumArtView(currentArtwork: UIImage(imageLiteralResourceName: ""))
-            .previewLayout(.sizeThatFits)
-            .padding()
-    }
-}
+//struct NowPlayingView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        AlbumArtView(currentSong: song)
+//            .previewLayout(.sizeThatFits)
+//            .padding()
+//    }
+//}

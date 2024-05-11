@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SessionView: View {
+    @EnvironmentObject private var activeSession: Session
+    
     @State private var selectedTab = 1
     @State private var showNowPlaying = false
     
@@ -21,7 +23,9 @@ struct SessionView: View {
             
             Spacer()
             
-            MiniPlayerBar(showingNowPlaying: $showNowPlaying)
+            if !activeSession.queue.isEmpty {
+                MiniPlayerBar(showingNowPlaying: $showNowPlaying)
+            }
         }
         .sheet(isPresented: $showNowPlaying) {
             NowPlayingView()

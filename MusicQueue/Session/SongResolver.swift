@@ -12,7 +12,7 @@ import MusicKit
 
 class SongResolver {
     @Injected private var logger: CustomLoggerProtocol
-    private let defaultArtwork = UIImage(named: "defaultArtwork")!
+    private let defaultArtwork = UIImage(named: "AlbumArtPlaceholder")!
     
     private let appleSearchManager = AppleMusicSearchManager()
     private let spotifySearchManager = SpotifySearchManager()

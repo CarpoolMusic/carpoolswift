@@ -34,6 +34,10 @@ extension DependencyContainer {
         register(service: notificationCenter, as: NotificationCenterProtocol.self)
     }
     
+    func registerUserSettings(_ userSettings: UserSettingsProtocol)  {
+        register(service: userSettings, as: UserSettingsProtocol.self)
+    }
+    
     func registerSessionManager(_ sessionManager: SessionManagerProtocol) {
         register(service: sessionManager, as: SessionManagerProtocol.self)
     }
@@ -44,6 +48,10 @@ extension DependencyContainer {
     
     func registerMediaPlayer(_ mediaPlayer: MediaPlayerProtocol) {
         register(service: mediaPlayer, as: MediaPlayerProtocol.self)
+    }
+    
+    func registerAppRemoteManager(_ appRemoteManager: SpotifyAppRemoteManagerProtocol) {
+        register(service: appRemoteManager, as: SpotifyAppRemoteManagerProtocol.self)
     }
     
     func registerLogger(_ logger: CustomLoggerProtocol) {

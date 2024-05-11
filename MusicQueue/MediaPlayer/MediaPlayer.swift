@@ -1,31 +1,3 @@
-// MARK: - CodeAI Output
-/**
- This code defines a MediaPlayer class that is responsible for controlling the playback of music. It uses the MusicKit framework and SwiftUI for the user interface.
-
- The PlayerState enum represents the possible states of the player: playing, paused, or undetermined.
-
- The MediaPlayerProtocol protocol defines the required methods and properties for a media player. It includes methods for playing, pausing, resuming, skipping to the next or previous track, and getting the current player state.
-
- The MediaPlayer class is an implementation of the MediaPlayerProtocol. It has a published property called currentEntry that represents the currently playing music item. It also has a private property called currentEntrySubscription that holds a subscription to receive updates on the current entry from the base media player.
-
- The init method of MediaPlayer takes a SongQueue parameter and initializes the base media player based on user preferences. It also sets up the currentEntrySubscription.
-
- The setupCurrentEntrySubscription method sets up a subscription to receive updates on the current entry from the base media player. When a new song is received, it updates the currentEntry property.
-
- The play method calls the play method of the base media player.
-
- The pause method calls the pause method of the base media player.
-
- The togglePlayPause method checks if the player is currently playing and calls either pause or play accordingly.
-
- The resume method calls the resume method of the base media player.
-
- The skipToNext method calls the skipToNext method of the base media player.
-
- The skipToPrevious method calls the skipToPrevious method of the base media player.
-
- The getPlayerState method returns th
-*/
 import SwiftUI
 import MusicKit
 import Combine
@@ -36,62 +8,157 @@ enum PlayerState {
     case undetermined
 }
 
+enum ScrubState {
+    case reset
+    case scrubStarted
+    case scrubEnded(TimeInterval)
+}
+
 protocol MediaPlayerBaseProtocol{
+    func play(song: SongProtocol)
+    func pause()
+    func resume()
+    func restartCurrentEntry()
+    func getPlayerState() -> PlayerState
+    func seek(toTime: TimeInterval)
+}
+
+protocol MediaPlayerProtocol {
+    var displayTime: Double { get set }
+    var scrubState: ScrubState { get set }
+    
     func play()
     func pause()
     func resume()
     func skipToNext()
     func skipToPrevious()
     func getPlayerState() -> PlayerState
-}
-
-protocol MediaPlayerProtocol: MediaPlayerBaseProtocol {
     func isPlaying() -> Bool
     func togglePlayPause()
 }
 
 
 class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
+    @Injected private var userSettings: UserSettingsProtocol
+    @Injected private var sessionManager: SessionManagerProtocol
     
-    @Published var currentEntry: (SongProtocol)?
+    @Published var playerState: PlayerState = .undetermined
+    @Published var displayTime: Double = 0
     
-    private var currentEntrySubscription: AnyCancellable?
     
     private var base: MediaPlayerBaseProtocol?
+    private var playbackSet: Bool = false
+    private var timer: Timer?
+    var scrubState: ScrubState = .reset {
+        didSet {
+            switch scrubState {
+            case .reset:
+                if isPlaying() {
+                    startTimer()
+                }
+                return
+            case .scrubStarted:
+                stopTimer()
+            case .scrubEnded(let seekTime):
+                seek(toTime: seekTime)
+                displayTime = seekTime
+                if isPlaying() {
+                    startTimer()
+                }
+            }
+        }
+    }
     
-    //MARK: - Music Controls
     
-    func initializeBase(base: MediaPlayerBaseProtocol) {
-        self.base = base
+    override init() {
+        super.init()
+        
+        base = (userSettings.musicServiceType == .apple) ? AppleMusicMediaPlayer() : SpotifyMediaPlayer()
+    }
+    
+    func seek(toTime: TimeInterval) {
+        base?.seek(toTime: toTime)
     }
     
     func play() {
-        base?.play()
+        if playbackSet {
+            base?.resume()
+        } else if let currentSong = sessionManager.getActiveSession()?.queue.currentSong {
+            base?.play(song: currentSong)
+        }
+        
+        playerState = getPlayerState()
+        startTimer()
     }
     
     func pause() {
         base?.pause()
+        stopTimer()
+        playerState = getPlayerState()
+    }
+    
+    func resume() {
+        base?.resume()
+    }
+    
+    func skipToNext() {
+        resetTimer()
+        if ((sessionManager.getActiveSession()?.queue.next()) != nil) {
+            self.play()
+        }
+    }
+    
+    func skipToPrevious() {
+        if displayTime > 3 {
+            restartCurrentEntry()
+            return
+        }
+        
+        resetTimer()
+        let _ = sessionManager.getActiveSession()?.queue.previous()
+        if isPlaying() {
+            self.play()
+            startTimer()
+        }
     }
     
     func togglePlayPause() {
         isPlaying() ? pause() : play()
     }
     
-    func resume() { base?.resume() }
-    
-    func skipToNext() {
-        base?.skipToNext()
+    func restartCurrentEntry() {
+        base?.restartCurrentEntry()
+        resetTimer()
+        if isPlaying() {
+            startTimer()
+        }
     }
     
-    func skipToPrevious() {
-        base?.skipToPrevious()
-   }
-
-   func getPlayerState() -> PlayerState {
-       return base?.getPlayerState() ?? .undetermined
-   }
-
-   func isPlaying() -> Bool {
-       return getPlayerState() == .playing
-   }
+    func getPlayerState() -> PlayerState {
+        return base?.getPlayerState() ?? PlayerState.undetermined
+    }
+    
+    func isPlaying() -> Bool {
+        return getPlayerState() == .playing
+    }
+    
+    private func startTimer() {
+        timer?.invalidate()  // Invalidate any existing timer
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self = self, self.isPlaying() else { return }
+            DispatchQueue.main.async {
+                self.displayTime += 1
+            }
+        }
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    private func resetTimer() {
+        stopTimer()
+        displayTime = 0
+    }
 }

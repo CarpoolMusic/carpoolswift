@@ -11,7 +11,6 @@ struct NowPlayingView: View {
     
     @State private var showingQueue: Bool = false
     
-    
     var body: some View {
         ZStack {
             VStack {
@@ -20,10 +19,10 @@ struct NowPlayingView: View {
                         .progressViewStyle(CircularProgressViewStyle())
                     
                 } else {
-                    AlbumArtView(currentArtwork: viewModel.artworkImage)
+                    AlbumArtView()
                 }
                 
-                AudioControlView(isHost: false)
+                AudioControlView(isHost: true)
             }
             .blur(radius: showingQueue ? 3 : 0)
             .disabled(showingQueue)
@@ -49,13 +48,11 @@ class NowPlayingViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
     
     @State var isLoading = false
-    @Published var artworkImage: UIImage
+    @Published var currentSong: SongProtocol?
     
-    private let defaultArtwork = UIImage(named: "defaultArtwork")!
     private var songResolver = SongResolver()
     
     init() {
-        self.artworkImage = defaultArtwork
         setupCurrentSongChangeSubscriber()
     }
     
@@ -68,18 +65,7 @@ class NowPlayingViewModel: ObservableObject {
         guard let song = notification.object as? (SongProtocol) else {
             return
         }
-        resolveArtwork(for: song.artworkImageURL(size: CGSize(width: 300, height: 300)))
-    }
-    
-    func resolveArtwork(for url: URL?) {
-        isLoading = true
-        Task {
-            let resolvedImage = await songResolver.resolveArtwork(for: url)
-            DispatchQueue.main.async { [weak self] in
-                self?.artworkImage = resolvedImage
-                self?.isLoading = false
-            }
-        }
+        self.currentSong = song
     }
 }
 

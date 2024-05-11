@@ -7,6 +7,7 @@ struct AuthorizationView: View {
     @Binding var isAuthenticated: Bool
     @ObservedObject var authorizationViewModel = AuthorizationViewModel()
     
+   
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -47,33 +48,39 @@ struct AuthorizationView: View {
     }
 }
 
-class AuthorizationViewModel: ObservableObject { // Added for completeness
+class AuthorizationViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
+    @Injected private var userSettings: UserSettingsProtocol
     
     @Published var isAuthenticated: Bool = false
+    @Published var musicServiceType: MusicServiceType = .unselected
     var sessionManager: SpotifySessionManager?
 
     func handleAppleButtonPressed() {
-        UserPreferences.setUserMusicService(type: .apple)
-
         AppleAuthenticationController().authenticate(authenticated: { result in
             DispatchQueue.main.async {
                 self.isAuthenticated = result
+                self.userSettings.musicServiceType = .apple
             }
         })
-        
         logger.debug("Authenticated with apple music.")
     }
 
     func handleSpotifyButtonPressed() {
+        @Injected var appRemoteManager: SpotifyAppRemoteManagerProtocol
         UserPreferences.setUserMusicService(type: .spotify)
 
         self.sessionManager = SpotifySessionManager()
         sessionManager?.initiateSession(authenticated: { authenticated in
             DispatchQueue.main.async {
                 self.isAuthenticated = authenticated
+                self.userSettings.musicServiceType = .spotify
             }
         })
+        
+        // Connecting here seems to avoid a second navigation away from the app. This isn't use until the media player but worth it to get connected early.
+        appRemoteManager.connect(with: "")
+        
         
         logger.debug("Authenticated with spotify music.")
     }

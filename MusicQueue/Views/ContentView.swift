@@ -7,9 +7,10 @@ import SwiftUI
 
 // ContentView is a SwiftUI view that displays either DashboardView or AuthorizationView based on authentication status.
 struct ContentView: View {
-    @State private var isAuthenticated: Bool = false
     @Injected private var logger: CustomLoggerProtocol
     
+    @State private var isAuthenticated: Bool = false
+
     var body: some View {
         if isAuthenticated {
             MainTabView()

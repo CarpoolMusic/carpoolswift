@@ -24,25 +24,26 @@ struct MainTabView: View {
                 }
                 .tag(Tab.home)
             
-            if isActiveSession {
-                    SessionView()
-                    .tabItem {
-                        Label("Session", systemImage: "music.note.list")
-                    }
-                    .tag(Tab.session)
-                } else {
-                    SessionMenu()
-                    .tabItem {
-                        Label("Session", systemImage: "music.note.list")
-                    }
-                    .tag(Tab.session)
-                }
-        
-            AccountView()
+            if isActiveSession, let session = sessionManager.getActiveSession() {
+                SessionView()
+                .environmentObject(session)
                 .tabItem {
-                    Label("Account", systemImage: "person.crop.circle")
+                    Label("Session", systemImage: "music.note.list")
                 }
-                .tag(Tab.account)
+                .tag(Tab.session)
+            } else {
+                SessionMenu()
+                .tabItem {
+                    Label("Session", systemImage: "music.note.list")
+                }
+                .tag(Tab.session)
+            }
+    
+        AccountView()
+            .tabItem {
+                Label("Account", systemImage: "person.crop.circle")
+            }
+            .tag(Tab.account)
         }
         .onReceive(sessionManager.sessionConnectivityPublisher.receive(on: RunLoop.main)) { isActive in
             DispatchQueue.main.async {

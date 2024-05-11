@@ -15,14 +15,7 @@ struct MusicCellView: View {
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading) {
-                Text(song.songTitle)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                Text(song.artist)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+            BaseMusicItemCell(song: song)
             Spacer()
         }
         .padding(.vertical, 8)
@@ -106,6 +99,7 @@ class QueueViewModel: ObservableObject {
             case .failure(let error):
                 self.logger.error(error.localizedDescription)
             case .success():
+                self.sessionManager.getActiveSession()?.queue.removeItem(id: songId)
                 self.logger.debug("Removed song \(songId)")
             }
         }
@@ -116,7 +110,7 @@ class QueueViewModel: ObservableObject {
             logger.error("Trying to get songs in queue with no active session.")
             return []
         }
-        return activeSession.getQueuedSongs()
+        return activeSession.queue.getQueueItems()
     }
 }
 

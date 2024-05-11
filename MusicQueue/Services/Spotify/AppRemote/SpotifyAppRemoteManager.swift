@@ -1,7 +1,15 @@
-/**
- This class manages the Spotify app remote functionality. It handles connecting to the Spotify app, authorizing and playing a song, and subscribing to player state updates.
- */
-class SpotifyAppRemoteManager: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelegate {
+import SpotifyiOS
+
+protocol SpotifyAppRemoteManagerProtocol {
+    var appRemote: SPTAppRemote { get }
+    var playerState: SPTAppRemotePlayerState? { get }
+    
+    func isConnected() -> Bool
+    func connect(with songUri: String) -> Void
+    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState)
+}
+
+class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelegate {
     
     // MARK: - Properties
     
@@ -41,12 +49,16 @@ class SpotifyAppRemoteManager: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlaye
         }
     }
     
+    func isConnected() -> Bool {
+        return appRemote.isConnected
+    }
+    
     // MARK: - SPTAppRemoteDelegate
     
     func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
         print("APP REMOTE Connection established")
         
-        connected = true
+        self.connected = true
         appRemote.playerAPI?.delegate = self
         appRemote.playerAPI?.subscribe(toPlayerState: { (success, error) in
             if let error = error {
@@ -57,12 +69,12 @@ class SpotifyAppRemoteManager: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlaye
     
     func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
         print("Connection attempt failed with error \(String(describing: error))")
-        connected = false
+        self.connected = false
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
         print("Session disconnected")
-        connected = false
+        self.connected = false
     }
     
     // MARK: - SPTAppRemotePlayerStateDelegate

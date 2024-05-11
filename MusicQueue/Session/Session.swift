@@ -1,8 +1,11 @@
-class Session {
+import SwiftUI
+
+class Session: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var notificationCenter: NotificationCenterProtocol
     
-    private var _queue: SongQueue = SongQueue()
+    @Published private(set) var queue: SongQueue = SongQueue()
+    
     private var _users: [User] = []
     private var _socketEventSender: SocketEventSender
     
@@ -18,11 +21,6 @@ class Session {
         self._socketEventSender = SocketEventSender(socket: Socket())
         
         subscribeToSessionEvents()
-    }
-    
-    var queue: SongQueue {
-        get { return _queue }
-        set { _queue = newValue }
     }
     
     var users: [User] {
@@ -50,12 +48,8 @@ class Session {
         _socketEventSender.removeSong(sessionId: sessionId, songID: songId, completion: completion)
     }
     
-    func getQueuedSongs() -> [SongProtocol] {
-        return _queue.getQueueItems()
-    }
-    
     func contains(songId: String) -> Bool {
-        return _queue.contains(songId: songId)
+        return queue.contains(songId: songId)
     }
 }
 
@@ -71,7 +65,7 @@ extension Session {
             return
         }
         
-        _queue.enqueue(newElement: song)
+        queue.enqueue(newElement: song)
     }
 }
 

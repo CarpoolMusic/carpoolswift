@@ -6,10 +6,10 @@ struct BaseMusicItemCell: View {
     private let title: String
     private let artist: String
     
-    init(song: SongProtocol) {
-        self.title = song.songTitle
-        self.artist = song.artist
-        self.artworkURL = song.artworkImageURL(size: CGSize(width: 300, height: 300))
+    init(song: SongProtocol?) {
+        self.title = song?.songTitle ?? ""
+        self.artist = song?.artist ?? ""
+        self.artworkURL = song?.artworkImageURL(size: CGSize(width: 300, height: 300))
     }
     
     var body: some View {
@@ -39,14 +39,22 @@ struct ArtworkImageView: View {
     let artworkURL: URL?
     
     var body: some View {
-        AsyncImage(url: artworkURL) { image in
-            image
-                .resizable() // This allows the image to be resized
-                .aspectRatio(contentMode: .fit) // This makes sure the image fits within the view bounds
-        } placeholder: {
-            ProgressView() // This will display a progress indicator while the image is loading
+        AsyncImage(url: artworkURL) { phase in
+            switch phase {
+            case .empty:
+                ProgressView()
+            case .success(let image):
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            case .failure:
+                Image("defaultAlbumArt")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            @unknown default:
+                EmptyView()
+            }
         }
-        .frame(width: 50, height: 50) // Set the frame of the image
-        .clipped() // This will clip off any parts of the image that do not fit in the frame
+        .clipped()
     }
 }

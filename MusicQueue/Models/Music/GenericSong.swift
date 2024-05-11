@@ -15,6 +15,7 @@ protocol SongProtocol {
     var songTitle: String { get }
     var artist: String { get }
     var albumTitle: String { get }
+    var duration: Double { get }
     var votes: Int { get }
     var artworkURL: String { get }
     var artworkImage: UIImage? {get set}
@@ -35,14 +36,15 @@ struct SocketSong: Codable {
     var albumTitle: String
     var votes: Int = 0
     var artworkURL: String
+    var duration: Double
     
     var artworkImage: UIImage?
     
     enum CodingKeys: String, CodingKey {
-        case id, appleId, spotifyId, uri, title, artist, album, votes, artworkURL
+        case id, appleId, spotifyId, uri, title, artist, album, votes, artworkURL, duration
     }
     
-    init(id: String, appleId: String, spotifyId: String, uri: String, songTitle: String, artist: String, albumTitle: String, votes: Int, artworkUrl: String) {
+    init(id: String, appleId: String, spotifyId: String, uri: String, songTitle: String, artist: String, albumTitle: String, votes: Int, artworkUrl: String, duration: Double) {
         self.id = id
         self.appleId = appleId
         self.spotifyId = spotifyId
@@ -52,6 +54,7 @@ struct SocketSong: Codable {
         self.albumTitle = albumTitle
         self.votes = votes
         self.artworkURL = artworkUrl
+        self.duration = duration
     }
     
     init(from decoder: Decoder) throws {
@@ -65,6 +68,7 @@ struct SocketSong: Codable {
         albumTitle = try container.decode(String.self, forKey: .album)
         votes = try container.decodeIfPresent(Int.self, forKey: .votes) ?? 0
         artworkURL = try container.decode(String.self, forKey: .artworkURL)
+        duration = try container.decode(Double.self, forKey: .duration)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -77,6 +81,7 @@ struct SocketSong: Codable {
         try container.encode(artist, forKey: .album)
         try container.encode(albumTitle, forKey: .album)
         try container.encode(votes, forKey: .votes)
+        try container.encode(duration, forKey: .duration)
     }
     
     func artworkImageURL(size: CGSize) -> URL? {
@@ -92,6 +97,7 @@ struct AppleSong: SongProtocol {
     let albumTitle: String
     var votes: Int
     let musicKitBase: MusicKit.Song
+    let duration: Double
     
     internal let artworkURL: String
     var artworkImage: UIImage?
@@ -109,6 +115,7 @@ struct AppleSong: SongProtocol {
         self.votes = 0
         self.artworkURL = song.artwork?.url(width: 300, height: 300)?.absoluteString ?? ""
         self.musicKitBase = song
+        self.duration = Double(song.duration ?? 0) * 1000
     }
     
     mutating func upvote() {
@@ -128,7 +135,7 @@ struct AppleSong: SongProtocol {
     }
     
     func toSocketSong() -> SocketSong {
-        return SocketSong(id: id, appleId: id, spotifyId: "", uri: uri, songTitle: songTitle, artist: artist, albumTitle: albumTitle, votes: votes, artworkUrl: artworkURL)
+        return SocketSong(id: id, appleId: id, spotifyId: "", uri: uri, songTitle: songTitle, artist: artist, albumTitle: albumTitle, votes: votes, artworkUrl: artworkURL, duration: duration)
     }
 }
 
@@ -138,12 +145,14 @@ struct SpotifyTrack: Decodable, SongProtocol {
     let songTitle: String
     let artist: String
     let albumTitle: String
+    let duration: Double
     var votes: Int = 0
     let artworkURL: String
     var artworkImage: UIImage?
     
     enum CodingKeys: String, CodingKey {
         case uri, id, name, artists, album
+        case duration = "duration_ms"
         case externalUrls = "external_urls"
         case previewUrl = "preview_url"
     }
@@ -165,6 +174,7 @@ struct SpotifyTrack: Decodable, SongProtocol {
         id = try container.decode(String.self, forKey: .id)
         uri = try container.decode(String.self, forKey: .uri)
         songTitle = try container.decode(String.self, forKey: .name)
+        duration = try container.decode(Double.self, forKey: .duration)
 
         var artistsArray = try container.nestedUnkeyedContainer(forKey: .artists)
         let firstArtistContainer = try artistsArray.nestedContainer(keyedBy: ArtistKeys.self)
@@ -192,7 +202,7 @@ struct SpotifyTrack: Decodable, SongProtocol {
     }
     
     func toSocketSong() -> SocketSong {
-        return SocketSong(id: id, appleId: "", spotifyId: id, uri: uri, songTitle: songTitle, artist: artist, albumTitle: albumTitle, votes: votes, artworkUrl: artworkURL)
+        return SocketSong(id: id, appleId: "", spotifyId: id, uri: uri, songTitle: songTitle, artist: artist, albumTitle: albumTitle, votes: votes, artworkUrl: artworkURL, duration: duration)
     }
     
     func artworkImageURL(size: CGSize) -> URL? {
