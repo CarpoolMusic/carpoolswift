@@ -10,12 +10,9 @@ import Combine
 import os
 
 struct SongSearchView: View {
-    @ObservedObject var songSearchViewModel: SongSearchViewModel
-
-    init(sessionManager: SessionManager) {
-        let viewModel = SongSearchViewModel(sessionManager: sessionManager)
-        self.songSearchViewModel = viewModel
-    }
+    @StateObject private var viewModel = SongSearchViewModel()
+    
+    @State private var searchQuery = ""
 
     var body: some View {
         NavigationView {
@@ -23,28 +20,32 @@ struct SongSearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
-                    TextField("Search songs", text: $songSearchViewModel.query)
+                    TextField("Search songs", text: $searchQuery)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .onChange(of: searchQuery) { newValue in
+                            viewModel.searchManager?.initiateSearch(query: newValue, limit: 10)
+                        }
                 }
                 .padding(.all, 10)
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .padding()
 
-                List(songSearchViewModel.songs) { song in
+                List(viewModel.songs, id: \.id) { song in
                     SearchMusicItemCell(
                         song: song,
                         songInQueue: Binding<Bool>(
-                            get: { songSearchViewModel.songInQueue(song) },
+                            get: { viewModel.songInQueue(song) },
                             set: { _ in }
                         ),
                         onAddToQueue: {
-                            songSearchViewModel.addSongToQueue(song)
-                        }
+                            viewModel.addSongToQueue(song)
+                        }, cellTapped: false
                     )
-                    .listRowBackground(songSearchViewModel.songInQueue(song) ? Color.green.opacity(0.1) : Color.clear)
+                    .listRowBackground(viewModel.songInQueue(song) ? Color.green.opacity(0.1) : Color.clear)
                 }
             }
-            .navigationTitle("Song Search")
         }
         .accentColor(.primary)
     }
@@ -53,50 +54,65 @@ struct SongSearchView: View {
 // MARK: - View Model
 
 class SongSearchViewModel: ObservableObject {
-    let logger = Logger()
+    @Injected private var logger: CustomLoggerProtocol
+    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var notificationCenter: NotificationCenterProtocol
+    @Injected private var userSettings: UserSettingsProtocol
     
-    let searchManager: SearchManager
+    var searchManager: SearchManager?
     
-    @Published var songs: [AnyMusicItem] = []
+    @Published var songs: [SongProtocol] = []
     
-    init(sessionManager: SessionManager) {
-        self.sessionManager = sessionManager
-        self.searchManager = (UserPreferences.getUserMusicService() == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
+    
+    let musicServiceType: String = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        self.searchManager = (userSettings.musicServiceType == .apple) ? SearchManager(AppleMusicSearchManager()): SearchManager(SpotifySearchManager())
+        
+        searchManager?.$songs
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$songs)
     }
     
     
     @Published var query: String = "" {
         didSet {
-            self.searchManager.searchSongs(query: query, limit: 20) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let songs):
-                        self?.songs = songs
-                    case .failure(let error):
-                        self?.logger.log(level: .error, "\(error.localizedDescription)")
-                        self?.songs = []
-                    }
-                }
-            }
+            searchManager?.initiateSearch(query: query, limit: 20)
         }
     }
     
-    let musicServiceType: String = UserDefaults.standard.string(forKey: "musicServiceType") ?? ""
-    let sessionManager: SessionManager
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    func songInQueue(_ song: AnyMusicItem) -> Bool {
-        sessionManager.getQueuedSongs().contains(where: { $0.id == song.id })
+    func songInQueue(_ song: SongProtocol) -> Bool {
+        guard let session = sessionManager.getActiveSession() else {
+            logger.error("Check for song but no active queue")
+            return false
+        }
+        return session.contains(songId: song.id)
     }
     
-    func addSongToQueue(_ song: AnyMusicItem) {
-        do {
-            if !songInQueue(song) {
-                try sessionManager.addSong(song: song)
+    func addSongToQueue(_ song: SongProtocol) {
+        guard let session = sessionManager.getActiveSession() else {
+            logger.error("Check for song but no active queue")
+            return
+        }
+        
+        if session.contains(songId: song.id) {
+            logger.debug("Song \(song.id) already in queue.")
+            return
+        }
+        
+        Task {
+            do {
+                let status = try await session.addSong(song: song)
+                if (status["status"] as? String == "success") {
+                    print("POSTING SONG ADDED")
+                    notificationCenter.post(name: .songAddedNotification, object: song)
+                } else {
+                    throw SongResolutionError(message: "Unable to add song to queue with error \(String(describing: status["message"]))")
+                }
+            } catch {
+                logger.error("Unable to add song with error \(error)")
             }
-        } catch {
-            logger.error("Error adding song")
         }
     }
 }
@@ -104,7 +120,6 @@ class SongSearchViewModel: ObservableObject {
 struct SongSearchView_Preview: PreviewProvider {
     
     static var previews: some View {
-        let sessionManager = SessionManager(sessionId: "", sessionName: "", hostName: "")
-        SongSearchView(sessionManager: sessionManager)
+        SongSearchView()
     }
 }

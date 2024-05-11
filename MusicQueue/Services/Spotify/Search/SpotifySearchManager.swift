@@ -3,32 +3,23 @@ import Foundation
 import UIKit
 import Kingfisher
 
-class SpotifySearchManager: SearchManagerProtocol {
-    let logger = Logger()
+class SpotifySearchManager: SearchManagerBaseProtocol {
+    @Injected private var logger: CustomLoggerProtocol
+    
     let spotifyAPIClient: SpotifyAPIClient
     
     init() {
         spotifyAPIClient = SpotifyAPIClient()
     }
     
-    // Function to search songs based on a query and limit
-    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        spotifyAPIClient.searchSongs(query: query, limit: limit, completion: completion)
+    func searchSongs(query: String, limit: Int) async throws -> [SongProtocol] {
+        logger.debug("Using query \(query)")
+        return try await spotifyAPIClient.searchSongs(query: query, limit: limit)
     }
     
-    // Function to resolve a specific song and its artwork
-    func resolveSong(song: Song, completion: @escaping (Result<AnyMusicItem, Error>) -> Void) {
-        var song = SpotifySong(song: song)
+    func resolveSong(song: SongProtocol) async throws -> SongProtocol? {
+        return try await spotifyAPIClient.resolveSong(song: song)
         
-        // Resolving the artwork for the song
-        resolveArtwork(artworkURL: song.artworkURL) { image in
-            guard let image = image else {
-                print("Unable to resolve artwork")
-                return
-            }
-            song.artworkImage = image
-            completion(.success(AnyMusicItem(song)))
-        }
     }
     
     // Private function to resolve the artwork for a given URL
@@ -36,17 +27,6 @@ class SpotifySearchManager: SearchManagerProtocol {
         guard let url = URL(string: artworkURL) else {
             completion(nil)
             return
-        }
-        
-        // Using Kingfisher library to retrieve the image from the URL
-        KingfisherManager.shared.retrieveImage(with: url) { result in
-            switch result {
-            case .success(let value):
-                completion(value.image)
-            case .failure(_):
-                print("Failed to resolve image")
-                completion(nil)
-            }
         }
     }
 }

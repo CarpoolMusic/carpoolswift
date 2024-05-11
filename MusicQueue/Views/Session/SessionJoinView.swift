@@ -40,19 +40,14 @@ struct SessionJoinView: View {
     func joinSession() {
         // Validate session ID
         // Join Session
-        do {
-            try self.sessionManager.joinSession(sessionId: sessionID, hostName: "current host name")
-            presentationMode.wrappedValue.dismiss()
-        } catch {
-            // Handle error
-            print("Error joining session")
-        }
+//        self.sessionManager.joinSession(sessionId: sessionID, hostName: "current host name")
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
 struct SessionJoinView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionJoinView(sessionManager: MockSessionManager(sessionId: "", sessionName: "", hostName: ""))
+        SessionJoinView(sessionManager: SessionManager())
     }
 }
 

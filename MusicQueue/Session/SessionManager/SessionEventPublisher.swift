@@ -19,7 +19,7 @@ class SessionEventPublisher {
     // Publishers
     let sessionCreated = PassthroughSubject<Bool, CustomError>()
     let sessionJoined = PassthroughSubject<[String], Never>()
-    let songAdded = PassthroughSubject<AnyMusicItem, CustomError>()
+    let songAdded = PassthroughSubject<SongProtocol, CustomError>()
     let songRemoved = PassthroughSubject<String, Never>()
     let songVoted = PassthroughSubject<(songId: String, vote: Int), Never>()
 }

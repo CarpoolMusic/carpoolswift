@@ -1,8 +1,13 @@
 import SwiftUI
+import Combine
 
 struct MainTabView: View {
-    @State private var activeSession: Bool = false
+    @Injected private var sessionManager: SessionManagerProtocol
+    
+    @State private var isActiveSession: Bool = false
     @State private var selection: Tab = .home
+    
+    private var cancellables = Set<AnyCancellable>()
     
     enum Tab {
         case home
@@ -10,7 +15,7 @@ struct MainTabView: View {
         case search
         case account
     }
-
+    
     var body: some View {
         TabView(selection: $selection) {
             HomeView()
@@ -19,25 +24,31 @@ struct MainTabView: View {
                 }
                 .tag(Tab.home)
             
-                if activeSession {
-                    SessionView()
-                    .tabItem {
-                        Label("Session", systemImage: "music.note.list")
-                    }
-                    .tag(Tab.session)
-                } else {
-                    SessionMenu()
-                    .tabItem {
-                        Label("Session", systemImage: "music.note.list")
-                    }
-                    .tag(Tab.session)
-                }
-        
-            AccountView()
+            if isActiveSession, let session = sessionManager.getActiveSession() {
+                SessionView()
+                .environmentObject(session)
                 .tabItem {
-                    Label("Account", systemImage: "person.crop.circle")
+                    Label("Session", systemImage: "music.note.list")
                 }
-                .tag(Tab.account)
+                .tag(Tab.session)
+            } else {
+                SessionMenu()
+                .tabItem {
+                    Label("Session", systemImage: "music.note.list")
+                }
+                .tag(Tab.session)
+            }
+    
+        AccountView()
+            .tabItem {
+                Label("Account", systemImage: "person.crop.circle")
+            }
+            .tag(Tab.account)
+        }
+        .onReceive(sessionManager.sessionConnectivityPublisher.receive(on: RunLoop.main)) { isActive in
+            DispatchQueue.main.async {
+                self.isActiveSession = isActive
+            }
         }
     }
 }

@@ -23,23 +23,9 @@ class DependencyContainer {
     static func resolve<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
         guard let service = shared.services[key] as? T else {
-            fatalError("No regisered service for type \(key)")
+            fatalError("No registered service for type \(key)")
         }
         return service
-    }
-    
-    func registerLazy<T>(_ protocolType: T.Type, factory: @escaping () -> T) {
-        let key = String(describing: protocolType)
-        services[key] = factory
-    }
-    
-    static func resolveLazy<T>(_ type: T.Type) -> T {
-        let key = String(describing: type)
-        if let factory = shared.services[key] as? () -> T {
-            return factory()
-        } else {
-            fatalError("No registered factory for type \(key)")
-        }
     }
 }
 
@@ -48,14 +34,28 @@ extension DependencyContainer {
         register(service: notificationCenter, as: NotificationCenterProtocol.self)
     }
     
-    func registerSessionManager(sessionId: String, sessionName: String, hostName: String) {
-        registerLazy(SessionManager.self) {
-            // This block is only executed when SessionManager is first resolved
-            return SessionManager(sessionId: sessionId, sessionName: sessionName, hostName: hostName)
-        }
+    func registerUserSettings(_ userSettings: UserSettingsProtocol)  {
+        register(service: userSettings, as: UserSettingsProtocol.self)
     }
     
-    func registerAPIManager(_ apiManager: APIManagerProtocol = APIManager()) {
+    func registerSessionManager(_ sessionManager: SessionManagerProtocol) {
+        register(service: sessionManager, as: SessionManagerProtocol.self)
+    }
+    
+    func registerAPIManager(_ apiManager: APIManagerProtocol) {
         register(service: apiManager, as: APIManagerProtocol.self)
     }
+    
+    func registerMediaPlayer(_ mediaPlayer: MediaPlayerProtocol) {
+        register(service: mediaPlayer, as: MediaPlayerProtocol.self)
+    }
+    
+    func registerAppRemoteManager(_ appRemoteManager: SpotifyAppRemoteManagerProtocol) {
+        register(service: appRemoteManager, as: SpotifyAppRemoteManagerProtocol.self)
+    }
+    
+    func registerLogger(_ logger: CustomLoggerProtocol) {
+        register(service: logger, as: CustomLoggerProtocol.self)
+    }
+    
 }

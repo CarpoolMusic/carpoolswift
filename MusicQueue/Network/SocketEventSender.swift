@@ -47,77 +47,55 @@ struct SocketEventSender: SocketEventSenderProtocol {
         self.socket = socket
     }
     
-    func connect() {
-        self.socket.connect()
+    func connect() async throws {
+        try await self.socket.connect()
+    }
+    
+    func isConnected() -> Bool {
+        return socket.isConnected()
     }
     
     func disconnect() {
         self.socket.disconnect()
     }
     
-    func checkConnection() throws {
-        guard socket.connected else {
-            ErrorToast.shared.showToast(message: "Cannot connect to server. Please check connection and reload.")
-            throw SocketError(message: "Socket is not connected", stacktrace: Thread.callStackSymbols)
-        }
-    }
     
-    func emitEvent(event: SocketSendEvent, jsonData: Data) throws {
-        try checkConnection()
+    func joinSession(sessionId: String, hostName: String) async throws -> [String: Any] {
+        let joinSessionRequest = JoinSessionRequest(sessionId: sessionId, hostName: hostName)
         
-        socket.emit(event: event.rawValue, with: [jsonData])
+        let jsonData = try JSONEncoder().encode(joinSessionRequest)
+        
+        let data = try await socket.emitWithAck(.joinSession, jsonData)
+        
+        return data
+    }
+
+    
+    func addSong(sessionId: String, song: SongProtocol) async throws -> [String: Any] {
+        let addSongRequest = AddSongRequest(sessionId: sessionId, song: song.toSocketSong())
+        
+        let jsonData = try JSONEncoder().encode(addSongRequest)
+        
+        let data = try await socket.emitWithAck(.addSong, jsonData)
+        
+        return data
     }
     
-    func createSession(hostName: String, sessionName: String) throws {
-//        let createSessionRequest = CreateSessionRequest(hostID: hostName, socketID: <#String#>, sessionName: sessionName)
+    func leaveSession(sessionId: String, completion: @escaping (Result<LeaveSessionResponse, Error>) -> Void) {
+//        let leaveSessionRequest = LeaveSessionRequest(sessionId: sessionId)
 //        
-//        let jsonData = try createSessionRequest.jsonData()
+//        emitEventWithAck(event: .leaveSession, jsonData: leaveSessionRequest.flatten(), completion: completion)
+    }
+    
+    func removeSong(sessionId: String, songID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+//        let removeSongRequest = RemoveSongRequest(sessionId: sessionId, songId: songID)
 //        
-//        try emitEvent(event: .createSession, jsonData: jsonData)
+//        emitEventWithAck(event: .removeSong, jsonData: removeSongRequest.flatten(), completion: completion)
     }
     
-    func joinSession(sessionId: String, hostName: String) throws {
-        let joinSessionRequest = JoinSessionRequest(sessionID: sessionId, userID: hostName)
-        
-        let jsonData = try joinSessionRequest.jsonData()
-        
-        try emitEvent(event: .joinSession, jsonData: jsonData)
-    }
-    
-    func addSong(sessionId: String, songItem: AnyMusicItem) throws {
-        let song = Song(id:songItem.id,
-                        appleID:songItem.appleID,
-                        spotifyID:songItem.spotifyID,
-                        uri:songItem.uri,
-                        title:songItem.title,
-                        artist:songItem.artist,
-                        album:songItem.album,
-                        artworkURL:songItem.artworkURL ?? "",
-                        votes:songItem.votes)
-        
-        let addSongRequest = AddSongRequest(sessionID: sessionId, song: song)
-        
-        let jsonData = try addSongRequest.jsonData()
-        
-        try emitEvent(event: .addSong, jsonData: jsonData)
-    }
-    
-    func leaveSession(sessionId: String) throws {
-    }
-    
-    func removeSong(sessionId: String, songID: String) throws {
-        let removeSongRequest = RemoveSongRequest(sessionID: sessionId, id: songID)
-        
-        let jsonData = try removeSongRequest.jsonData()
-        
-        try emitEvent(event: .removeSong, jsonData: jsonData)
-    }
-    
-    func voteSong(sessionId: String, songId: String, vote: Int) throws {
-        let voteSongRequest = VoteSongRequest(sessionID: sessionId, id: songId, vote: vote)
-        
-        let jsonData = try voteSongRequest.jsonData()
-        
-        try emitEvent(event:.voteSong, jsonData:jsonData)
+    func voteSong(sessionId: String, songId: String, vote: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
+//        let voteSongRequest = VoteSongRequest(sessionId: sessionId, songId: songId, vote: vote)
+//        
+//        emitEventWithAck(event: .voteSong, jsonData: voteSongRequest.flatten(), completion: completion)
     }
 }

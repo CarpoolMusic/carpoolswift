@@ -17,26 +17,26 @@ struct SessionCreationView: View {
     
     // temp
     @State private var hostName = "temp"
-
+    
     @State private var sessionName = ""
     @State private var sessionDescription = ""
     @State private var isPublic: Bool = true
     @State private var sessionPassword: String = ""
-
+    
     @State private var hostControl: Bool = true
     @State private var enableVoting: Bool = false
     @State private var directSongAddition: Bool = true
-
+    
     @State private var enableJoinLeaveNotifications: Bool = true
     @State private var enableSongChangeNotifications: Bool = true
-
+    
     var genres = ["Pop", "Rock", "Jazz", "Electronic", "Classical", "Hip Hop", "Country"]
     @State private var selectedGenre: String = "Pop"
-
+    
     init() {
         self.sessionCreationViewModel = SessionCreationViewModel()
     }
-
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -44,7 +44,7 @@ struct SessionCreationView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.bottom, 20)
-
+                
                 Form {
                     Section(header: Text("Session Details")) {
                         TextField("Session Name", text: $sessionName)
@@ -55,20 +55,20 @@ struct SessionCreationView: View {
                             }
                         }
                     }
-
+                    
                     Section(header: Text("Privacy Settings")) {
                         Toggle("Public Session", isOn: $isPublic)
                         if !isPublic {
                             SecureField("Session Password", text: $sessionPassword)
                         }
                     }
-
+                    
                     Section(header: Text("Playback Control")) {
                         Toggle("Host Controls Playback", isOn: $hostControl)
                         Toggle("Enable Voting System", isOn: $enableVoting)
                         Toggle("Allow Direct Song Addition", isOn: $directSongAddition)
                     }
-
+                    
                     Section(header: Text("Notifications")) {
                         Toggle("Join/Leave Notifications", isOn: $enableJoinLeaveNotifications)
                         Toggle("Song Change Notifications", isOn: $enableSongChangeNotifications)
@@ -76,28 +76,34 @@ struct SessionCreationView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, -10) // Adjust based on your Form's visual needs
-
-                Button(action: {
-                    sessionCreationViewModel.handleCreateSessionButtonPressed(
-                        sessionName: sessionName,
-                        hostName: hostName)
-                }) {
-                    Text("Create Session")
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .font(.headline)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing))
-                        .opacity(sessionName.isEmpty ? 0.5 : 1)
-                        .cornerRadius(40)
-                        .padding(.horizontal)
+                
+                if sessionCreationViewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(1.5)
+                } else {
+                    Button(action: {
+                        sessionCreationViewModel.handleCreateSessionButtonPressed(
+                            sessionName: sessionName,
+                            hostName: hostName)
+                    }) {
+                        Text("Create Session")
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                            .font(.headline)
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing))
+                            .opacity(sessionName.isEmpty ? 0.5 : 1)
+                            .cornerRadius(40)
+                            .padding(.horizontal)
+                    }
+                    .disabled(sessionName.isEmpty)
+                    
+                    Spacer()
                 }
-                .disabled(sessionName.isEmpty)
-
-                Spacer()
             }
             .padding()
-            .onChange(of: sessionCreationViewModel.activeSession) { sessionCreated in
+            .onChange(of: sessionCreationViewModel.isConnected) { sessionCreated in
                 if sessionCreated {
                     self.presentationMode.wrappedValue.dismiss()
                 }
@@ -109,12 +115,13 @@ struct SessionCreationView: View {
 // A view model for session creation
 class SessionCreationViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
-    
-    @Published var activeSession = false
+    @Injected private var logger: CustomLoggerProtocol
+    @Injected private var sessionManager: SessionManagerProtocol
     
     private var cancellables = Set<AnyCancellable>()
     
-    var sessionManager: SessionManager? // The session manager
+    @Published var isLoading = false
+    @Published var isConnected: Bool = false
     
     private var sessionName: String = ""
     private var hostName: String = ""
@@ -125,13 +132,26 @@ class SessionCreationViewModel: ObservableObject {
     
     // Handle the create session button pressed event
     func handleCreateSessionButtonPressed(sessionName: String, hostName: String) {
+        self.isLoading = true
+        
         self.sessionName = sessionName
         self.hostName = hostName
-        do {
-            DependencyContainer.shared.registerSessionManager(sessionId: "", sessionName: sessionName, hostName: hostName)
-            try self.sessionManager?.createSession(hostId: hostName, sessionName: sessionName)
-        } catch {
-            print("Error creating session")
+        Task {
+            DispatchQueue.main.async {
+                self.isLoading = true
+            }
+            
+            do {
+                let session = try await sessionManager.createSession(hostId: hostName, sessionName: sessionName)
+                try await sessionManager.joinSession(sessionId: session.sessionId, hostName: hostName)
+            } catch let error as CustomError {
+                logger.error(error)
+            }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.isConnected = true
+            }
         }
     }
 }

@@ -10,11 +10,7 @@ class UserPreferences {
     private static let musicServiceTypeKey = "musicServiceType"
     
     static func getUserMusicService() -> MusicServiceType {
-        if let stringValue = userDefaults.string(forKey: musicServiceTypeKey),
-           let rawValue = MusicServiceType(rawValue: stringValue) {
-            return rawValue
-        }
-        return .unselected
+        return userDefaults.object(forKey: musicServiceTypeKey) as? MusicServiceType ?? .unselected
     }
     
     static func setUserMusicService(type: MusicServiceType) {

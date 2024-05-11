@@ -7,24 +7,29 @@ import SwiftUI
 import Combine
 
 struct NowPlayingView: View {
+    @ObservedObject private var viewModel = NowPlayingViewModel()
     
-    @EnvironmentObject private var sessionManager: SessionManager
     @State private var showingQueue: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                AlbumArtView()
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    
+                } else {
+                    AlbumArtView()
+                }
                 
-                AudioControlView(isHost: sessionManager.isHost)
-                    .environmentObject(MediaPlayer(queue: sessionManager.queue))
+                AudioControlView(isHost: true)
             }
             .blur(radius: showingQueue ? 3 : 0)
             .disabled(showingQueue)
             .padding()
         
             if showingQueue {
-                SessionQueueView(sessionManager: sessionManager)
+                SessionQueueView()
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }
@@ -39,11 +44,36 @@ struct NowPlayingView: View {
     }
 }
 
+class NowPlayingViewModel: ObservableObject {
+    @Injected private var notificationCenter: NotificationCenterProtocol
+    
+    @State var isLoading = false
+    @Published var currentSong: SongProtocol?
+    
+    private var songResolver = SongResolver()
+    
+    init() {
+        setupCurrentSongChangeSubscriber()
+    }
+    
+    
+    private func setupCurrentSongChangeSubscriber() {
+        notificationCenter.addObserver(self, selector: #selector(currentSongChangedHandler(_:)), name: .currentSongChangedNotification, object: nil)
+    }
+    
+    @objc private func currentSongChangedHandler(_ notification: Notification) async {
+        guard let song = notification.object as? (SongProtocol) else {
+            return
+        }
+        self.currentSong = song
+    }
+}
+
 // MARK: - NowPlayingView Preview
 
 struct SessionView_Previews: PreviewProvider {
     static var previews: some View {
         NowPlayingView()
-            .environmentObject(SessionManager(sessionId: "", sessionName: "", hostName: "")) // If you use environment objects
+            .environmentObject(SessionManager()) // If you use environment objects
     }
 }

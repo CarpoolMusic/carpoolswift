@@ -6,11 +6,10 @@
 //
 
 import SocketIO
-import os
 
 class SocketEventReceiver {
     @Injected private var notificationCenter: NotificationCenterProtocol
-    private var logger = Logger()
+    @Injected private var logger: CustomLoggerProtocol
     
     private var socket: SocketIOClient
     
@@ -27,7 +26,7 @@ class SocketEventReceiver {
         case "userJoined":
             handleUserJoinedEvent(items: items)
         case "songAdded":
-            notificationCenter.post(name: .songAddedNotification, object: items)
+            handleSongAddedEvent(items: items)
         case "songRemoved":
             notificationCenter.post(name: .songRemovedNotification, object: items)
         case "songVoted":
@@ -92,29 +91,18 @@ class SocketEventReceiver {
     }
     
     func handleSongAddedEvent(items: [Any]) {
-        guard let firstItem = items.first as? [String: Any] else {
-            let error = SerializationError(message: "Unable to deserialize response")
+        guard let firstItem = items.first, let jsonData = try? JSONSerialization.data(withJSONObject: firstItem) else {
+            let error = SerializationError(message: "Failed to deserialize items")
             postError(causedBy: .songAddedNotification, error)
             return
         }
-
+        
         do {
-            let song = try buildMusicItem(songItems: firstItem)
-            resolveSong(song) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let resolvedSong):
-                        self?.postResponse(from: .songAddedNotification, resolvedSong)
-                        self?.postResponse(from: .queueUpdatedNotification)
-                    case .failure(let error):
-                        self?.postError(causedBy: .songAddedNotification, error as! CustomError)
-                    }
-                }
-            }
-        } catch let error as CustomError {
-            postError(causedBy: .songAddedNotification, error)
+            let song = try JSONDecoder().decode(SocketSong.self, from: jsonData)
+            postResponse(from: .songAddedNotification, song)
         } catch {
-            logger.fault("Unkown error")
+            let error = SerializationError(message: "Could not decode song \(jsonData)")
+            postError(causedBy: .songAddedNotification, error)
         }
     }
     
@@ -155,64 +143,28 @@ class SocketEventReceiver {
         }
     }
     
-    
-    // MARK: - Helper functions
-    private func resolveSong(_ song: Song, completion: @escaping (Result<AnyMusicItem, any Error>) -> Void) {
-        let searchManager = UserPreferences.getUserMusicService() == .apple ? SearchManager(AppleMusicSearchManager()) : SearchManager(SpotifySearchManager())
-
-        searchManager.resolveSong(song: song) { result in
-            completion(result)
-        }
-    }
-    
-    private func buildMusicItem(songItems: [String: Any]) throws -> Song {
-        guard let songJson = songItems["song"] as? [String: Any] else {
-            throw SongConversionError(message: "Unable to get songJson for items \(songItems)", stacktrace: Thread.callStackSymbols)
-        }
-        
-        guard let id = songJson["id"] as? String,
-              let appleID = songJson["appleID"] as? String,
-              let spotifyID = songJson["spotifyID"] as? String,
-              let uri = songJson["uri"] as? String,
-              let title = songJson["title"] as? String,
-              let album = songJson["album"] as? String,
-              let artist = songJson["artist"] as? String,
-              let artworkURL = songJson["artworkUrl"] as? String,
-              let votes = songJson["votes"] as? Int else {
-            
-            throw SongConversionError(message: "Unable to convert song JSON to song for JSON \(songJson)", stacktrace: Thread.callStackSymbols)
-        }
-        
-        return Song(id: id, appleID: appleID, spotifyID: spotifyID, uri: uri, title: title, artist: album, album: artist, artworkURL: artworkURL, votes: votes)
-    }
-    
     private func postResponse(from notificationName: Notification.Name) {
         notificationCenter.post(name: notificationName, object: nil)
-        logger.debug("Posted notificaiton ")
         logger.debug("Posted notificaiton ")
     }
     
     private func postResponse(from notificationName: Notification.Name, _ response: String) {
         notificationCenter.post(name: notificationName, object: response)
         logger.debug("Posted notificaiton ")
-        logger.debug("Posted notificaiton ")
     }
     
     private func postResponse(from notificationName: Notification.Name, _ response: [String]) {
         notificationCenter.post(name: notificationName, object: response)
         logger.debug("Posted notificaiton ")
-        logger.debug("Posted notificaiton ")
     }
     
-    private func postResponse(from notificationName: Notification.Name, _ response: AnyMusicItem) {
+    private func postResponse(from notificationName: Notification.Name, _ response: SocketSong) {
         notificationCenter.post(name: notificationName, object: response)
-        logger.debug("Posted notificaiton ")
         logger.debug("Posted notificaiton ")
     }
     
     private func postResponse(from notificationName: Notification.Name, _ response: (String, Int)) {
         notificationCenter.post(name: notificationName, object: response)
-        logger.debug("Posted notificaiton ")
         logger.debug("Posted notificaiton ")
     }
     

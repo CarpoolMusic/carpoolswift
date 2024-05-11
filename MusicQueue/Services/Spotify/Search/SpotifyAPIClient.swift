@@ -1,118 +1,94 @@
 // MARK: - CodeAI Output
-/**
- This code is a Swift implementation of a Spotify API client. It provides functionality to search for songs using the Spotify API.
- 
- The code is organized into the following sections:
- - `SpotifyAPIClient` struct: Represents the Spotify API client and contains methods for searching songs.
- - `makeUrl(limit:query:)` private function: Constructs the URL for the search request based on the provided limit and query parameters.
- - `searchSongs(query:limit:completion:)` function: Performs a search request to the Spotify API using the constructed URL and returns the search results as an array of `AnyMusicItem` objects.
- 
- The code also uses a `Logger` class to log messages at different levels (debug, error, fault).
- */
 
 import Foundation
 import os
 
 // MARK: - CodeAI Output
 
-struct SpotifyAPIClient {
-    let logger = Logger()
+class SpotifyAPIClient {
+    @Injected private var logger: CustomLoggerProtocol
+    
     let baseURL = "https://api.spotify.com/v1"
     let accessToken: String
     
-    /**
-     Initializes a new instance of `SpotifyAPIClient`.
-     
-     The access token is fetched from the Keychain using `TokenVault.getTokenFromKeychain()`. If no access token is found, an error message is logged.
-     */
     init() {
         self.accessToken = TokenVault.getTokenFromKeychain() ?? ""
+        
         if self.accessToken.isEmpty {
-            logger.log(level: .error, "Unable to fetch access token")
+            let error = APIError(message: "Unable to fetch access token")
+            logger.error(error)
         } else {
-            logger.log(level: .debug, "Token fetched")
+            logger.debug("Token fetched")
         }
     }
     
-    /**
-     Constructs the URL for the search request based on the provided limit and query parameters.
-     
-     - Parameters:
-        - limit: The maximum number of results to return.
-        - query: The search query string.
-     
-     - Returns: The constructed URL as a string.
-     */
-    private func makeUrl(limit: Int, query: String) -> String {
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        return "\(baseURL)/search?type=track&limit=\(limit)&q=\(encodedQuery)"
-    }
-    
-    /**
-     Performs a search request to the Spotify API using the constructed URL and returns the search results as an array of `AnyMusicItem` objects.
-     
-     - Parameters:
-        - query: The search query string.
-        - limit: The maximum number of results to return.
-        - completion: A closure to be called with the search results or an error.
-     */
-    func searchSongs(query: String, limit: Int, completion: @escaping (Result<[AnyMusicItem], Error>) -> Void) {
-        let url = makeUrl(limit: limit, query: query)
-        
-        guard let requestUrl = URL(string: url) else {
-            let searchError = SearchError(message: "Invalid URL", stacktrace: Thread.callStackSymbols)
-            logger.log(level: .error, "\(searchError.toString())")
-            completion(.failure(searchError))
-            return
+    func sendRequest<T: Decodable>(endpoint: String, method: String, parameters: [String: Any]? = nil) async throws -> T {
+        guard var urlComponents = URLComponents(string: "\(baseURL)/\(endpoint)") else {
+            throw APIError(message: "Invalid URL")
         }
         
-        var request = URLRequest(url: requestUrl)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        if method == "GET" {
+            if let parameters = parameters {
+                urlComponents.queryItems = parameters.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
+            }
+        }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                let searchError = SearchError(message: error.localizedDescription, stacktrace: Thread.callStackSymbols)
-                self.logger.log(level: .error, "\(searchError.toString())")
-                completion(.failure(searchError))
-                return
-            }
-            
-            guard let data = data else {
-                let searchError = SearchError(message: "Data in response is empty.", stacktrace: Thread.callStackSymbols)
-                self.logger.log(level: .error, "\(searchError.toString())")
-                completion(.failure(searchError))
-                return
-            }
-            
-            do {
-                guard let jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                    throw SerializationError(message: "Unable to serialize JSON from response data \(data)", stacktrace: Thread.callStackSymbols)
-                }
-                
-                guard let tracksDict = jsonDict["tracks"] as? [String: Any] else {
-                    throw UnknownResponseError(message: "Unexpected data in response \(jsonDict)", stacktrace: Thread.callStackSymbols)
-                }
-                
-                guard let items = tracksDict["items"] as? [[String: Any]] else {
-                    throw UnknownResponseError(message: "Unexpected items in data \(jsonDict)", stacktrace: Thread.callStackSymbols)
-                }
-                
-                let tracks = try items.compactMap { item in
-                    guard let song = SpotifySong(dictionary: item) else {
-                        throw SongConversionError(message: "Unable to convert to SpotifySong for item", stacktrace: Thread.callStackSymbols)
-                    }
-                    return AnyMusicItem(song)
-                }
-                
-                completion(.success(tracks))
-            } catch let error as CustomError {
-                self.logger.log(level: .error, "\(error.toString())")
-                completion(.failure(error))
-            } catch {
-                self.logger.log(level: .fault, "Unhandled error \(error.localizedDescription)")
-                fatalError(error.localizedDescription)
-            }
-        }.resume()
+        guard let url = urlComponents.url else {
+            throw APIError(message: "Invalid URL")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
+        if method != "GET", let parameters = parameters {
+            let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
+            request.httpBody = jsonData
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError(message: "Invalid response \(response)")
+        }
+        
+        if !((200...299).contains(httpResponse.statusCode)) {
+            throw APIError(message: "Error response with error code \(httpResponse.statusCode), response \(httpResponse) using request \(request)")
+        }
+        
+        let decoder = JSONDecoder()
+        let decodedData = try decoder.decode(T.self, from: data)
+        return decodedData
     }
+    
+    
+    func searchSongs(query: String, limit: Int) async throws -> [SongProtocol] {
+        let parameters: [String: Any] = [
+            "q": query,
+            "type": "track",
+            "limit": limit
+        ]
+        
+        let searchResponse: SpotifySearchResponse = try await sendRequest(endpoint: "search", method: "GET", parameters: parameters)
+        
+        return searchResponse.tracks.items
+    }
+    
+    func resolveSong(song: SongProtocol) async throws -> SongProtocol? {
+        let query = createSearchQuery(from: song)
+        return try await searchSongs(query: query, limit: 1).first
+    }
+    
+    private func createSearchQuery(from song: SongProtocol) -> String {
+        var queryItems = [String]()
+
+        queryItems.append("track:\(song.songTitle)")
+        queryItems.append("artist:\(song.artist)")
+        queryItems.append("album:\(song.albumTitle)")
+
+        let query = queryItems.joined(separator: " ")
+        return query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+    }
+
 }

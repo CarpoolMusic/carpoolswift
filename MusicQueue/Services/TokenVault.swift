@@ -13,8 +13,8 @@ class TokenVault {
      */
     static func upsertTokenToKeychain(token: String) -> Void {
         let data = Data(token.utf8)
-        let service = "YourServiceIdentifier"
-        let account = "YourAccountIdentifier"
+        let service = "test"
+        let account = "test"
         
         // Define the query parameters for updating or adding an item to the keychain
         let query: [String: Any] = [
@@ -43,9 +43,14 @@ class TokenVault {
      The retrieved token from the keychain, or nil if no token is found.
      */
     static func getTokenFromKeychain() -> String? {
+        let service = "test"
+        let account = "test"
+        
         // Define the query parameters for retrieving an item from the keychain
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
             kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]

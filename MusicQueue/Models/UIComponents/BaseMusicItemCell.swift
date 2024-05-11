@@ -2,21 +2,19 @@ import SwiftUI
 import MusicKit
 
 struct BaseMusicItemCell: View {
-    private let artwork: Artwork?
-    private let artworkURL: String?
+    private let artworkURL: URL?
     private let title: String
     private let artist: String
     
-    init(song: AnyMusicItem) {
-        self.title = song.title
-        self.artist = song.artist
-        self.artwork = song.artwork
-        self.artworkURL = song.artworkURL
+    init(song: SongProtocol?) {
+        self.title = song?.songTitle ?? ""
+        self.artist = song?.artist ?? ""
+        self.artworkURL = song?.artworkImageURL(size: CGSize(width: 300, height: 300))
     }
     
     var body: some View {
         HStack {
-            ArtworkImageView(artwork: artwork, artworkURL: artworkURL)
+            ArtworkImageView(artworkURL: artworkURL)
                 .frame(width: 50, height: 50)
                 .cornerRadius(8)
                 .padding(.trailing, 8)
@@ -38,35 +36,25 @@ struct BaseMusicItemCell: View {
 }
 
 struct ArtworkImageView: View {
-    let artwork: Artwork?
-    let artworkURL: String?
+    let artworkURL: URL?
     
     var body: some View {
-        Group {
-            if let artwork = artwork {
-                // Assuming ArtworkImage is a provided view capable of displaying MusicKit.Artwork
-                ArtworkImage(artwork, width: 50, height: 50)
-            } else if let urlString = artworkURL, let url = URL(string: urlString) {
-                // For loading and displaying an image from a URL
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable()
-                    case .failure(_):
-                        Image(systemName: "music.note")
-                            .resizable()
-                    default:
-                        ProgressView()
-                    }
-                }
-            } else {
-                // Fallback placeholder image
-                Image(systemName: "music.note")
+        AsyncImage(url: artworkURL) { phase in
+            switch phase {
+            case .empty:
+                ProgressView()
+            case .success(let image):
+                image
                     .resizable()
+                    .aspectRatio(contentMode: .fit)
+            case .failure:
+                Image("defaultAlbumArt")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            @unknown default:
+                EmptyView()
             }
         }
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 50, height: 50)
         .clipped()
     }
 }
