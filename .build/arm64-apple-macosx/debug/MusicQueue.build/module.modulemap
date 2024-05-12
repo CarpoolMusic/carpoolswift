@@ -1,4 +1,0 @@
-module MusicQueue {
-    header "/Users/nolb/carpool/carpoolswift/.build/arm64-apple-macosx/debug/MusicQueue.build/MusicQueue-Swift.h"
-    requires objc
-}

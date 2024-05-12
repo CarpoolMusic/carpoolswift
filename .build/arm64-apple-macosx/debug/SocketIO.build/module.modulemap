@@ -1,4 +1,0 @@
-module SocketIO {
-    header "/Users/nolb/carpool/carpoolswift/.build/arm64-apple-macosx/debug/SocketIO.build/SocketIO-Swift.h"
-    requires objc
-}
