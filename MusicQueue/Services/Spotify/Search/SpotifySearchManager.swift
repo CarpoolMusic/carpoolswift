@@ -1,7 +1,5 @@
 import os
 import Foundation
-import UIKit
-import Kingfisher
 
 class SpotifySearchManager: SearchManagerBaseProtocol {
     @Injected private var logger: CustomLoggerProtocol

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		601C5F0C2BD5AC57002A7D46 /* SongResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601C5F0B2BD5AC57002A7D46 /* SongResolver.swift */; };
 		604728C32B5CB0A6009873AD /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604728C22B5CB0A6009873AD /* Error.swift */; };
-		604D0D332B7846050029B57D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 604D0D322B7846050029B57D /* Kingfisher */; };
 		60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */; };
 		60551F2E2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2D2A87EF3E002AA8F9 /* SpotifyAppRemoteManager.swift */; };
 		60576CB42AB527C6005D6E15 /* SpotifyMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60576CB32AB527C6005D6E15 /* SpotifyMediaPlayer.swift */; };
@@ -33,10 +32,8 @@
 		605E8A462BB4E29600676B5D /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605E8A452BB4E29600676B5D /* APIManager.swift */; };
 		606C70C02BD0BA7100462CF2 /* Media.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606C70BF2BD0BA7100462CF2 /* Media.swift */; };
 		606C70C22BD34B0000462CF2 /* TestSpotifyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606C70C12BD34B0000462CF2 /* TestSpotifyAPIClient.swift */; };
-		606C70C52BD3652600462CF2 /* CallStackSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = 606C70C42BD3652600462CF2 /* CallStackSymbols */; };
 		6070A5A82BDD9EDF00A96894 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6070A5A72BDD9EDF00A96894 /* UserSettings.swift */; };
 		607168672AB7BA6700485AD4 /* GenericSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168662AB7BA6700485AD4 /* GenericSong.swift */; };
-		607168702AC221B600485AD4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6071686F2AC221B600485AD4 /* Alamofire */; };
 		607168722AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */; };
 		607168742AC238AF00485AD4 /* AppleAuthenticationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168732AC238AF00485AD4 /* AppleAuthenticationController.swift */; };
 		607168762ACB9C8900485AD4 /* TokenVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168752ACB9C8900485AD4 /* TokenVault.swift */; };
@@ -196,11 +193,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				60BA77D02A63278000A5516B /* KeychainSwift in Frameworks */,
-				607168702AC221B600485AD4 /* Alamofire in Frameworks */,
 				60BA77A42A5E351000A5516B /* SocketIO in Frameworks */,
 				60BA77B92A61EE9E00A5516B /* SpotifyiOS in Frameworks */,
-				604D0D332B7846050029B57D /* Kingfisher in Frameworks */,
-				606C70C52BD3652600462CF2 /* CallStackSymbols in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -599,9 +593,6 @@
 				60BA77A32A5E351000A5516B /* SocketIO */,
 				60BA77B82A61EE9E00A5516B /* SpotifyiOS */,
 				60BA77CF2A63278000A5516B /* KeychainSwift */,
-				6071686F2AC221B600485AD4 /* Alamofire */,
-				604D0D322B7846050029B57D /* Kingfisher */,
-				606C70C42BD3652600462CF2 /* CallStackSymbols */,
 			);
 			productName = MusicQueue;
 			productReference = 60BA775F2A55E2A400A5516B /* MusicQueue.app */;
@@ -680,9 +671,6 @@
 				60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */,
 				60BA77B72A61EE9E00A5516B /* XCRemoteSwiftPackageReference "ios-sdk" */,
 				60BA77CE2A63278000A5516B /* XCRemoteSwiftPackageReference "keychain-swift" */,
-				6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				606C70C32BD3652600462CF2 /* XCRemoteSwiftPackageReference "CallStackSymbols" */,
 			);
 			productRefGroup = 60BA77602A55E2A400A5516B /* Products */;
 			projectDirPath = "";
@@ -1145,30 +1133,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.10.2;
-			};
-		};
-		606C70C32BD3652600462CF2 /* XCRemoteSwiftPackageReference "CallStackSymbols" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/naru-jpn/CallStackSymbols.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
-			};
-		};
-		6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.0;
-			};
-		};
 		60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -1196,21 +1160,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		604D0D322B7846050029B57D /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 604D0D312B7846050029B57D /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
-		606C70C42BD3652600462CF2 /* CallStackSymbols */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 606C70C32BD3652600462CF2 /* XCRemoteSwiftPackageReference "CallStackSymbols" */;
-			productName = CallStackSymbols;
-		};
-		6071686F2AC221B600485AD4 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6071686E2AC221B600485AD4 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
 		60BA77A32A5E351000A5516B /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */;

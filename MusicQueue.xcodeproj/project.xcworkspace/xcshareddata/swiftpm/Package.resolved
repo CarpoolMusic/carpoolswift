@@ -1,24 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "alamofire",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire",
-      "state" : {
-        "revision" : "b2fa556e4e48cbf06cf8c63def138c98f4b811fa",
-        "version" : "5.8.0"
-      }
-    },
-    {
-      "identity" : "callstacksymbols",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/naru-jpn/CallStackSymbols.git",
-      "state" : {
-        "revision" : "779289fcdd73b1da49f94bd8cc3d86a5f0dbdb9a",
-        "version" : "1.0.2"
-      }
-    },
-    {
       "identity" : "ios-sdk",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/spotify/ios-sdk",
@@ -34,15 +16,6 @@
       "state" : {
         "revision" : "d108a1fa6189e661f91560548ef48651ed8d93b9",
         "version" : "20.0.0"
-      }
-    },
-    {
-      "identity" : "kingfisher",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher.git",
-      "state" : {
-        "revision" : "3ec0ab0bca4feb56e8b33e289c9496e89059dd08",
-        "version" : "7.10.2"
       }
     },
     {

@@ -1,5 +1,4 @@
 import SwiftUI
-import SpotifyiOS
 
 class SpotifyMediaPlayer: NSObject, MediaPlayerBaseProtocol, SPTAppRemotePlayerStateDelegate {
     @Injected private var logger: CustomLoggerProtocol

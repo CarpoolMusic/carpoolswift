@@ -1,0 +1,91 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : "xcframework",
+        "packageRef" : {
+          "identity" : "ios-sdk",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/spotify/ios-sdk",
+          "name" : "SpotifyiOS"
+        },
+        "path" : "/Users/nolb/carpool/carpoolswift/.build/checkouts/ios-sdk/SpotifyiOS.xcframework",
+        "source" : {
+          "type" : "local"
+        },
+        "targetName" : "SpotifyiOS"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "ios-sdk",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/spotify/ios-sdk",
+          "name" : "SpotifyiOS"
+        },
+        "state" : {
+          "checkoutState" : {
+            "branch" : "master",
+            "revision" : "9a46112bbf8ca7cb42fb28ede0a3fe9a85ab006c"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "ios-sdk"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "keychain-swift",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/evgenyneu/keychain-swift",
+          "name" : "KeychainSwift"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "d108a1fa6189e661f91560548ef48651ed8d93b9",
+            "version" : "20.0.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "keychain-swift"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "socket.io-client-swift",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/socketio/socket.io-client-swift",
+          "name" : "SocketIO"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "148c30247480cd96a068d38b1594e95a5f7bc1df",
+            "version" : "15.0.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "socket.io-client-swift"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "starscream",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/daltoniam/Starscream",
+          "name" : "Starscream"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "a063fda2b8145a231953c20e7a646be254365396",
+            "version" : "3.1.2"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "Starscream"
+      }
+    ]
+  },
+  "version" : 6
+}
