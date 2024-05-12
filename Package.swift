@@ -29,9 +29,12 @@ let package = Package(
                 .product(name: "SocketIO", package: "socket.io-client-swift"), 
                 .product(name: "SpotifyiOS", package: "ios-sdk"),
                 .product(name: "KeychainSwift", package: "keychain-swift")
-                ]),
+                ], 
+                path: "./MusicQueue"
+                ),
         .testTarget(
             name: "MusicQueueTests",
-            dependencies: ["MusicQueue"]),
+            dependencies: ["MusicQueue"],
+            path: "./MusicQueueTests"),
     ]
 )
