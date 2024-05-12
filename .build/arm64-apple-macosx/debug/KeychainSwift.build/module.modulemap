@@ -1,4 +1,0 @@
-module KeychainSwift {
-    header "/Users/nolb/carpool/carpoolswift/.build/arm64-apple-macosx/debug/KeychainSwift.build/KeychainSwift-Swift.h"
-    requires objc
-}
