@@ -21,6 +21,7 @@
  - eventPublisher: A PassthroughSubject that publishes received events along with their associated data as tuples of type (String, [Any]).
  */
 
+import SwiftUI
 import SocketIO
 import Combine
 

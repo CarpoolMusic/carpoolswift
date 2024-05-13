@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "MusicQueue",
     platforms: [
-        .iOS(.v16) // Specify minimum iOS version
+        .iOS(.v16), // Specify minimum iOS version
+        .macOS(.v12) // Specify minimum macOS version
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -17,7 +18,6 @@ let package = Package(
     dependencies: [
         // Update dependencies to use the non-deprecated API for specifying branches.
         .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "15.0.0")),
-        .package(url: "https://github.com/spotify/ios-sdk", branch: "master"),
         .package(url: "https://github.com/evgenyneu/keychain-swift", from: "20.0.0")
     ],
     targets: [
@@ -27,14 +27,18 @@ let package = Package(
             name: "MusicQueue",
             dependencies: [
                 .product(name: "SocketIO", package: "socket.io-client-swift"), 
-                .product(name: "SpotifyiOS", package: "ios-sdk"),
-                .product(name: "KeychainSwift", package: "keychain-swift")
+                .product(name: "KeychainSwift", package: "keychain-swift"),
+                "SpotifyiOS"
                 ], 
                 path: "./MusicQueue"
-                ),
+        ),
+        .binaryTarget(
+            name: "SpotifyiOS",
+            path: "./MusicQueue/SpotifyiOS.xcframework" // Path to the local .xcframework
+        ),
         .testTarget(
             name: "MusicQueueTests",
-            dependencies: ["MusicQueue"],
+            dependencies: [],
             path: "./MusicQueueTests"),
     ]
 )

@@ -1,3 +1,4 @@
+import SpotifyiOS
 
 protocol SpotifyAppRemoteManagerProtocol {
     var appRemote: SPTAppRemote { get }

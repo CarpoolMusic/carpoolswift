@@ -6,6 +6,7 @@
 //
 
 import SocketIO
+import NotificationCenter
 
 class SocketEventReceiver {
     @Injected private var notificationCenter: NotificationCenterProtocol

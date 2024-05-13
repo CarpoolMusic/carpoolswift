@@ -4,6 +4,7 @@
 //
 //  Created by Nolan Biscaro on 2023-08-11.
 //
+import SwiftUI
 
 class UserPreferences {
     private static let userDefaults = UserDefaults.standard
