@@ -4,6 +4,7 @@
 //
 //  Created by Nolan Biscaro on 2024-03-27.
 //
+import SwiftUI
 
 protocol APIManagerProtocol {
     func createSessionRequest(hostId: String, sessionName: String) async throws -> ResponseProtocol

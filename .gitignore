@@ -3,3 +3,5 @@
 Sources
 Tests
 .build/*
+.swiftpm
+.vscode
