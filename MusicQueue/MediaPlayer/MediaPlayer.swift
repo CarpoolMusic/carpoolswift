@@ -40,7 +40,7 @@ protocol MediaPlayerProtocol {
 
 class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     @Injected private var userSettings: UserSettingsProtocol
-    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var sessionManager: any SessionManagerProtocol
     
     @Published var playerState: PlayerState = .undetermined
     @Published var displayTime: Double = 0
@@ -83,18 +83,18 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     func play() {
         if playbackSet {
             base?.resume()
-        } else if let currentSong = sessionManager.getActiveSession()?.queue.currentSong {
+        } else if let currentSong = sessionManager.activeSession?.queue.currentSong {
             base?.play(song: currentSong)
         }
         
-        playerState = getPlayerState()
+        playerState = PlayerState.playing
         startTimer()
     }
     
     func pause() {
         base?.pause()
         stopTimer()
-        playerState = getPlayerState()
+        playerState = PlayerState.paused
     }
     
     func resume() {
@@ -103,7 +103,7 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     
     func skipToNext() {
         resetTimer()
-        if ((sessionManager.getActiveSession()?.queue.next()) != nil) {
+        if ((sessionManager.activeSession?.queue.next()) != nil) {
             self.play()
         }
     }
@@ -115,7 +115,7 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
         }
         
         resetTimer()
-        let _ = sessionManager.getActiveSession()?.queue.previous()
+        let _ = sessionManager.activeSession?.queue.previous()
         if isPlaying() {
             self.play()
             startTimer()

@@ -18,7 +18,9 @@ let package = Package(
     dependencies: [
         // Update dependencies to use the non-deprecated API for specifying branches.
         .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "15.0.0")),
-        .package(url: "https://github.com/evgenyneu/keychain-swift", from: "20.0.0")
+        .package(url: "https://github.com/evgenyneu/keychain-swift", from: "20.0.0"),
+        .package(url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "2.0.0")
+
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

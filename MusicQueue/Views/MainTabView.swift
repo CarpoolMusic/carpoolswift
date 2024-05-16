@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct MainTabView: View {
-    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var sessionManager: any SessionManagerProtocol
     
     @State private var isActiveSession: Bool = false
     @State private var selection: Tab = .home
@@ -24,7 +24,7 @@ struct MainTabView: View {
                 }
                 .tag(Tab.home)
             
-            if isActiveSession, let session = sessionManager.getActiveSession() {
+            if isActiveSession, let session = sessionManager.activeSession {
                 SessionView()
                 .environmentObject(session)
                 .tabItem {

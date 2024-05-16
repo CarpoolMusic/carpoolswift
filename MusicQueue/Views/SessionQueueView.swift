@@ -83,13 +83,13 @@ struct SongQueueList: View {
 class QueueViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
     @Injected private var logger: CustomLoggerProtocol
-    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var sessionManager: any SessionManagerProtocol
     
     private var cancellables = Set<AnyCancellable>()
     
     
     func removeSong(songId: String) {
-        guard let activeSession = sessionManager.getActiveSession() else {
+        guard let activeSession = sessionManager.activeSession else {
             logger.error("Trying to delete song from queue with no active session.")
             return
         }
@@ -99,14 +99,14 @@ class QueueViewModel: ObservableObject {
             case .failure(let error):
                 self.logger.error(error.localizedDescription)
             case .success():
-                self.sessionManager.getActiveSession()?.queue.removeItem(id: songId)
+                self.sessionManager.activeSession?.queue.removeItem(id: songId)
                 self.logger.debug("Removed song \(songId)")
             }
         }
     }
     
     func getSongs() -> [SongProtocol] {
-        guard let activeSession = sessionManager.getActiveSession() else {
+        guard let activeSession = sessionManager.activeSession else {
             logger.error("Trying to get songs in queue with no active session.")
             return []
         }

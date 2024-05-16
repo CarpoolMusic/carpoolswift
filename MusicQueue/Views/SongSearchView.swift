@@ -55,7 +55,7 @@ struct SongSearchView: View {
 
 class SongSearchViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
-    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var sessionManager: any SessionManagerProtocol
     @Injected private var notificationCenter: NotificationCenterProtocol
     @Injected private var userSettings: UserSettingsProtocol
     
@@ -83,7 +83,7 @@ class SongSearchViewModel: ObservableObject {
     }
     
     func songInQueue(_ song: SongProtocol) -> Bool {
-        guard let session = sessionManager.getActiveSession() else {
+        guard let session = sessionManager.activeSession else {
             logger.error("Check for song but no active queue")
             return false
         }
@@ -91,21 +91,23 @@ class SongSearchViewModel: ObservableObject {
     }
     
     func addSongToQueue(_ song: SongProtocol) {
-        guard let session = sessionManager.getActiveSession() else {
+        guard let session = sessionManager.activeSession else {
             logger.error("Check for song but no active queue")
             return
         }
-        
+
         if session.contains(songId: song.id) {
             logger.debug("Song \(song.id) already in queue.")
             return
         }
         
+        let songResolver = SongResolver()
+        songResolver.prefetchArtwork(for: URL(string: song.artworkURL))
+
         Task {
             do {
                 let status = try await session.addSong(song: song)
                 if (status["status"] as? String == "success") {
-                    print("POSTING SONG ADDED")
                     notificationCenter.post(name: .songAddedNotification, object: song)
                 } else {
                     throw SongResolutionError(message: "Unable to add song to queue with error \(String(describing: status["message"]))")

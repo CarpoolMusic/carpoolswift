@@ -20,12 +20,4 @@ class SpotifySearchManager: SearchManagerBaseProtocol {
         return try await spotifyAPIClient.resolveSong(song: song)
         
     }
-    
-    // Private function to resolve the artwork for a given URL
-    private func resolveArtwork(artworkURL: String, completion: @escaping (UIImage?) -> Void) {
-        guard let url = URL(string: artworkURL) else {
-            completion(nil)
-            return
-        }
-    }
 }
