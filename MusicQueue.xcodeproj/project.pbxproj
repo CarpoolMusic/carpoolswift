@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6005C8A72BF167D800EFFAC3 /* SearchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6005C8A62BF167D800EFFAC3 /* SearchManager.swift */; };
 		6005C8A92BF1683C00EFFAC3 /* AppleMusicSearchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6005C8A82BF1683C00EFFAC3 /* AppleMusicSearchManager.swift */; };
+		6005C8AC2BF43FB300EFFAC3 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 6005C8AB2BF43FB300EFFAC3 /* SDWebImageSwiftUI */; };
 		601C5F0C2BD5AC57002A7D46 /* SongResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601C5F0B2BD5AC57002A7D46 /* SongResolver.swift */; };
 		604728C32B5CB0A6009873AD /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604728C22B5CB0A6009873AD /* Error.swift */; };
 		60551F2C2A87EA1A002AA8F9 /* SpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60551F2B2A87EA1A002AA8F9 /* SpotifySessionManager.swift */; };
@@ -188,6 +189,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6005C8AC2BF43FB300EFFAC3 /* SDWebImageSwiftUI in Frameworks */,
 				60BA77D02A63278000A5516B /* KeychainSwift in Frameworks */,
 				60BA77A42A5E351000A5516B /* SocketIO in Frameworks */,
 				60BA77B92A61EE9E00A5516B /* SpotifyiOS in Frameworks */,
@@ -579,6 +581,7 @@
 				60BA77A32A5E351000A5516B /* SocketIO */,
 				60BA77B82A61EE9E00A5516B /* SpotifyiOS */,
 				60BA77CF2A63278000A5516B /* KeychainSwift */,
+				6005C8AB2BF43FB300EFFAC3 /* SDWebImageSwiftUI */,
 			);
 			productName = MusicQueue;
 			productReference = 60BA775F2A55E2A400A5516B /* MusicQueue.app */;
@@ -657,6 +660,7 @@
 				60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */,
 				60BA77B72A61EE9E00A5516B /* XCRemoteSwiftPackageReference "ios-sdk" */,
 				60BA77CE2A63278000A5516B /* XCRemoteSwiftPackageReference "keychain-swift" */,
+				6005C8AA2BF43FB300EFFAC3 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 			);
 			productRefGroup = 60BA77602A55E2A400A5516B /* Products */;
 			projectDirPath = "";
@@ -1117,6 +1121,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6005C8AA2BF43FB300EFFAC3 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.4;
+			};
+		};
 		60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -1144,6 +1156,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6005C8AB2BF43FB300EFFAC3 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6005C8AA2BF43FB300EFFAC3 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
 		60BA77A32A5E351000A5516B /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 60BA77A22A5E351000A5516B /* XCRemoteSwiftPackageReference "socket" */;
