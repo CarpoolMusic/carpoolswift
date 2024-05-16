@@ -1,6 +1,7 @@
 import SwiftUI
 import Foundation
 import MusicKit
+import SDWebImage
 
 /** 
  Theres 3 main types of resolutions associated with songs:
@@ -10,6 +11,7 @@ import MusicKit
  **/
 
 
+
 class SongResolver {
     @Injected private var logger: CustomLoggerProtocol
     private let defaultArtwork = UIImage(named: "AlbumArtPlaceholder")!
@@ -17,24 +19,11 @@ class SongResolver {
     private let appleSearchManager = AppleMusicSearchManager()
     private let spotifySearchManager = SpotifySearchManager()
     
-    func resolveArtwork(for artworkURL: URL?) async -> UIImage {
-        guard let artworkURL = artworkURL else {
-            logger.error("Artwork URL was not found.")
-            return defaultArtwork
+    func prefetchArtwork(for artworkURL: URL?) {
+        guard let url = artworkURL else {
+            return
         }
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: artworkURL)
-            if let image = UIImage(data: data) {
-                return image
-            } else {
-                logger.error("Unable to resolve data to UIImage.")
-            }
-        } catch {
-            logger.error("Error resolving artwork: \(error)")
-        }
-        
-        return defaultArtwork
+        SDWebImagePrefetcher.shared.prefetchURLs([url])
     }
     
     func resolveMusicKitSong(for songId: MusicItemID) async throws -> MusicKit.Song {

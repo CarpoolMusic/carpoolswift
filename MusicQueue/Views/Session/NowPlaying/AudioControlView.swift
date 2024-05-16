@@ -2,44 +2,38 @@ import SwiftUI
 import Combine
 
 struct AudioControlView: View {
-    @ObservedObject private var mediaPlayer: MediaPlayer
+    @EnvironmentObject private var mediaPlayer: MediaPlayer
     
     @EnvironmentObject private var session: Session
     
     @State var isHost: Bool = true
     
-    @State private var cancellables = Set<AnyCancellable>()
-    
-    // Subscribed variables
-    @State private var currentSong: (SongProtocol)?
-    
     init(isHost: Bool) {
-        self.mediaPlayer = MediaPlayer()
         self.isHost = isHost
     }
     
     var body: some View {
         VStack {
-            Text(currentSong?.songTitle ?? "")
+            Text(session.queue.currentSong?.songTitle ?? "")
                 .font(.headline)
                 .padding(1)
             
-            Text(currentSong?.artist ?? "")
+            Text(session.queue.currentSong?.artist ?? "")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
             
-            Text(currentSong?.albumTitle ?? "")
+            Text(session.queue.currentSong?.albumTitle ?? "")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
             
             Slider(
                 value: Binding(
-                    get: { self.mediaPlayer.displayTime / ((currentSong?.duration ?? 1) / 1000) },
+                    get: { self.mediaPlayer.displayTime / ((session.queue.currentSong?.duration ?? 1) / 1000) },
                     set: { newValue in
                         self.mediaPlayer.displayTime = newValue
-                        let duration = currentSong?.duration ?? 0
+                        let duration = session.queue.currentSong?.duration ?? 0
                         self.mediaPlayer.scrubState = .scrubEnded(newValue * (duration / 1000))
                     }
                 ),
@@ -79,32 +73,19 @@ struct AudioControlView: View {
                 .opacity(isHost ? 1.0 : 0.5)
             }
         }
-        .onAppear {
-            // Subscribe when the view appears
-            setupSubscriptions()
-        }
         .padding()
         .background(Color(UIColor.systemBackground)) // Adjusts for dark/light mode
         .cornerRadius(20)
         .shadow(radius: 10)
         .padding()
     }
-    
-    private func setupSubscriptions() {
-        session.queue.$currentSong
-            .receive(on: RunLoop.main)
-            .sink { newSong in
-                self.currentSong = newSong
-            }
-            .store(in: &cancellables)
-    }
 }
 
 // Assuming MockMediaPlayer and MockSongQueue are placeholder types for the preview
-struct AudioControlView_Previews: PreviewProvider {
-    static var previews: some View {
-        AudioControlView(isHost: true)
-            .environmentObject(MockMediaPlayer())
-    }
-}
+//struct AudioControlView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        AudioControlView(isHost: true)
+//            .environmentObject(MockMediaPlayer())
+//    }
+//}
 

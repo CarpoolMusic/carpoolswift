@@ -25,7 +25,7 @@ struct MusicQueueApp: App {
         
         DependencyContainer.shared.registerAPIManager(APIManager() as APIManagerProtocol)
         
-        DependencyContainer.shared.registerSessionManager(SessionManager() as SessionManagerProtocol)
+        DependencyContainer.shared.registerSessionManager(SessionManager() as (any SessionManagerProtocol))
         
         DependencyContainer.shared.registerMediaPlayer(MediaPlayer() as MediaPlayerProtocol)
         

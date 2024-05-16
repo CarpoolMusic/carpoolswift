@@ -3,6 +3,8 @@ import SwiftUI
 struct SessionView: View {
     @EnvironmentObject private var activeSession: Session
     
+    @ObservedObject private var mediaPlayer = MediaPlayer()
+    
     @State private var selectedTab = 1
     @State private var showNowPlaying = false
     
@@ -25,10 +27,13 @@ struct SessionView: View {
             
             if !activeSession.queue.isEmpty {
                 MiniPlayerBar(showingNowPlaying: $showNowPlaying)
+                    .environmentObject(mediaPlayer)
+                    .environmentObject(activeSession)
             }
         }
         .sheet(isPresented: $showNowPlaying) {
             NowPlayingView()
+                .environmentObject(mediaPlayer)
         }
     }
 }
@@ -62,6 +67,7 @@ struct SessionAnalyticsView: View {
     var body: some View {
         // Placeholder for Session Analytics content
         Text("Session Analytics")
+
     }
 }
 

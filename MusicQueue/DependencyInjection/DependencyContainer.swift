@@ -38,8 +38,8 @@ extension DependencyContainer {
         register(service: userSettings, as: UserSettingsProtocol.self)
     }
     
-    func registerSessionManager(_ sessionManager: SessionManagerProtocol) {
-        register(service: sessionManager, as: SessionManagerProtocol.self)
+    func registerSessionManager(_ sessionManager: any SessionManagerProtocol) {
+        register(service: sessionManager, as: (any SessionManagerProtocol).self)
     }
     
     func registerAPIManager(_ apiManager: APIManagerProtocol) {

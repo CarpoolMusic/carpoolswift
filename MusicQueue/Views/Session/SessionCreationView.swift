@@ -116,7 +116,7 @@ struct SessionCreationView: View {
 class SessionCreationViewModel: ObservableObject {
     @Injected private var notificationCenter: NotificationCenterProtocol
     @Injected private var logger: CustomLoggerProtocol
-    @Injected private var sessionManager: SessionManagerProtocol
+    @Injected private var sessionManager: any SessionManagerProtocol
     
     private var cancellables = Set<AnyCancellable>()
     

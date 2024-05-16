@@ -7,6 +7,8 @@ import SwiftUI
 import Combine
 
 struct NowPlayingView: View {
+    @EnvironmentObject private var mediaPlayer: MediaPlayer
+    
     @ObservedObject private var viewModel = NowPlayingViewModel()
     
     @State private var showingQueue: Bool = false
@@ -23,6 +25,8 @@ struct NowPlayingView: View {
                 }
                 
                 AudioControlView(isHost: true)
+                    .environmentObject(mediaPlayer)
+                    .padding(.top, 20)
             }
             .blur(radius: showingQueue ? 3 : 0)
             .disabled(showingQueue)

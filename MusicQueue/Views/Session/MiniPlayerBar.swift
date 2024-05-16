@@ -3,6 +3,7 @@ import SwiftUI
 struct MiniPlayerBar: View {
     @Binding var showingNowPlaying: Bool
     
+    @EnvironmentObject private var mediaPlayer: MediaPlayer
     @EnvironmentObject private var session: Session
     
     var body: some View {

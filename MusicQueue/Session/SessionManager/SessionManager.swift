@@ -11,14 +11,14 @@ import Combine
 import MusicKit
 import os
 
-protocol SessionManagerProtocol {
+protocol SessionManagerProtocol: ObservableObject {
+    var activeSession: Session? { get }
+    
     var sessionConnectivityPublisher: PassthroughSubject<Bool, Never> { get }
     
     func createSession(hostId: String, sessionName: String) async throws -> Session
     func joinSession(sessionId: String, hostName: String) async throws
     func deleteSession(sessionId: String, hostName: String) async throws
-    
-    func getActiveSession() -> Session?
 }
 
 /**
@@ -28,10 +28,10 @@ class SessionManager: SessionManagerProtocol, ObservableObject {
     @Injected private var apiManager: APIManagerProtocol
     @Injected private var logger: CustomLoggerProtocol
     
+    @Published var activeSession: Session?
+    
     var sessionConnectivityPublisher = PassthroughSubject<Bool, Never>()
     
-    
-    private var activeSessionId: String = ""
     private var sessions: [String: Session] = [:]
     
     
@@ -43,13 +43,13 @@ class SessionManager: SessionManagerProtocol, ObservableObject {
         let sessionId = resp.sessionId
         let session = Session(sessionId: sessionId, sessionName: sessionName, hostName: hostId)
         self.sessions[sessionId] = session
-        self.activeSessionId = sessionId
+        self.activeSession = session
         
         return session
     }
     
     func joinSession(sessionId: String, hostName: String) async throws {
-        guard let session = self.getActiveSession() else {
+        guard let session = self.activeSession else {
             throw SessionManagerError(message: "Trying to join session with no active sessions.")
         }
         
@@ -68,12 +68,8 @@ class SessionManager: SessionManagerProtocol, ObservableObject {
     func deleteSession(sessionId: String, hostName: String) {
     }
     
-    func getActiveSession() -> Session? {
-        return sessions[activeSessionId]
-    }
-    
     func connect(sessionId: String) async throws {
-        guard let session = getActiveSession() else {
+        guard let session = self.activeSession else {
             throw SocketError(message: "Attempting to connect with no active session.")
         }
         
@@ -81,7 +77,7 @@ class SessionManager: SessionManagerProtocol, ObservableObject {
     }
     
     func isConnected() -> Bool {
-        guard let session = getActiveSession() else {
+        guard let session = self.activeSession else {
             return false
         }
         
