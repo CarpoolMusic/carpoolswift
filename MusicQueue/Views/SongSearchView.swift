@@ -101,9 +101,6 @@ class SongSearchViewModel: ObservableObject {
             return
         }
         
-        let songResolver = SongResolver()
-        songResolver.prefetchArtwork(for: URL(string: song.artworkURL))
-
         Task {
             do {
                 let status = try await session.addSong(song: song)

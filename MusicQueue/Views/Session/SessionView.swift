@@ -27,12 +27,12 @@ struct SessionView: View {
             
             if !activeSession.queue.isEmpty {
                 MiniPlayerBar(showingNowPlaying: $showNowPlaying)
-                    .environmentObject(mediaPlayer)
                     .environmentObject(activeSession)
             }
         }
         .sheet(isPresented: $showNowPlaying) {
             NowPlayingView()
+                .environmentObject(activeSession)
                 .environmentObject(mediaPlayer)
         }
     }

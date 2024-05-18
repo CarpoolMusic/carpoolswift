@@ -65,7 +65,7 @@ extension Session {
             return
         }
         
-        queue.enqueue(newElement: song)
+        queue.enqueue(newSong: song)
     }
 }
 
