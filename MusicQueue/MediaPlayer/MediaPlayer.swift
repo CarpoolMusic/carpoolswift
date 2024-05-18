@@ -81,10 +81,11 @@ class MediaPlayer: NSObject, MediaPlayerProtocol, ObservableObject {
     }
     
     func play() {
-        if playbackSet {
+        if getPlayerState() == .paused {
             base?.resume()
         } else if let currentSong = sessionManager.activeSession?.queue.currentSong {
             base?.play(song: currentSong)
+            playbackSet = true
         }
         
         playerState = PlayerState.playing

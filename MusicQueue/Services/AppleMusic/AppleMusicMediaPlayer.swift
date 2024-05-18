@@ -8,7 +8,6 @@ class AppleMusicMediaPlayer: MediaPlayerBaseProtocol {
     @Injected private var logger: CustomLoggerProtocol
     
     private let player: ApplicationMusicPlayer
-    private var isPlaybackQueueSet = false
     private var queueUpdate: AnyCancellable?
     
     init() {
@@ -48,7 +47,6 @@ class AppleMusicMediaPlayer: MediaPlayerBaseProtocol {
         }
         let entry = MusicPlayer.Queue.Entry(musicItem.getMusicKitBase())
         player.queue = ApplicationMusicPlayer.Queue([entry])
-        isPlaybackQueueSet = true
     }
     
     func getPlayerState() -> PlayerState {

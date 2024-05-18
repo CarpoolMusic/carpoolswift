@@ -13,6 +13,8 @@ class SongQueue: ObservableObject {
     @Published private var array: [SongProtocol] = []
     @Published private(set) var currentSong: (SongProtocol)?
     
+    private var songResolver = SongResolver()
+    
     var isEmpty: Bool {
         return array.isEmpty
     }
@@ -67,10 +69,11 @@ class SongQueue: ObservableObject {
         currentSong = array.first
     }
     
-    func enqueue(newElement: SongProtocol) {
-        array.append(newElement)
+    func enqueue(newSong: SongProtocol) {
+        array.append(newSong)
+        songResolver.prefetchArtwork(for: newSong.artworkImageURL(size: ALBUM_ART_CG_SIZE))
         if array.count == 1 {
-            currentSong = newElement
+            currentSong = newSong
         }
     }
 }

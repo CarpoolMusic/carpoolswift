@@ -2,9 +2,8 @@ import SwiftUI
 import Combine
 
 struct AudioControlView: View {
-    @EnvironmentObject private var mediaPlayer: MediaPlayer
-    
     @EnvironmentObject private var session: Session
+    @EnvironmentObject private var mediaPlayer: MediaPlayer
     
     @State var isHost: Bool = true
     

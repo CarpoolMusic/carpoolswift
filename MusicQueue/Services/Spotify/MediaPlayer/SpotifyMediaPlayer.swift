@@ -4,10 +4,6 @@ class SpotifyMediaPlayer: NSObject, MediaPlayerBaseProtocol, SPTAppRemotePlayerS
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var appRemoteManager: SpotifyAppRemoteManagerProtocol
     
-    
-    private var playbackSet: Bool = false
-    private var playerState: SPTAppRemotePlayerState?
-    
     override init() {
     }
     

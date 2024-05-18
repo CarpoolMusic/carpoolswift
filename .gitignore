@@ -5,3 +5,4 @@ Tests
 .build/*
 .swiftpm
 .vscode
+MusicQueue.xcodeproj/project.pbxproj

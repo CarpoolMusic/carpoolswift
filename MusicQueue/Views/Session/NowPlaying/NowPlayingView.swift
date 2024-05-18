@@ -7,25 +7,14 @@ import SwiftUI
 import Combine
 
 struct NowPlayingView: View {
-    @EnvironmentObject private var mediaPlayer: MediaPlayer
-    
-    @ObservedObject private var viewModel = NowPlayingViewModel()
-    
     @State private var showingQueue: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                    
-                } else {
-                    AlbumArtView()
-                }
+                AlbumArtView()
                 
                 AudioControlView(isHost: true)
-                    .environmentObject(mediaPlayer)
                     .padding(.top, 20)
             }
             .blur(radius: showingQueue ? 3 : 0)
@@ -47,32 +36,6 @@ struct NowPlayingView: View {
         }
     }
 }
-
-class NowPlayingViewModel: ObservableObject {
-    @Injected private var notificationCenter: NotificationCenterProtocol
-    
-    @State var isLoading = false
-    @Published var currentSong: SongProtocol?
-    
-    private var songResolver = SongResolver()
-    
-    init() {
-        setupCurrentSongChangeSubscriber()
-    }
-    
-    
-    private func setupCurrentSongChangeSubscriber() {
-        notificationCenter.addObserver(self, selector: #selector(currentSongChangedHandler(_:)), name: .currentSongChangedNotification, object: nil)
-    }
-    
-    @objc private func currentSongChangedHandler(_ notification: Notification) async {
-        guard let song = notification.object as? (SongProtocol) else {
-            return
-        }
-        self.currentSong = song
-    }
-}
-
 // MARK: - NowPlayingView Preview
 
 struct SessionView_Previews: PreviewProvider {
