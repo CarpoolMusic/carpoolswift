@@ -6,3 +6,4 @@ Tests
 .swiftpm
 .vscode
 MusicQueue.xcodeproj/project.pbxproj
+MusicQueue.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
