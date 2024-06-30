@@ -10,6 +10,10 @@ protocol ResponseProtocol {
     
 }
 
+struct CreateAccountResponse: ResponseProtocol, Codable {
+    let userId: String
+}
+
 struct CreateSessionResponse: ResponseProtocol, Codable {
     let sessionId: String
 }
