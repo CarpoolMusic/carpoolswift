@@ -10,6 +10,7 @@ protocol APIManagerProtocol {
     func createSessionRequest(hostId: String, sessionName: String) async throws -> ResponseProtocol
 }
 
+// Implementation of API manager
 class APIManager: APIManagerProtocol {
     @Injected private var logger: CustomLoggerProtocol
     
@@ -19,7 +20,7 @@ class APIManager: APIManagerProtocol {
     func createSessionRequest(hostId: String, sessionName: String) async throws -> ResponseProtocol {
         guard let url = URL(string: baseUrl + createSessionUrl) else {
             let error = CustomURLError(message: "Bad URL: \(baseUrl + createSessionUrl)")
-            logger.error("Failed to create URL.")
+            logger.error(error.message)
             throw error
         }
         
@@ -36,13 +37,32 @@ class APIManager: APIManagerProtocol {
             throw error
         }
         
-        let (data, _) = try await URLSession.shared.data(for: request)
-        
         do {
-            let decodedResponse = try JSONDecoder().decode(CreateSessionResponse.self, from: data)
-            return decodedResponse
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // Check for HTTP errors
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 201 {
+                let errorMessage = "HTTP Error: \(httpResponse.statusCode). Response: \(String(data: data, encoding: .utf8) ?? "No response body")"
+                logger.error(errorMessage)
+                throw CustomURLError(message: errorMessage)
+            }
+            
+            do {
+                let decodedResponse = try JSONDecoder().decode(CreateSessionResponse.self, from: data)
+                return decodedResponse
+            } catch {
+                let errorMessage = "Unable to decode response. Data: \(String(data: data, encoding: .utf8) ?? "Invalid data"). Error: \(error)"
+                logger.error(errorMessage)
+                throw SerializationError(message: errorMessage)
+            }
         } catch {
-            let error = SerializationError(message: "Unable to decode response.")
+            // Print the error details
+            logger.error("Request failed with error: \(error.localizedDescription)")
+            
+            if let urlError = error as? URLError {
+                logger.error("URLError: \(urlError)")
+                logger.error("URLError code: \(urlError.code)")
+            }
             throw error
         }
     }
