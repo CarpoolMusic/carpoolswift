@@ -15,7 +15,8 @@ struct ContentView: View {
         if isAuthenticated {
             MainTabView()
         } else {
-            AuthorizationView(isAuthenticated: $isAuthenticated)
+            SignUpView()
+            //            AuthorizationView(isAuthenticated: $isAuthenticated)
         }
     }
 }

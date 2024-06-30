@@ -7,6 +7,7 @@
 import SwiftUI
 
 protocol APIManagerProtocol {
+    func createAccountRequest(email: String, username: String?, passsword: String) async throws -> ResponseProtocol
     func createSessionRequest(hostId: String, sessionName: String) async throws -> ResponseProtocol
 }
 
@@ -16,6 +17,58 @@ class APIManager: APIManagerProtocol {
     
     private let baseUrl: String = "http://192.168.1.160:3000"
     private let createSessionUrl = "/api/create-session"
+    private let signUpUrl = "/api/createUser"
+    
+    
+    func createAccountRequest(email: String, username: String?, passsword: String) async throws -> ResponseProtocol {
+        guard let url = URL(string: baseUrl + signUpUrl) else {
+            let error = CustomURLError(message: "Bad URL: \(baseUrl + signUpUrl)")
+            logger.error(error.message)
+            throw error
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let createAccountRequest = CreateAccountRequest(email: email, username: username, password: passsword)
+        do {
+            request.httpBody = try JSONEncoder().encode(createAccountRequest)
+        } catch {
+            let error = EncodingError(message: "Failed to encode createAccountRequest: \(createAccountRequest)")
+            logger.error(error.message)
+            throw error
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // Check for HTTP errors
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 201 {
+                let errorMessage = "HTTP Error: \(httpResponse.statusCode). Response: \(String(data: data, encoding: .utf8) ?? "No response body")"
+                logger.error(errorMessage)
+                throw CustomURLError(message: errorMessage)
+            }
+            
+            do {
+                let decodedResponse = try JSONDecoder().decode(CreateAccountResponse.self, from: data)
+                return decodedResponse
+            } catch {
+                let errorMessage = "Unable to decode response. Data: \(String(data: data, encoding: .utf8) ?? "Invalid data"). Error: \(error)"
+                logger.error(errorMessage)
+                throw SerializationError(message: errorMessage)
+            }
+        } catch {
+            // Print the error details
+            logger.error("Request failed with error: \(error.localizedDescription)")
+            
+            if let urlError = error as? URLError {
+                logger.error("URLError: \(urlError)")
+                logger.error("URLError code: \(urlError.code)")
+            }
+            throw error
+        }
+    }
     
     func createSessionRequest(hostId: String, sessionName: String) async throws -> ResponseProtocol {
         guard let url = URL(string: baseUrl + createSessionUrl) else {

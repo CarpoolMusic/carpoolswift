@@ -10,6 +10,16 @@ protocol Request {
 
 // MARK: - Requests
 
+struct CreateAccountRequest: Request, Codable {
+    let email: String
+    let username: String?
+    let password: String
+    
+    enum CodingKeys: String, CodingKey {
+        case email, username, password
+    }
+}
+
 struct CreateSessionRequest: Request, Codable {
     let hostId: String
     let sessionName: String
