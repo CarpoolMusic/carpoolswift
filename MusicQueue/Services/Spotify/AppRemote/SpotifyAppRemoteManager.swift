@@ -12,6 +12,7 @@ protocol SpotifyAppRemoteManagerProtocol {
 class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelegate {
     
     // MARK: - Properties
+    @Injected private var logger: CustomLoggerProtocol
     
     private let SpotifyClientID = "61c4e261fe3348b7baa6dbf27879f865"
     private let SpotifyRedirectURL = URL(string: "music-queue://login-callback")!
@@ -26,7 +27,11 @@ class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTApp
     
     lazy var appRemote: SPTAppRemote = {
         let appRemote = SPTAppRemote(configuration: configuration, logLevel: .debug)
-        appRemote.connectionParameters.accessToken = TokenVault.getTokenFromKeychain()
+        guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken") else {
+            logger.error("Unable to fetch access token")
+            return appRemote
+        }
+        appRemote.connectionParameters.accessToken = String(data: data, encoding: .utf8)
         appRemote.delegate = self
         return appRemote
     }()
@@ -42,7 +47,11 @@ class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTApp
     func connect(with songUri: String) {
         DispatchQueue.main.async {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                self.appRemote.connectionParameters.accessToken = TokenVault.getTokenFromKeychain()
+                guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken") else {
+                    self.logger.error("Unable to read access token")
+                    return
+                }
+                self.appRemote.connectionParameters.accessToken = String(data: data, encoding: .utf8)
                 self.appRemote.connect()
                 self.appRemote.authorizeAndPlayURI(songUri)
             }

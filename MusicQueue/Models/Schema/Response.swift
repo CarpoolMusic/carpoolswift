@@ -14,6 +14,11 @@ struct CreateAccountResponse: ResponseProtocol, Codable {
     let userId: String
 }
 
+struct LoginResponse: ResponseProtocol, Codable {
+    let accessToken: String
+    let refreshToken: String
+}
+
 struct CreateSessionResponse: ResponseProtocol, Codable {
     let sessionId: String
 }

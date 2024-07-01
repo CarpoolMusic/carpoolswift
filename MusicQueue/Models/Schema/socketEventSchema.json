@@ -1,9 +1,18 @@
 {
+    "LoginRequest": {
+        "identifier": "string",
+        "password": "string"
+    },
+    "CreateUserRequest": {
+        "email": "string",
+        "username": "string",
+        "password": "string"
+    },
     "CreateSessionRequest": {
         "hostId": "string",
+        "socketId": "string",
         "sessionName": "string"
     },
-
     "CreateSessionResponse": {
         "sessionId": "string"
     },
@@ -20,9 +29,10 @@
         ]
     },
     "Song": {
-        "service": "string",
         "id": "string",
-        "uri" : "string",
+        "appleID": "string",
+        "spotifyID": "string",
+        "uri": "string",
         "title": "string",
         "artist": "string",
         "album": "string",
@@ -32,9 +42,10 @@
     "AddSongRequest": {
         "sessionId": "string",
         "song": {
-            "service": "string",
             "id": "string",
-            "uri" : "string",
+            "appleID": "string",
+            "spotifyID": "string",
+            "uri": "string",
             "title": "string",
             "artist": "string",
             "album": "string",
@@ -44,9 +55,10 @@
     },
     "SongAddedEvent": {
         "song": {
-            "service": "string",
             "id": "string",
-            "uri" : "string",
+            "appleID": "string",
+            "spotifyID": "string",
+            "uri": "string",
             "title": "string",
             "artist": "string",
             "album": "string",
@@ -56,18 +68,18 @@
     },
     "RemoveSongRequest": {
         "sessionId": "string",
-        "songId": "string"
+        "id": "string"
     },
     "SongRemovedEvent": {
-        "songId": "string"
+        "id": "string"
     },
     "VoteSongRequest": {
         "sessionId": "string",
-        "songId": "string",
+        "id": "string",
         "vote": 0
     },
     "VoteSongEvent": {
-        "songId": "string",
+        "id": "string",
         "vote": 0
     },
     "ErrorResponse": {

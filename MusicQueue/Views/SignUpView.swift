@@ -22,7 +22,7 @@ struct SignUpView: View {
             Spacer()
 
             // Logo
-            Image("carpool_music_logo")
+            Image("Logo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 120, height: 120)
@@ -93,18 +93,6 @@ struct SignUpView: View {
                         .padding(.top, 20)
                 }
             }
-
-            // Toggle to Login
-            HStack {
-                Text("Already have an account?")
-                    .foregroundColor(.gray)
-//                NavigationLink(destination: LoginView()) {
-//                    Text("Login")
-//                        .fontWeight(.bold)
-//                        .foregroundColor(Color.blue)
-//                }
-            }
-            .padding(.top, 10)
 
             Spacer()
         }
