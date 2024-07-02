@@ -9,13 +9,13 @@ import Foundation
 
 import SwiftUI
 
-struct SignUpView: View {
+struct CreateAccountView: View {
     @State private var email: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
 
-    @ObservedObject private var signUpViewModel = SignUpViewModel()
+    @ObservedObject private var signUpViewModel = CreateAccountViewModel()
 
     var body: some View {
         VStack {
@@ -106,7 +106,7 @@ struct SignUpView: View {
 import Foundation
 import Combine
 
-class SignUpViewModel: ObservableObject {
+class CreateAccountViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var apiManager: APIManagerProtocol
     
@@ -152,6 +152,6 @@ class SignUpViewModel: ObservableObject {
 
 struct SignUpView_Previews: PreviewProvider {
     static var previews: some View {
-        SignUpView()
+        CreateAccountView()
     }
 }

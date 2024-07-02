@@ -28,7 +28,8 @@ class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTApp
     lazy var appRemote: SPTAppRemote = {
         let appRemote = SPTAppRemote(configuration: configuration, logLevel: .debug)
         guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken") else {
-            logger.error("Unable to fetch access token")
+            let error = KeychainHelperError(message: "Unable to read access token")
+            logger.error(error)
             return appRemote
         }
         appRemote.connectionParameters.accessToken = String(data: data, encoding: .utf8)
@@ -48,7 +49,8 @@ class SpotifyAppRemoteManager: NSObject, SpotifyAppRemoteManagerProtocol, SPTApp
         DispatchQueue.main.async {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken") else {
-                    self.logger.error("Unable to read access token")
+                    let error = KeychainHelperError(message: "Unable to read access token")
+                    self.logger.error(error)
                     return
                 }
                 self.appRemote.connectionParameters.accessToken = String(data: data, encoding: .utf8)

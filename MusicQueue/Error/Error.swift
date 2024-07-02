@@ -186,6 +186,16 @@ class APIError: CustomError {
     }
 }
 
+class KeychainHelperError: CustomError {
+    init(message: String, stacktrace: [String]? = Thread.callStackSymbols) {
+        super.init(type: "KeychainHelperError ", message: message, stacktrace: stacktrace)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 class UnkownError: CustomError {
     init(stacktrace: [String]? = Thread.callStackSymbols) {
         super.init(type: "MediaPlayerError", message: "Unkown Error", stacktrace: stacktrace)

@@ -13,7 +13,7 @@ class SpotifyAPIClient {
     
     init() {
         guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken"), let accessToken = String(data: data, encoding: .utf8) else {
-            let error = APIError(message: "Unable to fetch access token")
+            let error = KeychainHelperError(message: "Unable to fetch access token")
             logger.error(error)
             return
         }

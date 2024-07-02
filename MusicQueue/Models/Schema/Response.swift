@@ -41,3 +41,9 @@ struct LeaveSessionResponse: ResponseProtocol, Codable {
 struct SocketConnectionResponse: ResponseProtocol, Codable {
     let status: Bool
 }
+
+struct ErrorResponse: ResponseProtocol, Codable {
+    let type: String
+    let message: String
+    let stacktrace: String
+}

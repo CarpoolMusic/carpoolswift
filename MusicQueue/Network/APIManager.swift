@@ -19,7 +19,7 @@ class APIManager: APIManagerProtocol {
     private let baseUrl: String = "http://192.168.1.160:3000"
     private let createSessionUrl = "/api/create-session"
     private let loginUrl = "/api/login"
-    private let signUpUrl = "/api/createUser"
+    private let signUpUrl = "/api/createAccount"
     
     func createAccountRequest(email: String, username: String?, passsword: String) async throws -> ResponseProtocol {
         guard let url = URL(string: baseUrl + signUpUrl) else {
@@ -131,6 +131,13 @@ class APIManager: APIManagerProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "accessToken"), let accessToken = String(data: data, encoding: .utf8 ) else {
+            let error = KeychainHelperError(message: "Unable to read access token")
+            logger.error(error)
+            throw error
+        }
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
         let createSessionRequest = CreateSessionRequest(hostId: hostId, sessionName: sessionName)
         do {

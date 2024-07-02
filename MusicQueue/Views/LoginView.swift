@@ -6,6 +6,7 @@ struct LoginView: View {
     @State private var password: String = ""
     @State private var isShowingAlert: Bool = false
     @State private var alertMessage: String = ""
+    @State private var navigateToHome: Bool = false
     
     @ObservedObject private var loginViewModel = LoginViewModel()
     
@@ -85,7 +86,7 @@ struct LoginView: View {
                 HStack {
                     Text("Don't have an account?")
                         .foregroundColor(.gray)
-                    NavigationLink(destination: SignUpView()) {
+                    NavigationLink(destination: CreateAccountView()) {
                         Text("Sign Up")
                             .fontWeight(.bold)
                             .foregroundColor(Color.blue)
@@ -136,13 +137,26 @@ struct LoginView: View {
                 .padding(.top, 20)
                 
                 Spacer()
+                
+                // NavigationLink to HomeView
+                NavigationLink(destination: HomeView(), isActive: $loginViewModel.isLoginSuccessful) {
+                    EmptyView()
+                }
+                .hidden()
             }
             .background(Color.white.ignoresSafeArea())
             .alert(isPresented: $isShowingAlert) {
                 Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
+            .onReceive(loginViewModel.$isLoginSuccessful) { isLoginSuccessful in
+                if isLoginSuccessful {
+                    navigateToHome = true
+                } else if let errorMessage = loginViewModel.errorMessage {
+                    alertMessage = errorMessage
+                    isShowingAlert = true
+                }
+            }
         }
-        
     }
 }
 
@@ -153,6 +167,8 @@ class LoginViewModel: ObservableObject {
     @Published var isShowingAlert: Bool = false
     @Published var alertMessage: String = ""
     @Published var isLoading: Bool = false
+    @Published var isLoginSuccessful: Bool = false
+    @Published var errorMessage: String?
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -187,10 +203,21 @@ class LoginViewModel: ObservableObject {
             
                 DispatchQueue.main.async {
                     self.isLoading = false
+                    self.isLoginSuccessful = true
+                    self.errorMessage = nil
                 }
                 
-                let accessToken = response.accessToken
-                let refreshToken = response.refreshToken
+                let accessTokenData = Data(response.accessToken.utf8)
+                let refreshTokenData = Data(response.refreshToken.utf8)
+                
+                KeychainHelper.standard.save(accessTokenData, service: "com.poles.carpoolapp", account: "accessToken")
+                KeychainHelper.standard.save(refreshTokenData, service: "com.poles.carpoolapp", account: "refreshToken")
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    self.isLoginSuccessful = false
+                    self.errorMessage = error.localizedDescription
+                }
             }
         }
     }
