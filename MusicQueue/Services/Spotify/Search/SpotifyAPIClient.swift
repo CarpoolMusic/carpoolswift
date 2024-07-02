@@ -9,17 +9,15 @@ class SpotifyAPIClient {
     @Injected private var logger: CustomLoggerProtocol
     
     let baseURL = "https://api.spotify.com/v1"
-    let accessToken: String
+    var accessToken: String = ""
     
     init() {
-        self.accessToken = TokenVault.getTokenFromKeychain() ?? ""
-        
-        if self.accessToken.isEmpty {
-            let error = APIError(message: "Unable to fetch access token")
+        guard let data = KeychainHelper.standard.read(service: "com.poles.carpoolapp", account: "spotifyToken"), let accessToken = String(data: data, encoding: .utf8) else {
+            let error = KeychainHelperError(message: "Unable to fetch access token")
             logger.error(error)
-        } else {
-            logger.debug("Token fetched")
+            return
         }
+        self.accessToken = accessToken
     }
     
     func sendRequest<T: Decodable>(endpoint: String, method: String, parameters: [String: Any]? = nil) async throws -> T {

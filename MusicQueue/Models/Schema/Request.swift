@@ -19,6 +19,15 @@ struct CreateAccountRequest: Request, Codable {
         case email, username, password
     }
 }
+        
+struct LoginRequest: Request, Codable {
+    let identifier: String
+    let password: String
+    
+    enum CodingKeys: String, CodingKey {
+        case identifier, password
+    }
+}
 
 struct CreateSessionRequest: Request, Codable {
     let hostId: String

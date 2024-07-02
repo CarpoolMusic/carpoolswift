@@ -132,8 +132,6 @@ class SessionCreationViewModel: ObservableObject {
     
     // Handle the create session button pressed event
     func handleCreateSessionButtonPressed(sessionName: String, hostName: String) {
-        self.isLoading = true
-        
         self.sessionName = sessionName
         self.hostName = hostName
         Task {

@@ -14,6 +14,11 @@ struct CreateAccountResponse: ResponseProtocol, Codable {
     let userId: String
 }
 
+struct LoginResponse: ResponseProtocol, Codable {
+    let accessToken: String
+    let refreshToken: String
+}
+
 struct CreateSessionResponse: ResponseProtocol, Codable {
     let sessionId: String
 }
@@ -35,4 +40,10 @@ struct LeaveSessionResponse: ResponseProtocol, Codable {
 
 struct SocketConnectionResponse: ResponseProtocol, Codable {
     let status: Bool
+}
+
+struct ErrorResponse: ResponseProtocol, Codable {
+    let type: String
+    let message: String
+    let stacktrace: String
 }

@@ -38,7 +38,7 @@
 		607168672AB7BA6700485AD4 /* GenericSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168662AB7BA6700485AD4 /* GenericSong.swift */; };
 		607168722AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */; };
 		607168742AC238AF00485AD4 /* AppleAuthenticationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168732AC238AF00485AD4 /* AppleAuthenticationController.swift */; };
-		607168762ACB9C8900485AD4 /* TokenVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168752ACB9C8900485AD4 /* TokenVault.swift */; };
+		607168762ACB9C8900485AD4 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168752ACB9C8900485AD4 /* KeychainHelper.swift */; };
 		607168782AD1E69200485AD4 /* AuthenticationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168772AD1E69200485AD4 /* AuthenticationTest.swift */; };
 		6071687A2AD1E92F00485AD4 /* MockAuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607168792AD1E92F00485AD4 /* MockAuthenticationService.swift */; };
 		6071687D2AD1EB5000485AD4 /* MockSpotifySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6071687C2AD1EB5000485AD4 /* MockSpotifySessionManager.swift */; };
@@ -83,7 +83,8 @@
 		60C73AFB2B8437BA009C0730 /* SessionMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C73AFA2B8437BA009C0730 /* SessionMenu.swift */; };
 		60EC100D2BBB8DFC00B5B1C2 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EC100C2BBB8DFC00B5B1C2 /* Request.swift */; };
 		60EC10112BBB958C00B5B1C2 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EC10102BBB958C00B5B1C2 /* Response.swift */; };
-		60F090AB2C320D4C003A4244 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F090AA2C320D4C003A4244 /* SignUpView.swift */; };
+		60F090AB2C320D4C003A4244 /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F090AA2C320D4C003A4244 /* CreateAccountView.swift */; };
+		60F090AD2C3227E2003A4244 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F090AC2C3227E1003A4244 /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,7 +135,7 @@
 		607168662AB7BA6700485AD4 /* GenericSong.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericSong.swift; sourceTree = "<group>"; };
 		607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicServiceAuthenticationProtocol.swift; sourceTree = "<group>"; };
 		607168732AC238AF00485AD4 /* AppleAuthenticationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuthenticationController.swift; sourceTree = "<group>"; };
-		607168752ACB9C8900485AD4 /* TokenVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenVault.swift; sourceTree = "<group>"; };
+		607168752ACB9C8900485AD4 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		607168772AD1E69200485AD4 /* AuthenticationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationTest.swift; sourceTree = "<group>"; };
 		607168792AD1E92F00485AD4 /* MockAuthenticationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAuthenticationService.swift; sourceTree = "<group>"; };
 		6071687C2AD1EB5000485AD4 /* MockSpotifySessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSpotifySessionManager.swift; sourceTree = "<group>"; };
@@ -181,7 +182,8 @@
 		60C73AFA2B8437BA009C0730 /* SessionMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionMenu.swift; sourceTree = "<group>"; };
 		60EC100C2BBB8DFC00B5B1C2 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		60EC10102BBB958C00B5B1C2 /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
-		60F090AA2C320D4C003A4244 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
+		60F090AA2C320D4C003A4244 /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
+		60F090AC2C3227E1003A4244 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -466,6 +468,7 @@
 		60BA778E2A55F15800A5516B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				60F090AC2C3227E1003A4244 /* LoginView.swift */,
 				60BA77642A55E2A400A5516B /* ContentView.swift */,
 				60C73AFC2B84407E009C0730 /* Session */,
 				60BA778C2A55E39100A5516B /* AuthorizationView.swift */,
@@ -474,7 +477,7 @@
 				60B4E0B32B83E69B00F37EA5 /* MainTabView.swift */,
 				60B4E0B52B83F03300F37EA5 /* HomeView.swift */,
 				60B4E0B72B83F21000F37EA5 /* AccountView.swift */,
-				60F090AA2C320D4C003A4244 /* SignUpView.swift */,
+				60F090AA2C320D4C003A4244 /* CreateAccountView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -499,7 +502,7 @@
 				607168712AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift */,
 				60BA77C62A6241CE00A5516B /* AppleMusic */,
 				60BA77BF2A62378600A5516B /* Spotify */,
-				607168752ACB9C8900485AD4 /* TokenVault.swift */,
+				607168752ACB9C8900485AD4 /* KeychainHelper.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -727,12 +730,13 @@
 				60BA77CD2A6300C600A5516B /* User.swift in Sources */,
 				605E8A2C2BA13D3500676B5D /* SearchMusicItemCell.swift in Sources */,
 				60576CC32AB6366A005D6E15 /* AudioControlView.swift in Sources */,
+				60F090AD2C3227E2003A4244 /* LoginView.swift in Sources */,
 				605E8A3A2BA3DA4700676B5D /* DependencyContainer.swift in Sources */,
 				60BA77D92A6445ED00A5516B /* SocketServiceProtocol.swift in Sources */,
 				60BA77B42A61DF0C00A5516B /* AuthStatus.swift in Sources */,
 				60BA77922A55F39400A5516B /* NowPlayingView.swift in Sources */,
 				60BA77EF2A65A43500A5516B /* SongSearchView.swift in Sources */,
-				60F090AB2C320D4C003A4244 /* SignUpView.swift in Sources */,
+				60F090AB2C320D4C003A4244 /* CreateAccountView.swift in Sources */,
 				607168722AC2279000485AD4 /* MusicServiceAuthenticationProtocol.swift in Sources */,
 				60BA77E12A64794500A5516B /* Session.swift in Sources */,
 				60576CC12AB63412005D6E15 /* Images.swift in Sources */,
@@ -743,7 +747,7 @@
 				60998EC22B52F18A0022CDB9 /* SpotifyAPIClient.swift in Sources */,
 				60BA77652A55E2A400A5516B /* ContentView.swift in Sources */,
 				607B04982AAAAD95004DB82F /* SocketEventSender.swift in Sources */,
-				607168762ACB9C8900485AD4 /* TokenVault.swift in Sources */,
+				607168762ACB9C8900485AD4 /* KeychainHelper.swift in Sources */,
 				60BA778D2A55E39100A5516B /* AuthorizationView.swift in Sources */,
 				605E8A442BB4D9A100676B5D /* SessionStateManager.swift in Sources */,
 				60B4E0BA2B83F67F00F37EA5 /* PlayerControlView.swift in Sources */,

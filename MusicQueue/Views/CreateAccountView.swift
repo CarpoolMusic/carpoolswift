@@ -9,20 +9,20 @@ import Foundation
 
 import SwiftUI
 
-struct SignUpView: View {
+struct CreateAccountView: View {
     @State private var email: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
 
-    @ObservedObject private var signUpViewModel = SignUpViewModel()
+    @ObservedObject private var signUpViewModel = CreateAccountViewModel()
 
     var body: some View {
         VStack {
             Spacer()
 
             // Logo
-            Image("carpool_music_logo")
+            Image("Logo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 120, height: 120)
@@ -94,18 +94,6 @@ struct SignUpView: View {
                 }
             }
 
-            // Toggle to Login
-            HStack {
-                Text("Already have an account?")
-                    .foregroundColor(.gray)
-//                NavigationLink(destination: LoginView()) {
-//                    Text("Login")
-//                        .fontWeight(.bold)
-//                        .foregroundColor(Color.blue)
-//                }
-            }
-            .padding(.top, 10)
-
             Spacer()
         }
         .background(Color.white.ignoresSafeArea())
@@ -118,7 +106,7 @@ struct SignUpView: View {
 import Foundation
 import Combine
 
-class SignUpViewModel: ObservableObject {
+class CreateAccountViewModel: ObservableObject {
     @Injected private var logger: CustomLoggerProtocol
     @Injected private var apiManager: APIManagerProtocol
     
@@ -164,6 +152,6 @@ class SignUpViewModel: ObservableObject {
 
 struct SignUpView_Previews: PreviewProvider {
     static var previews: some View {
-        SignUpView()
+        CreateAccountView()
     }
 }

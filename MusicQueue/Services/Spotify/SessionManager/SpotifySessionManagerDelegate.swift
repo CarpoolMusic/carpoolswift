@@ -13,8 +13,7 @@ extension SpotifySessionManager: SPTSessionManagerDelegate {
      */
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
         print("success", session)
-        TokenVault.upsertTokenToKeychain(token: session.accessToken)
-        print("GOT TOKEN")
+        KeychainHelper.standard.save(Data(session.accessToken.utf8), service: "com.poles.carpoolapp", account: "spotifyToken")
         authenticated?(true)
     }
     
