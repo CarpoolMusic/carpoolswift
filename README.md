@@ -10,20 +10,20 @@ An innovative group music experience app that seamlessly integrates with Apple M
 - [Features](#features)
 - [Architecture](#architecture)
 - [Technologies Used](#technologies-used)
-- [Installation and Setup](#⚙installation-and-setup)
+- [Installation and Setup](#installation-and-setup)
 - [Usage](#usage)
 - [License](#license)
 - [Contributing](#contributing)
 
 ---
 
-## 📋 Project Overview
+## Project Overview
 
 CarpoolMusic is an iOS app designed to create a social music-sharing experience. Users can start a music session, invite friends to join, and listen together in real-time. By leveraging Apple Music and Spotify integrations, users have access to millions of songs and can control the playlist collaboratively, making every drive, gathering, or virtual hangout a synchronized musical journey.
 
 ---
 
-## ✨ Features
+## Features
 
 - **Real-Time Music Sessions**: Host or join live music sessions to listen to songs together.
 - **Cross-Platform Music Support**: Compatible with both Apple Music and Spotify.
@@ -35,7 +35,7 @@ CarpoolMusic is an iOS app designed to create a social music-sharing experience.
 
 ---
 
-## 🏛 Architecture
+## Architecture
 
 CarpoolMusic follows a modular and scalable architecture, utilizing best practices to ensure a clean and maintainable codebase. Here’s a high-level overview of the architecture:
 
@@ -53,7 +53,7 @@ CarpoolMusic follows a modular and scalable architecture, utilizing best practic
 
 ---
 
-## 🛠 Technologies Used
+## Technologies Used
 
 - **Languages**: Swift
 - **Frameworks**: SwiftUI, Combine, AVFoundation
@@ -67,7 +67,7 @@ CarpoolMusic follows a modular and scalable architecture, utilizing best practic
 
 ---
 
-## ⚙️ Installation and Setup
+## Installation and Setup
 
 To set up the CarpoolMusic iOS app locally:
 
@@ -98,7 +98,7 @@ To set up the CarpoolMusic iOS app locally:
 
 ---
 
-## 🚀 Usage
+## Usage
 
 1. **Sign In**: Log in using your preferred music service (Apple Music or Spotify).
 2. **Create or Join a Session**: Start a new music session or join an existing one nearby.
@@ -107,13 +107,13 @@ To set up the CarpoolMusic iOS app locally:
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please follow these steps:
 
