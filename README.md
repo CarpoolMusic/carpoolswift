@@ -6,14 +6,14 @@ An innovative group music experience app that seamlessly integrates with Apple M
 ---
 
 ## 📖 Table of Contents
-- [Project Overview](#📋-project-overview)
-- [Features](#✨-features)
-- [Architecture](#🏛-architecture)
-- [Technologies Used](#🛠-technologies-used)
-- [Installation and Setup](#⚙️-installation-and-setup)
-- [Usage](#🚀-usage)
-- [License](#📝-license)
-- [Contributing](#🤝-contributing)
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Technologies Used](#technologies-used)
+- [Installation and Setup](#⚙installation-and-setup)
+- [Usage](#usage)
+- [License](#license)
+- [Contributing](#contributing)
 
 ---
 
